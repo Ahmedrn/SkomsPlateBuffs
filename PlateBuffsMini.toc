@@ -1,6 +1,6 @@
 ## Interface: 30300
-## Title: PlateBuffs
-## Notes: Show buffs and debuffs on nameplates
+## Title: PlateBuffsMini
+## Notes: PlateBuffs variant: adds a left row (important buffs) and a right row (crowd control) next to the nameplate. Replaces PlateBuffs.
 ## Version: 1.19.5 (r238)
 ## Author: Cyprias
 ## SavedVariables: PB_DB

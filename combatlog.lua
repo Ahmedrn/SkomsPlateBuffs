@@ -19,6 +19,9 @@ local guidBuffs 			= core.guidBuffs
 local nametoGUIDs 			= core.nametoGUIDs
 local InterruptsDuration	= core.InterruptsDuration
 local hasModernAPI 		= core.hasModernAPI
+local SpellCategory 		= core.SpellCategory
+local SpellCategoryByName 	= core.SpellCategoryByName
+local CategorySide 		= core.CategorySide
 
 local GUIDDurations = {}
 local GUIDDrEffects = {}
@@ -50,6 +53,26 @@ local playerGUID = UnitGUID("player")
 local EventFrame = CreateFrame("Frame")
 
 local P
+
+-- Side rows: which auras go to the left / right row. Returns "right" or "left" and the category, or nil.
+local CATEGORY_OPTION = {
+	cc = "sideCatCC", root = "sideCatRoot", interrupt = "sideCatInterrupt",
+	immunity = "sideCatImmunity", immunity_spell = "sideCatImmunity",
+	buff_def = "sideCatDefensive", buff_off = "sideCatOffensive", buff_other = "sideCatOther",
+}
+
+local function SideForSpell(spellID, spellName, isDebuff)
+	local cat = SpellCategory[spellID] or (spellName and SpellCategoryByName[spellName])
+	if not cat then return end
+	local side = CategorySide[cat]
+	if side == "right" then
+		if not (isDebuff and P.sideRightEnabled) then return end
+	else
+		if isDebuff or not P.sideLeftEnabled then return end
+	end
+	if not P[CATEGORY_OPTION[cat]] then return end
+	return side, cat
+end
 do
 	local prev_OnEnable = core.OnEnable
 	function core:OnEnable()
@@ -133,7 +156,7 @@ local function GUIDBuffIndex(dstGUID, spellID, srcGUID)
 	return wildcard
 end
 
-local function AddSpellToGUID(dstGUID, spellID, spellName, texture, duration, srcGUID, isDebuff, debuffType, expirationTime, amount, scale)
+local function AddSpellToGUID(dstGUID, spellID, spellName, texture, duration, srcGUID, isDebuff, debuffType, expirationTime, amount, scale, side, main, cat)
 	guidBuffs[dstGUID] = guidBuffs[dstGUID] or {}
 	local t = guidBuffs[dstGUID]
 	if #t > 0 then
@@ -143,6 +166,7 @@ local function AddSpellToGUID(dstGUID, spellID, spellName, texture, duration, sr
 	if i then
 		t[i].duration = duration or 0
 		t[i].expirationTime = expirationTime or 0
+		t[i].side, t[i].main, t[i].cat = side, main, cat
 		return true
 	end
 	local rec = {
@@ -154,7 +178,10 @@ local function AddSpellToGUID(dstGUID, spellID, spellName, texture, duration, sr
 		expirationTime = expirationTime or 0,
 		sID = spellID,
 		srcGUID = srcGUID,
-		scale = scale or 1
+		scale = scale or 1,
+		side = side, -- "left" / "right": also shown on that side row
+		main = main, -- false: only on the side row (nil counts as shown in the main bars)
+		cat = cat
 	}
 	if isDebuff then
 		rec.isDebuff = true
@@ -248,7 +275,8 @@ local function CollectAuras(unitID, GUID, filter)
 	local name, icon, count, duration, expirationTime, unitCaster, spellId, debuffType, srcGUID, drType, shouldAdd, scale, spellOpts, _
 	local isDebuff = filter == "HARMFUL" or nil
 	local defaultShow = isDebuff and P.defaultDebuffShow or P.defaultBuffShow
-	if defaultShow == 5 then return end
+	local sideOn = isDebuff and P.sideRightEnabled or (not isDebuff and P.sideLeftEnabled)
+	if defaultShow == 5 and not sideOn then return end
 	local trackDR = isDebuff and not hasModernAPI
 	local isPlayerControlled = trackDR and UnitPlayerControlled(unitID)
 	local i = 1
@@ -280,7 +308,8 @@ local function CollectAuras(unitID, GUID, filter)
 						or (defaultShow == 2 and unitCaster == "player")
 						or (defaultShow == 4 and unitCaster == "player")
 		end
-		if shouldAdd then
+		local side, cat = SideForSpell(spellId, name, isDebuff and true or false)
+		if shouldAdd or side then
 			table_insert(guidBuffs[GUID], {
 				name = name,
 				icon = icon,
@@ -292,7 +321,10 @@ local function CollectAuras(unitID, GUID, filter)
 				isDebuff = isDebuff,
 				sID = spellId,
 				srcGUID = srcGUID,
-				scale = scale
+				scale = scale,
+				side = side,
+				main = shouldAdd and true or false,
+				cat = cat
 			})
 		end
 		i = i + 1
@@ -457,31 +489,38 @@ local function CheckFilter(tip, spelllist)
 end
 
 local function HandleAuraApply(srcGUID, srcFlags, dstGUID, dstName, dstFlags, spellID, spellName, auraType, amount)
-	if auraType == "BUFF" and P.defaultBuffShow == 5 then return end
-	if auraType == "DEBUFF" and P.defaultDebuffShow == 5 then return end
-	local duration = GetDuration(spellID, srcGUID, dstGUID, FlagIsPlayerControlled(srcFlags), FlagIsPlayerControlled(dstFlags))
+	local isDebuff = auraType == "DEBUFF"
+	local side, cat = SideForSpell(spellID, spellName, isDebuff)
+	local mainOff = (auraType == "BUFF" and P.defaultBuffShow == 5) or (isDebuff and P.defaultDebuffShow == 5)
+	if mainOff and not side then return end
+	local duration = GetDuration(spellID, srcGUID, dstGUID, FlagIsPlayerControlled(srcFlags), FlagIsPlayerControlled(dstFlags)) or 0
 	local expirationTime = duration ~= 0 and GetTime() + duration or 0
 	local texture = GetSpellIcon(spellID)
-	local isDebuff = auraType == "DEBUFF"
 	local debuffType = GetDebuffType(spellID)
 	local updateBars = false
-	local spellOpts = core:HaveSpellOpts(spellName, spellID)
-	if spellOpts and spellOpts.show and CheckFilter(auraType, true) then
-		if
-			spellOpts.show == 1 or
-			(spellOpts.show == 2 and srcGUID == playerGUID) or
-			(spellOpts.show == 4 and FlagIsFriendly(dstFlags)) or
-			(spellOpts.show == 5 and FlagIsHostle(dstFlags))
-		then
-			updateBars = AddSpellToGUID(dstGUID, spellID, spellName, texture, duration, srcGUID, isDebuff, debuffType, expirationTime, amount, spellOpts.increase)
+	local wantsMain, scale = false, 1
+	if not mainOff then
+		local spellOpts = core:HaveSpellOpts(spellName, spellID)
+		if spellOpts and spellOpts.show and CheckFilter(auraType, true) then
+			if
+				spellOpts.show == 1 or
+				(spellOpts.show == 2 and srcGUID == playerGUID) or
+				(spellOpts.show == 4 and FlagIsFriendly(dstFlags)) or
+				(spellOpts.show == 5 and FlagIsHostle(dstFlags))
+			then
+				wantsMain, scale = true, spellOpts.increase
+			end
+		else
+			if
+				(auraType == "BUFF" and (P.defaultBuffShow == 1 or ((P.defaultBuffShow == 2 or P.defaultBuffShow == 4) and srcGUID == playerGUID))) or
+				(auraType == "DEBUFF" and (P.defaultDebuffShow == 1 or ((P.defaultDebuffShow == 2 or P.defaultDebuffShow == 4) and srcGUID == playerGUID)))
+			then
+				wantsMain = true
+			end
 		end
-	else
-		if
-			(auraType == "BUFF" and (P.defaultBuffShow == 1 or ((P.defaultBuffShow == 2 or P.defaultBuffShow == 4) and srcGUID == playerGUID))) or
-			(auraType == "DEBUFF" and (P.defaultDebuffShow == 1 or ((P.defaultDebuffShow == 2 or P.defaultDebuffShow == 4) and srcGUID == playerGUID)))
-		then
-			updateBars = AddSpellToGUID(dstGUID, spellID, spellName, texture, duration, srcGUID, isDebuff, debuffType, expirationTime, amount, 1)
-		end
+	end
+	if wantsMain or side then
+		updateBars = AddSpellToGUID(dstGUID, spellID, spellName, texture, duration, srcGUID, isDebuff, debuffType, expirationTime, amount, scale, side, wantsMain, cat)
 	end
 	if updateBars then
 		ForceNameplateUpdate(dstGUID, dstName, dstFlags)
@@ -491,7 +530,7 @@ end
 
 function EventFrame:SPELL_AURA_APPLIED(srcGUID, srcFlags, dstGUID, dstName, dstFlags, spellID, spellName, auraType, amount)
 	local duration
-	if spellDuration[spellID] then
+	if spellDuration[spellID] or SpellCategory[spellID] then
 		duration = HandleAuraApply(srcGUID, srcFlags, dstGUID, dstName, dstFlags, spellID, spellName, auraType, amount)
 	end
 	local drType = drSpells[spellID]
@@ -525,7 +564,7 @@ function EventFrame:SPELL_AURA_REFRESH(srcGUID, srcFlags, dstGUID, dstName, dstF
 		end
 		rec.expirationTime = rec.duration ~= 0 and GetTime() + rec.duration or 0
 		ForceNameplateUpdate(dstGUID, dstName, dstFlags)
-	elseif spellDuration[spellID] then
+	elseif spellDuration[spellID] or SpellCategory[spellID] then
 		duration = HandleAuraApply(srcGUID, srcFlags, dstGUID, dstName, dstFlags, spellID, spellName, auraType, amount)
 	end
 	if drType then
@@ -543,7 +582,7 @@ function EventFrame:SPELL_AURA_APPLIED_DOSE(srcGUID, srcFlags, dstGUID, dstName,
 		return
 	end
 	--We're not tracking this aura yet: add it with the stack count the log reports.
-	if spellDuration[spellID] then
+	if spellDuration[spellID] or SpellCategory[spellID] then
 		HandleAuraApply(srcGUID, srcFlags, dstGUID, dstName, dstFlags, spellID, spellName, auraType, amount)
 	end
 end
@@ -558,9 +597,10 @@ function EventFrame:SPELL_AURA_REMOVED_DOSE(srcGUID, srcFlags, dstGUID, dstName,
 end
 
 function EventFrame:SPELL_INTERRUPT(srcGUID, srcFlags, dstGUID, dstName, dstFlags, spellID, spellName)
-	if not P.showInterrupts then return end
 	local duration = InterruptsDuration[spellID]
 	if not duration then return end
+	local side = (P.sideRightEnabled and P.sideCatInterrupt) and "right" or nil
+	if not (P.showInterrupts or side) then return end
 	duration = duration * (1 - P.interruptsReduction)
 	if not FlagIsPlayer(dstFlags) then return end
 	guidBuffs[dstGUID] = guidBuffs[dstGUID] or {}
@@ -578,7 +618,10 @@ function EventFrame:SPELL_INTERRUPT(srcGUID, srcFlags, dstGUID, dstName, dstFlag
 		expirationTime = GetTime() + duration,
 		sID = spellID,
 		srcGUID = srcGUID,
-		scale = P.interruptsScale
+		scale = P.interruptsScale,
+		side = side,
+		main = P.showInterrupts and true or false,
+		cat = "interrupt"
 	})
 	ForceNameplateUpdate(dstGUID, dstName, dstFlags)
 end

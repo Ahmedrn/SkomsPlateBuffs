@@ -189,6 +189,7 @@ function core:HidePlateSpells(plate)
 			buffFrames[plate][i]:Hide()
 		end
 	end
+	if self.HideSideRows then self:HideSideRows(plate) end
 end
 
 function core:ShouldAddBuffs(plate)

@@ -119,6 +119,24 @@ defaultSettings.fadeMinDuration = 6
 
 defaultSettings.increase = 1
 
+-- side rows (left: important buffs, right: crowd control)
+defaultSettings.sideRightEnabled = true
+defaultSettings.sideLeftEnabled = true
+defaultSettings.sideIconSize = 28
+defaultSettings.sideIconsPerRow = 4
+defaultSettings.sideSpacing = 2
+defaultSettings.sideOffsetX = 2
+defaultSettings.sideOffsetY = 0
+defaultSettings.sideAnchorHealthBar = true
+defaultSettings.sideHideInMain = true
+defaultSettings.sideCatCC = true
+defaultSettings.sideCatRoot = true
+defaultSettings.sideCatInterrupt = true
+defaultSettings.sideCatImmunity = true
+defaultSettings.sideCatDefensive = true
+defaultSettings.sideCatOffensive = true
+defaultSettings.sideCatOther = false
+
 core.CoreOptionsTable = {
 	name = core.title,
 	type = "group",
@@ -1297,10 +1315,115 @@ core.SpellOptionsTable = {
 	}
 }
 
+core.SideOptionsTable = {
+	type = "group",
+	name = L["Side rows"],
+	order = 6,
+	get = function(info)
+		return P[info[#info]]
+	end,
+	set = function(info, v)
+		P[info[#info]] = v
+		core:ResetSideRows()
+	end,
+	args = {
+		header = {
+			type = "header",
+			name = L["Side rows"],
+			order = 1
+		},
+		desc = {
+			type = "description",
+			name = L["Crowd control goes in a row to the right of the nameplate, important buffs in a row to the left. They are shown in addition to the normal rows above the plate."],
+			order = 2
+		},
+		sideRightEnabled = {
+			type = "toggle",
+			name = L["Right row: crowd control"],
+			order = 3
+		},
+		sideLeftEnabled = {
+			type = "toggle",
+			name = L["Left row: important buffs"],
+			order = 4
+		},
+		sideHideInMain = {
+			type = "toggle",
+			name = L["Hide them from the rows above the plate"],
+			desc = L["An aura shown on a side row is not repeated in the normal rows."],
+			order = 5
+		},
+		sideAnchorHealthBar = {
+			type = "toggle",
+			name = L["Anchor to the health bar"],
+			desc = L["Anchor the side rows to the health bar instead of the whole nameplate frame."],
+			order = 6
+		},
+		sizeHeader = {
+			type = "header",
+			name = L["Size and position"],
+			order = 10
+		},
+		sideIconSize = {
+			type = "range",
+			name = L["Icon size"],
+			order = 11,
+			min = 12,
+			max = 64,
+			step = 1
+		},
+		sideIconsPerRow = {
+			type = "range",
+			name = L["Icons per row"],
+			order = 12,
+			min = 1,
+			max = 8,
+			step = 1
+		},
+		sideSpacing = {
+			type = "range",
+			name = L["Spacing"],
+			order = 13,
+			min = -6,
+			max = 12,
+			step = 1
+		},
+		sideOffsetX = {
+			type = "range",
+			name = L["Offset X"],
+			order = 14,
+			min = -60,
+			max = 60,
+			step = 1
+		},
+		sideOffsetY = {
+			type = "range",
+			name = L["Offset Y"],
+			order = 15,
+			min = -60,
+			max = 60,
+			step = 1
+		},
+		catHeader = {
+			type = "header",
+			name = L["What goes in the rows"],
+			order = 20
+		},
+		sideCatCC = { type = "toggle", name = L["Crowd control"], order = 21 },
+		sideCatRoot = { type = "toggle", name = L["Roots"], order = 22 },
+		sideCatInterrupt = { type = "toggle", name = L["Interrupt lockouts"], order = 23 },
+		sideCatImmunity = { type = "toggle", name = L["Immunities"], order = 24 },
+		sideCatDefensive = { type = "toggle", name = L["Defensive buffs"], order = 25 },
+		sideCatOffensive = { type = "toggle", name = L["Offensive buffs"], order = 26 },
+		sideCatOther = { type = "toggle", name = L["Other buffs"], order = 27 }
+	}
+}
+
 core.CoreOptionsTable.args.display  = core.DisplayOptionsTable
 core.CoreOptionsTable.args.style    = core.DefaultSpellOptionsTable
 core.CoreOptionsTable.args.position = core.BarOptionsTable
 core.CoreOptionsTable.args.spells   = core.SpellOptionsTable
+core.CoreOptionsTable.args.side     = core.SideOptionsTable
 
 do
 	local _spelliconcache = {}

@@ -32,6 +32,8 @@ local nametoGUIDs = core.nametoGUIDs
 local buffBars = core.buffBars
 local buffFrames = core.buffFrames
 local guidBuffs = core.guidBuffs
+local LibNameplates = core.LibNameplates
+local CategoryPriority = core.CategoryPriority
 
 local unknownIconPath = "Interface\\Icons\\Inv_misc_questionmark"
 local COOLDOWN_RADIAL_TEXTURE = "Interface\\AddOns\\PlateBuffsMini\\media\\Swipe"
@@ -305,7 +307,11 @@ local function iconOnShow(self)
 		end
 	end
 
-	if self.playerCast and P.biggerSelfSpells then
+	if self.sideRow then
+		-- side rows have their own icon size; the fonts follow it
+		increase = P.sideIconSize / math_max(1, P.iconSize)
+		UpdateIconSize(self, P.sideIconSize, P.sideIconSize)
+	elseif self.playerCast and P.biggerSelfSpells then
 		UpdateIconSize(self, (P.iconSize * increase * 1.2), (P.iconSize2 * increase * 1.2))
 	else
 		UpdateIconSize(self, P.iconSize * increase, P.iconSize2 * increase)
@@ -749,20 +755,151 @@ local function SortFunc(a, b)
 	end
 end
 
+----------------------------------------------------------------------------------------------
+-- Side rows: crowd control on the right of the plate, important buffs on the left
+----------------------------------------------------------------------------------------------
+local sideFrames = {}   -- [plate] = { parent = Frame, right = { icon frames }, left = { icon frames } }
+core.sideFrames = sideFrames
+local mainScratch, rightScratch, leftScratch = {}, {}, {}
+
+local function sideSort(a, b)
+	local pa, pb = CategoryPriority[a.cat or ""] or 0, CategoryPriority[b.cat or ""] or 0
+	if pa ~= pb then return pa > pb end
+	local ea, eb = a.expirationTime or 0, b.expirationTime or 0
+	if ea ~= eb then return ea > eb end
+	return (a.sID or 0) < (b.sID or 0)
+end
+
+local function GetSideFrames(plate)
+	local s = sideFrames[plate]
+	if not s then
+		if not plate.PB_parentFrame then
+			plate.PB_parentFrame = CreateFrame("Frame", nil, plate)
+			plate.PB_parentFrame:SetAllPoints(plate)
+		end
+		s = { right = {}, left = {} }
+		s.parent = CreateFrame("Frame", nil, plate.PB_parentFrame)
+		s.parent:SetAllPoints(plate.PB_parentFrame)
+		sideFrames[plate] = s
+	end
+	return s
+end
+
+local function SideAnchor(plate)
+	if P.sideAnchorHealthBar then
+		local bar = LibNameplates:GetHealthBar(plate)
+		if bar then return bar end
+	end
+	return plate
+end
+
+local function LayoutSide(plate, s, side, list, enabled)
+	local frames = s[side]
+	local n = enabled and math_min(#list, P.sideIconsPerRow) or 0
+	if n > 1 then table_sort(list, sideSort) end
+	local anchor = SideAnchor(plate)
+	local padX, padY = P.intervalX or 12, P.intervalY or 12
+	for i = 1, n do
+		local f = frames[i]
+		if not f then
+			f = CreateBuffFrame(s.parent, plate)
+			f.sideRow = side
+			frames[i] = f
+		end
+		f:SetParent(s.parent)
+		f:ClearAllPoints()
+		if side == "right" then
+			if i == 1 then
+				f:SetPoint("LEFT", anchor, "RIGHT", P.sideOffsetX - padX / 2, P.sideOffsetY - padY / 2)
+			else
+				f:SetPoint("LEFT", frames[i - 1], "RIGHT", P.sideSpacing - padX, 0)
+			end
+		else
+			if i == 1 then
+				f:SetPoint("RIGHT", anchor, "LEFT", -P.sideOffsetX + padX / 2, P.sideOffsetY - padY / 2)
+			else
+				f:SetPoint("RIGHT", frames[i - 1], "LEFT", -P.sideSpacing + padX, 0)
+			end
+		end
+		local rec = list[i]
+		f.spellName = rec.name or ""
+		f.sID = rec.sID or ""
+		f.expirationTime = rec.expirationTime or 0
+		f.duration = rec.duration
+		f.stackCount = rec.stackCount or 0
+		f.isDebuff = rec.isDebuff
+		f.debuffType = rec.debuffType
+		f.playerCast = rec.playerCast
+		f.scale = rec.scale or 1
+		if f.iconPath ~= rec.icon then
+			f.iconPath = rec.icon
+			f.texture:SetTexture(rec.icon)
+		end
+		if f:IsShown() then
+			iconOnShow(f)
+		else
+			f:Show()
+		end
+		iconOnUpdate(f, 1)
+	end
+	for i = n + 1, #frames do frames[i]:Hide() end
+end
+
+function core:UpdateSideRows(plate, rightList, leftList)
+	local wantRight = P.sideRightEnabled and #rightList > 0
+	local wantLeft = P.sideLeftEnabled and #leftList > 0
+	if not sideFrames[plate] and not (wantRight or wantLeft) then return end
+	local s = GetSideFrames(plate)
+	LayoutSide(plate, s, "right", rightList, P.sideRightEnabled)
+	LayoutSide(plate, s, "left", leftList, P.sideLeftEnabled)
+end
+
+function core:HideSideRows(plate)
+	local s = sideFrames[plate]
+	if not s then return end
+	for i = 1, #s.right do s.right[i]:Hide() end
+	for i = 1, #s.left do s.left[i]:Hide() end
+end
+
+-- Options changed: hide the side rows and lay every plate out again.
+function core:ResetSideRows()
+	for plate in pairs(sideFrames) do self:HideSideRows(plate) end
+	self:ShowAllKnownSpells()
+end
+
 -- Show spells on a plate linked to a GUID.
 function core:AddBuffsToPlate(plate, GUID)
 	if not buffFrames[plate] or not buffFrames[plate][P.iconsPerBar] then
 		self:BuildBuffFrame(plate)
 	end
 	local t = guidBuffs[GUID]
-	if not t then return end
+	if not t then
+		self:HideSideRows(plate)
+		return
+	end
 	table_sort(t, SortFunc)
+	-- split the records: main bars above the plate, and the left / right side rows
+	local mainList, rightList, leftList = mainScratch, rightScratch, leftScratch
+	for i = #mainList, 1, -1 do mainList[i] = nil end
+	for i = #rightList, 1, -1 do rightList[i] = nil end
+	for i = #leftList, 1, -1 do leftList[i] = nil end
+	for i = 1, #t do
+		local r = t[i]
+		if r.side == "right" then
+			rightList[#rightList + 1] = r
+		elseif r.side == "left" then
+			leftList[#leftList + 1] = r
+		end
+		if r.main ~= false and not (r.side and P.sideHideInMain) then
+			mainList[#mainList + 1] = r
+		end
+	end
 	local frames = buffFrames[plate]
 	local f, rec
 	for i = 1, P.numBars * P.iconsPerBar do
 		f = frames[i]
 		if f then
-			rec = t[i]
+			rec = mainList[i]
 			if rec then
 				f.spellName = rec.name or ""
 				f.sID = rec.sID or ""
@@ -789,6 +926,7 @@ function core:AddBuffsToPlate(plate, GUID)
 			end
 		end
 	end
+	self:UpdateSideRows(plate, rightList, leftList)
 	UpdateAllBarSizes(plate)
 end
 

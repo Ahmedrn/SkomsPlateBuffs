@@ -44,6 +44,7 @@ local CATEGORIES = {
 	{ "immunity_spell", "Spell immunities", "sidePrioImmunitySpell" },
 	{ "buff_def", "Defensive buffs", "sidePrioDefensive" },
 	{ "buff_off", "Offensive buffs", "sidePrioOffensive" },
+	{ "speed", "Speed boosts", "sidePrioSpeed" },
 	{ "buff_other", "Other buffs", "sidePrioOther" },
 }
 local CATEGORY_PRIO = {}
@@ -452,7 +453,7 @@ local function EntryOptions(e)
 				name = L["Icon size multiplier"],
 				desc = L["Multiplies the row's icon size for this spell (1 = the row's size). Used in every row that shows it."],
 				order = 3.6,
-				min = 0.5, max = 3, step = 0.05,
+				min = 0.5, max = 3, step = 0.25,
 				get = function() return P.spellScale[name] or 1 end,
 				set = function(_, v)
 					if math.abs(v - 1) < 0.001 then P.spellScale[name] = nil else P.spellScale[name] = v end
@@ -551,7 +552,7 @@ local function MyDebuffEntry(name, id)
 				name = L["Icon size multiplier"],
 				desc = L["Multiplies the row's icon size for this spell (1 = the row's size). Used in every row that shows it."],
 				order = 2,
-				min = 0.5, max = 3, step = 0.05,
+				min = 0.5, max = 3, step = 0.25,
 				get = function() return P.spellScale[name] or 1 end,
 				set = function(_, v)
 					if math.abs(v - 1) < 0.001 then P.spellScale[name] = nil else P.spellScale[name] = v end

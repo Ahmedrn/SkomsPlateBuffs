@@ -140,6 +140,7 @@ defaultSettings.topOffsetY = 10
 defaultSettings.sidePrioImmunitySpell = 9
 defaultSettings.sidePrioSnare = 4
 defaultSettings.sidePrioDisarm = 6
+defaultSettings.sidePrioSpeed = 3
 defaultSettings.sidePrioHealing = 5
 defaultSettings.spellScale = {}
 
@@ -149,6 +150,7 @@ defaultSettings.catGlow = {
 	root = { type = "border", color = { 1, 0.65, 0.2 } },
 	snare = { type = "border", color = { 0.7, 0.9, 0.3 } },
 	disarm = { type = "border", color = { 0.95, 0.75, 0.2 } },
+	speed = { type = "border", color = { 0.4, 0.9, 1 } },
 	healing_reduction = { type = "border", color = { 0.8, 0.3, 0.8 } },
 	interrupt = { type = "border", color = { 1, 0.5, 0 } },
 	immunity = { type = "border", color = { 0.4, 0.8, 1 } },
@@ -182,7 +184,7 @@ defaultSettings.myDebuffs = {}
 defaultSettings.myDebuffHidden = {}
 defaultSettings.rowTop2 = {
 	enabled = true, max = 4, size = 28, glow = true, onlyMine = false, show = "buffs",
-	cats = { buff_other = true }
+	cats = { buff_other = true, speed = true }
 }
 defaultSettings.rowTop3 = {
 	enabled = true, max = 4, size = 24, glow = false, onlyMine = false, show = "all",
@@ -1174,6 +1176,7 @@ local ROW_CATS = {
 	{ "immunity", "Immunities" },
 	{ "buff_def", "Defensive buffs" },
 	{ "buff_off", "Offensive buffs" },
+	{ "speed", "Speed boosts" },
 	{ "buff_other", "Other buffs" },
 	{ "any", "Any other aura" },
 }

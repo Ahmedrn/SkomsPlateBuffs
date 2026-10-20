@@ -846,7 +846,7 @@ end
 -- priority of a category (adjustable in the options): higher goes closer to the nameplate / first in the row
 local PRIORITY_KEY = {
 	cc = "sidePrioCC", interrupt = "sidePrioInterrupt", root = "sidePrioRoot",
-	snare = "sidePrioSnare", healing_reduction = "sidePrioHealing", disarm = "sidePrioDisarm",
+	snare = "sidePrioSnare", healing_reduction = "sidePrioHealing", disarm = "sidePrioDisarm", speed = "sidePrioSpeed",
 	immunity = "sidePrioImmunity", immunity_spell = "sidePrioImmunitySpell",
 	buff_def = "sidePrioDefensive", buff_off = "sidePrioOffensive", buff_other = "sidePrioOther",
 }

@@ -4,6 +4,14 @@ local folder, core = ...
 -- Generated from the BigDebuffs WotLK spell list (Jordon, Tsoukie): spell id -> category.
 -- Ranks of one spell are listed individually; the spell name is matched as well (see below).
 core.SpellCategory = {
+    -- speed (added)
+    [61684] = "speed", -- Dash (pet)
+    [2645] = "speed", -- Ghost Wolf
+    [31643] = "speed", -- Blazing Speed
+    [54861] = "speed", -- Nitro Boosts
+    [36554] = "speed", -- Shadowstep
+    [64128] = "speed", -- Body and Soul
+    [65081] = "speed", -- Body and Soul
     -- disarm (added)
     [30217] = "cc", -- Adamantite Grenade (from the old tracked list)
     [67769] = "cc", -- Cobalt Frag Bomb (from the old tracked list)
@@ -420,22 +428,22 @@ core.SpellCategory = {
     [31850] = "buff_def", -- Ardent Defender
     [66] = "buff_other", -- (was buff_off) Invisibility
     [1719] = "buff_off", -- Recklessness
-    [1850] = "buff_other", -- (was buff_off) Dash
+    [1850] = "speed", -- (was buff_off) Dash
     [2825] = "buff_off", -- Bloodlust
-    [2983] = "buff_off", -- Sprint
+    [2983] = "speed", -- Sprint
     [3045] = "buff_off", -- Rapid Fire
-    [5118] = "buff_other", -- (was buff_off) Aspect of the Cheetah
+    [5118] = "speed", -- (was buff_off) Aspect of the Cheetah
     [7744] = "buff_other", -- (was buff_off) Will of the Forsaken
-    [8696] = "buff_off",
-    [9821] = "buff_other", -- (was buff_off) Dash
+    [8696] = "speed",
+    [9821] = "speed", -- (was buff_off) Dash
     [10060] = "buff_off", -- Power Infusion
-    [11305] = "buff_off",
+    [11305] = "speed",
     [12042] = "buff_off", -- Arcane Power
     [12043] = "buff_other", -- (was buff_off) Presence of Mind
     [12051] = "buff_other", -- (was buff_off) Evocation
     [12292] = "buff_off", -- Death Wish
     [12472] = "buff_off", -- Icy Veins
-    [13159] = "buff_other", -- (was buff_off) Aspect of the Pack
+    [13159] = "speed", -- (was buff_off) Aspect of the Pack
     [13750] = "buff_off", -- Adrenaline Rush
     [13877] = "buff_off", -- Blade Flurry
     [14177] = "buff_other", -- (was buff_off) Cold Blood
@@ -512,7 +520,7 @@ core.SpellCategory = {
     [27065] = "buff_other",
     [27189] = "healing_reduction", -- Wound Poison V
     [30330] = "buff_other",
-    [33357] = "buff_other", -- Dash
+    [33357] = "speed", -- Dash
     [33891] = "buff_other", -- Tree of Life
     [41425] = "buff_other", -- Hypothermia
     [43039] = "buff_other", -- Ice Barrier
@@ -536,11 +544,11 @@ core.SpellCategory = {
 
 -- which row a category goes to, and its priority inside the row (higher first)
 core.CategorySide = {
-    cc = "right", root = "right", interrupt = "right", snare = "right", healing_reduction = "right", disarm = "right",
+    cc = "right", root = "right", interrupt = "right", snare = "right", healing_reduction = "right", disarm = "right", speed = "right",
     immunity = "left", immunity_spell = "left", buff_def = "left", buff_off = "left", buff_other = "left",
 }
 core.CategoryPriority = {
-    cc = 6, interrupt = 5, root = 3, snare = 3, healing_reduction = 4, disarm = 5,
+    cc = 6, interrupt = 5, root = 3, snare = 3, healing_reduction = 4, disarm = 5, speed = 2,
     immunity = 6, immunity_spell = 6, buff_def = 5, buff_off = 4, buff_other = 1,
 }
 

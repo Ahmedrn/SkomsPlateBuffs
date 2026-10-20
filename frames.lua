@@ -1161,9 +1161,7 @@ end
 
 -- This will reset all the anchors on the spell frames.
 function core:ResetAllPlateIcons()
-	for plate in pairs(buffFrames) do
-		core:BuildBuffFrame(plate, true)
-	end
+	core:ResetSideRows()
 end
 
 -- Create our buff frames on a plate.

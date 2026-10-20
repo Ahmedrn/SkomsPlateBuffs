@@ -1,16 +1,17 @@
 ## Interface: 30300
 ## Title: PlateBuffsMini
-## Notes: PlateBuffs variant: adds a left row (important buffs) and a right row (crowd control) next to the nameplate. Replaces PlateBuffs.
-## Version: 1.19.5 (r238)
-## Author: Cyprias
+## Notes: PlateBuffs with two extra rows beside the nameplate: crowd control on the right, important buffs on the left. Replaces PlateBuffs.
+## Version: 1.0.0 (based on PlateBuffs 1.19.5 r238)
+## Author: Cyprias (original PlateBuffs)
 ## SavedVariables: PB_DB
 ## OptionalDeps: LibStub, CallbackHandler-1.0, LibNameplates-1.0
 
 ## X-Backporter: Kader
 ## X-Modder: Khal
+## X-Variant: Ahmedrn (side rows)
 ## X-Website: https://github.com/KhalGH/PlateBuffs-WoTLK
-## X-Packaged-Version: r238
-## X-Date: 2026-09-29
+## X-Packaged-Version: r238-mini1
+## X-Date: 2026-10-20
 
 libs\embeds.xml
 locales\locales.xml

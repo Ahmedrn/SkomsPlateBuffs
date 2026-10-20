@@ -1,15 +1,35 @@
-# PlateBuffsMini
+# PlateBuffsMini 1.0.0 (WoW 3.3.5a)
 
-A variant of [PlateBuffs-WoTLK](https://github.com/KhalGH/PlateBuffs-WoTLK) (r238) for WoW 3.3.5a that adds two rows next to
-the nameplate, MiniCC style, on top of the normal rows above it:
+PlateBuffs with two extra rows beside the enemy nameplate, in the style of the retail addon MiniCC:
 
-- **Right row:** crowd control, roots, interrupt lockouts
-- **Left row:** important buffs (immunities, defensives, offensives)
+- **Right of the plate:** crowd control, roots and interrupt lockouts
+- **Left of the plate:** important buffs (immunities, defensive and offensive cooldowns)
 
-Everything else (tracking from the combat log and `UnitAura`, durations, diminishing returns, nameplate detection, styling)
-is the stock PlateBuffs. The new options are in the **Side rows** tab of the PlateBuffs options (`/pb`).
+The normal PlateBuffs rows above the plate keep working exactly as before. Everything about the side rows is in the
+**Side rows** tab of the PlateBuffs options (`/pb`): on/off per side, icon size, icons per row, spacing, X/Y offsets,
+anchoring (health bar or whole plate), which categories go in the rows, and whether an aura shown on a side row is
+hidden from the rows above the plate (default: yes).
 
-Use it **instead of** PlateBuffs (disable the original): it shares the `PB_DB` saved variables, so your settings carry over.
+## Install
+1. Delete or disable the original **PlateBuffs** (two copies would draw on the same plates).
+2. Put the `PlateBuffsMini` folder in `Interface\AddOns`.
+3. Log in. Your existing PlateBuffs settings are kept (same saved variables, `PB_DB`).
 
-Changes against the original are in git: `git diff 17c7609` shows everything added.
-The spell categories (`categories.lua`) come from the BigDebuffs WotLK spell list (Jordon, Tsoukie).
+No client patches are needed. It works the same way PlateBuffs does: nameplates are found with LibNameplates, auras come
+from the combat log and from `UnitAura` on your target, focus and mouseover.
+A plate whose unit PlateBuffs cannot identify yet shows nothing until you target or mouse over it.
+
+## Credits
+- **PlateBuffs** by **Cyprias**.
+- 3.3.5a backport by **Kader**, WotLK modifications and fixes by **Khal**: https://github.com/KhalGH/PlateBuffs-WoTLK
+  Almost all of this addon is their work.
+- Side rows and spell categories by **Ahmedrn**. The spell category list is generated from the BigDebuffs WotLK spell
+  list (Jordon, Tsoukie). The idea follows MiniCC / MiniAuras by Verubato; no code was copied from it.
+
+## Changes from PlateBuffs r238
+- New `categories.lua`: spell id -> category (crowd control, roots, interrupts, immunities, defensive, offensive).
+- `combatlog.lua`: spells of those categories are always tracked, even when the normal filters would hide them.
+- `frames.lua`: records are split into the normal rows and the two side rows; side rows are laid out left/right of the plate.
+- `options.lua` and `locales/enUS.lua`: the Side rows tab.
+- Start-up hardening: the settings table is set before the previous `OnEnable` runs.
+- The addon folder is `PlateBuffsMini`; the media paths point there.

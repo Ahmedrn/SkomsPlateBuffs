@@ -128,6 +128,37 @@ local function Tidy(name)
 	end
 end
 
+-- ---------------------------------------------------------------------------------------------------------
+-- spell descriptions (from the game's own tooltip)
+-- ---------------------------------------------------------------------------------------------------------
+local descCache = {}
+local function SpellDescription(id)
+	local d = descCache[id]
+	if d then return d end
+	local tip = core.tooltip
+	if not tip then return "" end
+	tip:SetOwner(UIParent, "ANCHOR_NONE")
+	tip:ClearLines()
+	tip:SetHyperlink("spell:" .. id)
+	local text = ""
+	local name = tip:GetName()
+	for i = tip:NumLines(), 2, -1 do
+		local fs = _G[name .. "TextLeft" .. i]
+		local t = fs and fs:GetText()
+		if t and t ~= "" then
+			text = t
+			break
+		end
+	end
+	if text ~= "" then descCache[id] = text end
+	return text
+end
+
+local function SpellTooltip(id, extra)
+	local d = SpellDescription(id)
+	return (d ~= "" and (d .. "\n\n") or "") .. "|cffffd100" .. L["Spell ID"] .. "|r " .. id .. (extra or "")
+end
+
 -- one entry per spell name: { name, id (for the icon), cat (default), ids = {...}, custom = true if only added by the user }
 local function CollectEntries()
 	local entries = {}
@@ -333,7 +364,7 @@ local function EntryOptions(e)
 		end,
 		icon = function() return select(3, GetSpellInfo(e.id)) end,
 		desc = function()
-			return "|cffffd100" .. L["Spell ID"] .. "|r " .. e.id .. (#e.ids > 1 and ("  (" .. #e.ids .. " " .. L["ranks"] .. ")") or "")
+			return SpellTooltip(e.id, #e.ids > 1 and ("  (" .. #e.ids .. " " .. L["ranks"] .. ")") or "")
 		end,
 		args = {
 			enabled = {
@@ -472,6 +503,146 @@ local function EntryOptions(e)
 	}
 end
 
+-- ---------------------------------------------------------------------------------------------------------
+-- My debuffs: the debuffs the player applies (hard crowd control stays on the right row). The list starts with the
+-- class's own debuffs and grows with every debuff the player applies.
+-- ---------------------------------------------------------------------------------------------------------
+local function IsHardCCSpell(id, name)
+	local c = core.SpellCategory[id] or core.SpellCategoryByName[name or ""]
+	return c == "cc" or c == "interrupt"
+end
+
+function core:LearnMyDebuff(id, name)
+	if not name or P.myDebuffs == nil or P.myDebuffs[name] then return end
+	if IsHardCCSpell(id, name) then return end
+	P.myDebuffs[name] = id
+	if core.BuildMyDebuffsUI then
+		core:BuildMyDebuffsUI()
+		local registry = LibStub("AceConfigRegistry-3.0", true)
+		if registry then registry:NotifyChange(core.title) end
+	end
+end
+
+local function MyDebuffEntry(name, id)
+	local function o() return P.sideSpells[name] end
+	return {
+		type = "group",
+		name = function()
+			if P.myDebuffHidden[name] then return "|cff808080" .. name .. "|r" end
+			return name
+		end,
+		icon = function() return select(3, GetSpellInfo(id)) end,
+		desc = function() return SpellTooltip(id) end,
+		args = {
+			show = {
+				type = "toggle",
+				name = L["Show"],
+				desc = L["Show this spell on the side rows"],
+				order = 1,
+				get = function() return not P.myDebuffHidden[name] end,
+				set = function(_, v)
+					P.myDebuffHidden[name] = (not v) or nil
+					Changed()
+				end,
+			},
+			scale = {
+				type = "range",
+				name = L["Icon size multiplier"],
+				desc = L["Multiplies the row's icon size for this spell (1 = the row's size). Used in every row that shows it."],
+				order = 2,
+				min = 0.5, max = 3, step = 0.05,
+				get = function() return P.spellScale[name] or 1 end,
+				set = function(_, v)
+					if math.abs(v - 1) < 0.001 then P.spellScale[name] = nil else P.spellScale[name] = v end
+					Changed()
+				end,
+			},
+			priorityGroup = {
+				type = "group",
+				inline = true,
+				name = L["Priority"],
+				order = 3,
+				args = {
+					customPriority = {
+						type = "toggle",
+						name = L["Custom priority"],
+						order = 1,
+						get = function() local t = o(); return t and t.prio ~= nil end,
+						set = function(_, v)
+							if v then
+								Override(name).prio = 5
+							else
+								local t = o()
+								if t then t.prio = nil end
+								Tidy(name)
+							end
+							Changed()
+						end,
+					},
+					priority = {
+						type = "range",
+						name = L["Priority"],
+						desc = L["The higher the priority, the closer to the nameplate."],
+						order = 2,
+						min = 1, max = 10, step = 1,
+						disabled = function() local t = o(); return not (t and t.prio) end,
+						get = function() local t = o(); return (t and t.prio) or 5 end,
+						set = function(_, v) Override(name).prio = v; Changed() end,
+					},
+				},
+			},
+			glowGroup = {
+				type = "group",
+				inline = true,
+				name = L["Glow"],
+				order = 4,
+				args = core.SpellGlowArgs(name, 1),
+			},
+		},
+	}
+end
+
+function core:BuildMyDebuffsUI()
+	local args = core.SideSpellsOptionsTable.args
+	local group = args.cat_mydebuffs
+	if not group then
+		group = {
+			type = "group",
+			name = L["My debuffs"],
+			order = 5,
+			args = {
+				desc = {
+					type = "description",
+					name = L["Your own debuffs on enemies, except hard crowd control (stuns, fears, disarms, silences), which stays on the right row. Switch off the ones you do not want to see, set a size multiplier and a glow. The list starts with your class's debuffs and grows with every debuff you apply."],
+					order = 1,
+				},
+			},
+		}
+		for k, v in pairs(CategoryGlowArgs("mydebuffs", 3)) do group.args[k] = v end
+		args.cat_mydebuffs = group
+	end
+	for k in pairs(group.args) do
+		if k:find("^spell") then group.args[k] = nil end
+	end
+	local entries = {}
+	for _, id in ipairs(core.MyDebuffSeeds or {}) do
+		local name = GetSpellInfo(id)
+		if name and not IsHardCCSpell(id, name) then entries[name] = id end
+	end
+	for name, id in pairs(P.myDebuffs or {}) do
+		if not entries[name] then entries[name] = id end
+	end
+	local list = {}
+	for name, id in pairs(entries) do list[#list + 1] = { name, id } end
+	table_sort(list, function(a, b) return a[1] < b[1] end)
+	for i, e in ipairs(list) do
+		local entry = MyDebuffEntry(e[1], e[2])
+		entry.order = 10 + i
+		group.args["spell" .. e[2]] = entry
+	end
+	group.name = L["My debuffs"] .. " (" .. #list .. ")"
+end
+
 core.SideSpellsOptionsTable = {
 	type = "group",
 	name = L["Spells"],
@@ -548,6 +719,7 @@ function core:BuildSideSpellUI()
 			g.args.empty = { type = "description", name = L["No spells in this category."], order = 10 }
 		end
 	end
+	core:BuildMyDebuffsUI()
 end
 
 -- the old PlateBuffs spell list (DoTs, poisons, ...) is the last category: "Other tracked auras"

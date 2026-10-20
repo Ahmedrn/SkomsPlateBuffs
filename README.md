@@ -4,23 +4,23 @@ Enemy nameplate auras, laid out the way you decide. Based on PlateBuffs (see Cre
 
 ## Rows
 - **Left row** and **right row**: one row each, 3 icons by default.
-- **Top rows** above the plate: you start with one and add more (up to six). Each has its own number of icons and size.
+- **Top row** above the plate, and **extra top rows** you add (up to five more). Each has its own number of icons and size.
+- **Top row = My debuffs** (a switch on the row): your own debuffs on enemies, except hard crowd control (stuns, fears, disarms, silences), which stays on the right row. Which ones, their size and their glow are set in the Spells tab, *My debuffs*. The list starts with your class's debuffs and grows with every debuff you apply.
 - Every row picks what it shows:
   - categories: crowd control, roots, snares, healing reduction, interrupt lockouts, immunities, defensive, offensive and other buffs;
   - **Other tracked auras**: the old PlateBuffs list (DoTs, poisons, ...);
   - **Any other aura**: everything no earlier row took.
 - Per row: buffs and debuffs / debuffs only / buffs only, and **only my auras**.
-  Top row 1 = *Any other aura* + *Debuffs only* + *Only my auras* is "my debuffs".
 - An aura goes to the first row that takes it. Rows set to *Only my auras* are checked first, then left, right and the top rows in order.
 
-Default set-up: left = immunities, defensive and offensive cooldowns; right = crowd control, roots, interrupts; top 1 = my debuffs.
+Default set-up (32 px icons): left = buffs only: immunities, defensive and offensive cooldowns; right = debuffs only: crowd control, roots, interrupts, snares, healing reduction; top row = my debuffs.
 The classic PlateBuffs bars are gone: the rows replace them.
 
 ## Options (`/spb`)
 - **Main settings:** Rows (per row: on/off, max icons, size, show, only mine, glow, categories), Display conditions, Appearance.
 - **Position:** left/right and top offsets and spacing, test mode.
 - **Spells:** a tree by category, like the BigDebuffs spells tab. Each category has its priority and glow and an add-by-ID box;
-  each spell has show on/off, category, priority, icon size multiplier (for example Hamstring 1.5x) and its own glow.
+  each spell has show on/off, category, priority, icon size multiplier (for example Hamstring 1.5x) and its own glow; hovering a spell shows what it does. *My debuffs* is the first group.
   The last group, *Other tracked auras*, is the classic PlateBuffs list. Spells that have a category are not repeated there.
 - **Profiles** and **About**.
 

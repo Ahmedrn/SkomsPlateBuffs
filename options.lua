@@ -156,6 +156,7 @@ defaultSettings.catGlow = {
 	buff_off = { type = "border", color = { 1, 0.25, 0.25 } },
 	buff_other = { type = "none", color = { 0.8, 0.8, 0.8 } },
 	tracked = { type = "none", color = { 1, 1, 0.3 } },
+	mydebuffs = { type = "none", color = { 1, 0.8, 0.2 } },
 }
 defaultSettings.spellGlow = {}
 
@@ -163,18 +164,21 @@ defaultSettings.spellGlow = {}
 -- cats: which categories the row shows; "classic" = whatever the classic filters / Bar spells list let through.
 defaultSettings.topRowCount = 1
 defaultSettings.rowLeft = {
-	enabled = true, max = 3, size = 28, glow = true, onlyMine = false, show = "all",
+	enabled = true, max = 3, size = 32, glow = true, onlyMine = false, show = "buffs",
 	cats = { immunity = true, buff_def = true, buff_off = true }
 }
 defaultSettings.rowRight = {
-	enabled = true, max = 3, size = 28, glow = true, onlyMine = false, show = "all",
-	cats = { cc = true, root = true, interrupt = true }
+	enabled = true, max = 3, size = 32, glow = true, onlyMine = false, show = "debuffs",
+	cats = { cc = true, root = true, interrupt = true, snare = true, healing_reduction = true }
 }
 -- top row 1: my debuffs. The other top rows start empty-ish; the user adds them.
 defaultSettings.rowTop1 = {
-	enabled = true, max = 6, size = 24, glow = false, onlyMine = true, show = "debuffs",
-	cats = { any = true }
+	enabled = true, max = 6, size = 24, glow = false, onlyMine = true, show = "debuffs", myDebuffs = true,
+	cats = {}
 }
+-- "My debuffs" list (Spells tab): debuffs learned as the player applies them, and the ones the user hides
+defaultSettings.myDebuffs = {}
+defaultSettings.myDebuffHidden = {}
 defaultSettings.rowTop2 = {
 	enabled = true, max = 4, size = 24, glow = false, onlyMine = false, show = "all",
 	cats = { tracked = true }
@@ -1151,12 +1155,12 @@ core.SpellOptionsTable = {
 local ROW_TITLES = {
 	rowLeft = "Left row",
 	rowRight = "Right row",
-	rowTop1 = "Top row 1",
-	rowTop2 = "Top row 2",
-	rowTop3 = "Top row 3",
-	rowTop4 = "Top row 4",
-	rowTop5 = "Top row 5",
-	rowTop6 = "Top row 6",
+	rowTop1 = "Top row",
+	rowTop2 = "Extra top row 1",
+	rowTop3 = "Extra top row 2",
+	rowTop4 = "Extra top row 3",
+	rowTop5 = "Extra top row 4",
+	rowTop6 = "Extra top row 5",
 }
 
 local ROW_CATS = {
@@ -1240,7 +1244,7 @@ local function RowOptions(rowKey, order)
 			},
 			addRow = {
 				type = "execute",
-				name = L["Add a top row"],
+				name = L["Add an extra top row"],
 				desc = L["Rows above the nameplate. Each one has its own content, size and number of icons."],
 				order = 7,
 				hidden = function() return (P.topRowCount or 1) >= MAX_TOP_ROWS end,
@@ -1248,7 +1252,7 @@ local function RowOptions(rowKey, order)
 			},
 			remove = {
 				type = "execute",
-				name = L["Remove this row"],
+				name = L["Remove this extra row"],
 				order = 7.5,
 				hidden = function() return not (topIndex and topIndex > 1 and topIndex == (P.topRowCount or 1)) end,
 				func = function()
@@ -1269,6 +1273,19 @@ local function RowOptions(rowKey, order)
 		local t = { type = "toggle", name = L[c[2]], order = 20 + i, width = "full" }
 		if ROW_CAT_DESC[c[1]] then t.desc = L[ROW_CAT_DESC[c[1]]] end
 		group.args[c[1]] = t
+	end
+	if rowKey == "rowTop1" then
+		group.args.myDebuffs = {
+			type = "toggle",
+			name = L["My debuffs"],
+			desc = L["Shows your own debuffs on enemies, except hard crowd control (stuns, fears, disarms, silences), which stays on the right row. Pick which ones to show, their size and glow in the Spells tab, My debuffs."],
+			order = 3.5,
+			width = "full",
+		}
+		-- with My debuffs on, what this row shows is decided in the Spells tab
+		local function off() return P.rowTop1.myDebuffs end
+		for _, k in ipairs{ "show", "onlyMine", "catHeader", "catDesc" } do group.args[k].hidden = off end
+		for _, c in ipairs(ROW_CATS) do group.args[c[1]].hidden = off end
 	end
 	return group
 end
@@ -1306,7 +1323,7 @@ core.RowsOptionsTable = {
 		},
 		addRow = {
 			type = "execute",
-			name = L["Add a top row"],
+			name = L["Add an extra top row"],
 			desc = L["Rows above the nameplate. Each one has its own content, size and number of icons."],
 			order = 4,
 			hidden = function() return (P.topRowCount or 1) >= MAX_TOP_ROWS end,

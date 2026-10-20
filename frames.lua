@@ -792,18 +792,23 @@ function core:UpdateWantedCategories()
 	for _, key in ipairs(ROW_KEYS) do
 		if RowActive(key) then
 			local row = P[key]
-			for cat, on in pairs(row.cats) do
-				if on and cat ~= "tracked" and cat ~= "any" then
-					WantedCats[cat] = true
-					any = true
-					if cat == "immunity" then WantedCats.immunity_spell = true end
+			if row.myDebuffs then
+				-- the My debuffs row needs the player's own debuffs
+				if debuffs ~= "all" then debuffs = "mine" end
+			else
+				for cat, on in pairs(row.cats) do
+					if on and cat ~= "tracked" and cat ~= "any" then
+						WantedCats[cat] = true
+						any = true
+						if cat == "immunity" then WantedCats.immunity_spell = true end
+					end
 				end
-			end
-			if row.cats.tracked then tracked = true end
-			if row.cats.any then
-				local level = row.onlyMine and "mine" or "all"
-				if row.show ~= "debuffs" and buffs ~= "all" then buffs = level end
-				if row.show ~= "buffs" and debuffs ~= "all" then debuffs = level end
+				if row.cats.tracked then tracked = true end
+				if row.cats.any then
+					local level = row.onlyMine and "mine" or "all"
+					if row.show ~= "debuffs" and buffs ~= "all" then buffs = level end
+					if row.show ~= "buffs" and debuffs ~= "all" then debuffs = level end
+				end
 			end
 		end
 	end
@@ -817,6 +822,14 @@ end
 local ROWKEY_OF_CAT = { immunity_spell = "immunity" }
 
 local CategorizedNames = core.CategorizedNames
+local SpellCategory = core.SpellCategory
+local SpellCategoryByName = core.SpellCategoryByName
+
+-- hard crowd control (stuns, fears, disarms, silences, interrupts) is never a "my debuff": it stays on the right row
+local function IsHardCC(rec)
+	local c = rec.cat or SpellCategory[rec.sID or 0] or SpellCategoryByName[rec.name or ""]
+	return c == "cc" or c == "interrupt"
+end
 
 -- is the aura on the "Other tracked auras" list (and not a spell that has a category)?
 local function IsTracked(rec)
@@ -827,6 +840,7 @@ end
 
 -- does the row take this record?
 local function RowAccepts(row, rec)
+	if row.myDebuffs then return false end   -- filled by the My debuffs pass
 	local show = row.show
 	if show == "debuffs" and not rec.isDebuff then return false end
 	if show == "buffs" and rec.isDebuff then return false end
@@ -906,7 +920,7 @@ local GLOW_KEY = "SPB"
 -- the glow a record gets: the spell's own setting, else its category's
 local function ResolveGlow(rec)
 	local o = P.spellGlow[rec.name or ""]
-	local cg = P.catGlow[rec.cat or "tracked"]
+	local cg = P.catGlow[rec.myDebuff and "mydebuffs" or rec.cat or "tracked"]
 	local gtype = (o and o.type) or (cg and cg.type) or "none"
 	local color = (o and o.color) or (cg and cg.color) or WHITE
 	return gtype, color
@@ -1148,14 +1162,26 @@ function core:AddBuffsToPlate(plate, GUID)
 	for _, key in ipairs(ROW_KEYS) do
 		if RowActive(key) and not P[key].onlyMine then order[#order + 1] = key end
 	end
+	-- the My debuffs row takes the player's own debuffs first (except hard crowd control); the ones the user hid are dropped
+	local myKey = RowActive("rowTop1") and P.rowTop1.myDebuffs and "rowTop1" or nil
+	local hidden = P.myDebuffHidden
 	for i = 1, #t do
 		local r = t[i]
-		for j = 1, #order do
-			local key = order[j]
-			if RowAccepts(P[key], r) then
-				local l = rowScratch[key]
+		r.myDebuff = false
+		if myKey and r.isDebuff and r.playerCast and not IsHardCC(r) then
+			r.myDebuff = true
+			if not hidden[r.name or ""] then
+				local l = rowScratch[myKey]
 				l[#l + 1] = r
-				break
+			end
+		else
+			for j = 1, #order do
+				local key = order[j]
+				if RowAccepts(P[key], r) then
+					local l = rowScratch[key]
+					l[#l + 1] = r
+					break
+				end
 			end
 		end
 	end

@@ -394,6 +394,14 @@ if classSpells and classSpells.spellList4 then
 	end
 end
 
+-- the debuffs this class applies itself: the starting point of the "My debuffs" list (Spells tab)
+core.MyDebuffSeeds = {}
+if classSpells and classSpells.spellList4 then
+	for _, id in ipairs(classSpells.spellList4) do
+		core.MyDebuffSeeds[#core.MyDebuffSeeds + 1] = id
+	end
+end
+
 ---- Interrupts list, assuming 30% duration reduction (worst-case scenario) ----
 core.InterruptsDuration = {
 	[47528] = 4,	-- DK: Mind Freeze

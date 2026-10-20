@@ -304,3 +304,14 @@ L["Healing reduction"] = true
 L["Icon size multiplier"] = true
 L["Multiplies the row's icon size for this spell (1 = the row's size). Used in every row that shows it."] = true
 L["An aura goes to the first row that takes it. Rows set to Only my auras come first, then left, right and the top rows in order."] = true
+L["Top row"] = true
+L["Extra top row 1"] = true
+L["Extra top row 2"] = true
+L["Extra top row 3"] = true
+L["Extra top row 4"] = true
+L["Extra top row 5"] = true
+L["Add an extra top row"] = true
+L["My debuffs"] = true
+L["Remove this extra row"] = true
+L["Shows your own debuffs on enemies, except hard crowd control (stuns, fears, disarms, silences), which stays on the right row. Pick which ones to show, their size and glow in the Spells tab, My debuffs."] = true
+L["Your own debuffs on enemies, except hard crowd control (stuns, fears, disarms, silences), which stays on the right row. Switch off the ones you do not want to see, set a size multiplier and a glow. The list starts with your class's debuffs and grows with every debuff you apply."] = true

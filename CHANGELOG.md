@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.0 (2026-10-20)
+- **Top row = My debuffs.** A switch on the top row. It shows your own debuffs (hard crowd control stays on the right row) and hides the "Show in this row" section. In the Spells tab, a new **My debuffs** group lists them (your class's debuffs first, then every debuff you apply) with show/hide, size multiplier, priority and glow per spell.
+- The right row shows other players' snares and healing reduction; yours go to the top row.
+- Renamed: "Top row" and "Extra top row 1..5".
+- Defaults: left and right rows 32 px, left = buffs only, right = debuffs only (snares and healing reduction included).
+- Disarms are crowd control again (Disarms category removed); the warrior Disarm and Snatch - Bird of Prey were moved there.
+- Spell tooltips in the Spells tab show what the spell does, not only the ID.
+
 ## 1.4.0 (2026-10-20)
 - **Top rows on demand:** one top row by default, "Add a top row" for more (up to six), "Remove this row" on the last one.
 - **Per row: Buffs and debuffs / Debuffs only / Buffs only, and Only my auras.** New content "Any other aura" (everything no earlier row took). Top row 1 by default is "my debuffs". The old Show Buffs / Show Debuffs / Show Interrupts settings are gone from Display conditions; the rows decide.

@@ -4,6 +4,7 @@ local folder, core = ...
 -- Generated from the BigDebuffs WotLK spell list (Jordon, Tsoukie): spell id -> category.
 -- Ranks of one spell are listed individually; the spell name is matched as well (see below).
 core.SpellCategory = {
+    [50541] = "cc", -- Snatch - Bird of Prey (Disarm)
     -- snare / healing_reduction (added)
     [1715] = "snare", -- Hamstring
     [2974] = "snare", -- Wing Clip
@@ -445,7 +446,7 @@ core.SpellCategory = {
     [26064] = "buff_other", -- Shell Shield (Pet) (restored, was buff_def)
     [71] = "buff_other", -- Defensive Stance
     [453] = "buff_other", -- Mind Soothe
-    [676] = "buff_other", -- Disarm
+    [676] = "cc", -- Disarm
     [768] = "buff_other", -- Cat Form
     [770] = "buff_other", -- Faerie Fire
     [783] = "buff_other", -- Travel Form

@@ -288,6 +288,9 @@ local function CollectAuras(unitID, GUID, filter)
 				end
 			end
 		end
+		if isDebuff and unitCaster == "player" and UnitCanAttack("player", unitID) then
+			core:LearnMyDebuff(spellId, name)
+		end
 		shouldAdd = false
 		scale = 1
 		spellOpts = core:HaveSpellOpts(name, spellId)
@@ -532,6 +535,9 @@ end
 
 function EventFrame:SPELL_AURA_APPLIED(srcGUID, srcFlags, dstGUID, dstName, dstFlags, spellID, spellName, auraType, amount)
 	local duration
+	if auraType == "DEBUFF" and srcGUID == playerGUID and FlagIsHostle(dstFlags) then
+		core:LearnMyDebuff(spellID, spellName)
+	end
 	if spellDuration[spellID] or SpellCategory[spellID] then
 		duration = HandleAuraApply(srcGUID, srcFlags, dstGUID, dstName, dstFlags, spellID, spellName, auraType, amount)
 	end

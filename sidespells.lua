@@ -453,7 +453,7 @@ local function EntryOptions(e)
 			scale = {
 				type = "range",
 				name = L["Icon size multiplier"],
-				desc = L["Multiplies the row's icon size for this spell (1 = the row's size). Used in every row that shows it."],
+				desc = L["Multiplies the row's icon size for this spell (1 = the row's size). Used in the top rows only."],
 				order = 3.6,
 				min = 0.5, max = 3, step = 0.25,
 				get = function() return P.spellScale[name] or 1 end,
@@ -552,7 +552,7 @@ local function MyDebuffEntry(name, id)
 			scale = {
 				type = "range",
 				name = L["Icon size multiplier"],
-				desc = L["Multiplies the row's icon size for this spell (1 = the row's size). Used in every row that shows it."],
+				desc = L["Multiplies the row's icon size for this spell (1 = the row's size). Used in the top rows only."],
 				order = 2,
 				min = 0.5, max = 3, step = 0.25,
 				get = function() return P.spellScale[name] or 1 end,

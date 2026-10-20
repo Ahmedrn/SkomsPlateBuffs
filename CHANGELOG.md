@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.2 (2026-10-20)
+- **The icon size multiplier applies to the top rows only.** Left and right keep the row's size.
+- **Long buffs removed from Other buffs:** the Paladin Blessings (and Greater Blessings), Earth Shield, Faerie Fire (both), Feign Death. The raid buffs (shouts, Mark of the Wild, Fortitude, ...) were never listed.
+- Aimed Shot and Mortal Strike ranks that were still filed under Other buffs are Healing reduction now.
+
 ## 1.9.1 (2026-10-20)
 - **My debuffs now have a stable order:** biggest icon first (size multiplier in the Spells tab), then priority (per-spell, default 5), then alphabetical. The category priority and the time left no longer move icons around.
 

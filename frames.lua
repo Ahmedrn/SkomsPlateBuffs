@@ -1182,7 +1182,8 @@ local function LayoutRow(plate, s, key, row, list, topY)
 	for i = 1, n do
 		local rec = list[i]
 		if not rec then return topY, true end
-		local size = RecSize(rec, base)
+		-- the spell's size multiplier only applies to the top rows; left and right keep the row's size
+		local size = isTop and RecSize(rec, base) or base
 		sizeScratch[i] = size
 		if size > rowHeight then rowHeight = size end
 		total = total + size

@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.8.1 (2026-10-20)
+- **Default glows:** Proc glow for crowd control, disarms, interrupts and offensive buffs; Action button glow for immunities, spell immunities and defensive buffs. The other categories keep the border (or none). Colours are unchanged. Only applies to settings you have not changed yourself.
+
 ## 1.8.0 (2026-10-20)
 - **New category: Shields** (absorbs): Power Word: Shield, Mana Shield, Ice Barrier, Fire / Frost / Shadow Ward, Sacred Shield, Stoneclaw Totem absorb, Divine Aegis (45 spell ids, all ranks). Priority 5; ticked on Extra top row 1 by default.
 - **Unrelenting Assault** (all three ids) is Healing reduction, not Other buffs.

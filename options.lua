@@ -1722,20 +1722,18 @@ core.AboutOptionsTable = {
 			"Title",
 			"Notes",
 			"Author",
-			"X-Backporter",
-			"X-Modder",
+			"X-Based-On",
+			"X-Inspired-By",
 			"Version",
 			"X-Date",
-			"X-Website",
 		}
 		local haseditbox = {
 			["X-Website"] = true,
 		}
 		local fNames = {
-			["X-Backporter"] = "Backporter",
-			["X-Modder"] = "Modder",
+			["X-Based-On"] = "Built on",
+			["X-Inspired-By"] = "Inspired by",
 			["X-Date"] = "Date",
-			["X-Website"] = "Website",
 		}
 		local yellow = "|cffffd100%s|r"
 		for i, field in ipairs(fields) do

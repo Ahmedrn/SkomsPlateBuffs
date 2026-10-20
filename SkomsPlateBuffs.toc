@@ -1,16 +1,14 @@
 ## Interface: 30300
 ## Title: SkomsPlateBuffs
-## Notes: Enemy nameplate auras in rows you define: left, right and up to four above the plate, each with its own categories. Based on PlateBuffs; replaces it.
-## Version: 1.10.0 (based on PlateBuffs 1.19.5 r238)
-## Author: Cyprias (original PlateBuffs)
+## Notes: Enemy nameplate auras in rows you define: left, right and up to four above the plate, each with its own categories. Built on the PlateBuffs engine; replaces PlateBuffs.
+## Version: 1.11.0
+## Author: Skom
 ## SavedVariables: SkomsPlateBuffsDB, PB_DB
 ## OptionalDeps: LibStub, CallbackHandler-1.0, LibNameplates-1.0, LibCustomGlow-1.0, WeakAuras
 
-## X-Backporter: Kader
-## X-Modder: Khal
-## X-Variant: Skom (side rows)
-## X-Website: https://github.com/KhalGH/PlateBuffs-WoTLK
-## X-Packaged-Version: r238-skom16
+## X-Based-On: PlateBuffs by Cyprias, 3.3.5a backport by Kader, WotLK changes by Khal (github.com/KhalGH/PlateBuffs-WoTLK)
+## X-Inspired-By: MiniCC (Verubato), BigDebuffs (Jordon, Tsoukie), WeakAuras / LibCustomGlow
+## X-Packaged-Version: r238-skom17
 ## X-Date: 2026-10-20
 
 libs\embeds.xml

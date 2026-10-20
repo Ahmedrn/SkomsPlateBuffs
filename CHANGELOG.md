@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.11.0 (2026-10-20)
+- **Brought back:** Swiftness Potion, Goblin and Gnomish Rocket Boots (Speed boosts) and Living Action Potion (Defensive buffs), with durations.
+- **Credits reworded:** the addon is no longer presented as a PlateBuffs fork. Author is Skom; the About tab and README say "Built on" (PlateBuffs by Cyprias, backport by Kader, WotLK changes by Khal) and "Inspired by" (MiniCC, BigDebuffs, WeakAuras / LibCustomGlow).
+
 ## 1.10.0 (2026-10-20)
 - **Dispellable buffs get their own glow** (Appearance > Glow): Magic buffs on enemies that your class can remove (priest, shaman, mage, warlock, warrior with Shield Slam). Scope: Other buffs only (default) or all buffs except immunities; own style and colour (pixel glow, purple by default). A glow set on one spell wins. Classes that cannot dispel buffs never see it.
 - Buffs keep their dispel type (Magic, ...) in the records now, which also makes "glow by spell type" work for buffs.

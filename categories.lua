@@ -4,6 +4,10 @@ local folder, core = ...
 -- Generated from the BigDebuffs WotLK spell list (Jordon, Tsoukie): spell id -> category.
 -- Ranks of one spell are listed individually; the spell name is matched as well (see below).
 core.SpellCategory = {
+    [2379] = "speed", -- Swiftness Potion (brought back)
+    [8892] = "speed", -- Goblin Rocket Boots (brought back)
+    [13141] = "speed", -- Gnomish Rocket Boots (brought back)
+    [24364] = "buff_def", -- Living Action Potion (brought back)
     [5384] = "buff_def", -- Feign Death (kept on request)
     [974] = "shield", -- Earth Shield (kept on request)
     [32593] = "shield", -- Earth Shield (kept on request)
@@ -570,6 +574,9 @@ do
         [31850] = 10, [31852] = 10, -- Ardent Defender
         [53271] = 4,                -- Master's Call
         [49016] = 30,               -- Unholy Frenzy
+        [2379] = 15,                -- Swiftness Potion
+        [8892] = 20, [13141] = 20,  -- Rocket Boots
+        [24364] = 5,                -- Living Action Potion
     }
     for id, d in pairs(extraDuration) do
         if not core.spellDuration[id] then core.spellDuration[id] = d end

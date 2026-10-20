@@ -1,6 +1,6 @@
-# SkomsPlateBuffs 1.4.0 (WoW 3.3.5a)
+# SkomsPlateBuffs 1.11.0 (WoW 3.3.5a)
 
-Enemy nameplate auras, laid out the way you decide. Based on PlateBuffs (see Credits), inspired by the retail addon MiniCC.
+Enemy nameplate auras, laid out the way you decide: rows beside and above the nameplate, each with the categories you pick, with glow and its own spell list. Built on the PlateBuffs engine (see Credits); the layout, categories, glow and options are new.
 
 ## Rows
 - **Left row** and **right row**: one row each, 3 icons by default.
@@ -37,10 +37,14 @@ No client patches are needed. Nameplates are found with LibNameplates, auras com
 on your target, focus and mouseover. A plate whose unit the addon cannot identify yet shows nothing until you target or
 mouse over it.
 
-## Credits
-- **PlateBuffs** by **Cyprias**.
-- 3.3.5a backport by **Kader**, WotLK modifications and fixes by **Khal**: https://github.com/KhalGH/PlateBuffs-WoTLK
-  Almost all of the nameplate code is their work.
-- Rows, spell categories, glow and the Spells tab by **Skom**. The category list started from the BigDebuffs WotLK spell
-  list (Jordon, Tsoukie). The idea follows MiniCC / MiniAuras by Verubato; no code was copied from it.
-- Glow styles from LibCustomGlow-1.0 (used if present).
+## Credits and inspirations
+**Built on** (code this addon still runs on):
+- **PlateBuffs** by **Cyprias**: nameplate tracking, icons, timers and the base of the options.
+- 3.3.5a backport by **Kader**; WotLK changes and fixes by **Khal**: https://github.com/KhalGH/PlateBuffs-WoTLK
+
+**Inspired by**:
+- **MiniCC / MiniAuras** by **Verubato**: crowd control and important buffs beside the nameplate. No code copied.
+- **BigDebuffs** by **Jordon** and **Tsoukie**: the starting spell category list, and the layout of the spells tab.
+- **WeakAuras** and **LibCustomGlow-1.0**: the glow styles (pixel, autocast shine, action button, proc). Used if present.
+
+**New in this addon** (by **Skom**): the rows system, the categories and their priorities, My debuffs, per-category and per-spell glow and size, dispellable-buff glow, the Spells tab, speed boosts, shields, snares, healing reduction, and the glow showcase.

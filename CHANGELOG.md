@@ -6,6 +6,8 @@
   Everything else moved to the "Other buffs" category, which is off by default.
 - New option: hide left-row auras that have no duration (forms, stances, permanent buffs). On by default.
 - Added Unholy Frenzy, Ardent Defender and missing durations for a few kept spells.
+- Adjustable priority per category (Side rows > Priority): the highest priority is shown closest to the nameplate, so an immunity such as Divine Shield always comes before other buffs. Lists are now sorted before they are cut to the icon limit.
+- Entries with a known duration that were removed during the cleanup (pets, battleground buffs, drinks) are back in "Other buffs".
 
 ## 1.0.0 (2026-10-20)
 - First release, based on PlateBuffs 1.19.5 (r238) by Cyprias / Kader / Khal.

@@ -763,8 +763,20 @@ local sideFrames = {}   -- [plate] = { parent = Frame, right = { icon frames }, 
 core.sideFrames = sideFrames
 local mainScratch, rightScratch, leftScratch = {}, {}, {}
 
+-- priority of a category on the side rows (adjustable in the options): higher goes closer to the nameplate
+local PRIORITY_KEY = {
+	cc = "sidePrioCC", interrupt = "sidePrioInterrupt", root = "sidePrioRoot",
+	immunity = "sidePrioImmunity", immunity_spell = "sidePrioImmunity",
+	buff_def = "sidePrioDefensive", buff_off = "sidePrioOffensive", buff_other = "sidePrioOther",
+}
+
+local function CatPriority(cat)
+	local key = PRIORITY_KEY[cat or ""]
+	return (key and P[key]) or CategoryPriority[cat or ""] or 0
+end
+
 local function sideSort(a, b)
-	local pa, pb = CategoryPriority[a.cat or ""] or 0, CategoryPriority[b.cat or ""] or 0
+	local pa, pb = CatPriority(a.cat), CatPriority(b.cat)
 	if pa ~= pb then return pa > pb end
 	local ea, eb = a.expirationTime or 0, b.expirationTime or 0
 	if ea ~= eb then return ea > eb end
@@ -838,7 +850,7 @@ end
 local function LayoutSide(plate, s, side, list, enabled)
 	local frames = s[side]
 	local n = enabled and math_min(#list, P.sideIconsPerRow) or 0
-	if n > 1 then table_sort(list, sideSort) end
+	if #list > 1 then table_sort(list, sideSort) end
 	local anchor = SideAnchor(plate)
 	local padX, padY = P.intervalX or 12, P.intervalY or 12
 	for i = 1, n do

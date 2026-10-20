@@ -137,6 +137,13 @@ defaultSettings.sideCatImmunity = true
 defaultSettings.sideCatDefensive = true
 defaultSettings.sideCatOffensive = true
 defaultSettings.sideCatOther = false
+defaultSettings.sidePrioCC = 9
+defaultSettings.sidePrioInterrupt = 7
+defaultSettings.sidePrioRoot = 5
+defaultSettings.sidePrioImmunity = 9
+defaultSettings.sidePrioDefensive = 7
+defaultSettings.sidePrioOffensive = 6
+defaultSettings.sidePrioOther = 2
 defaultSettings.sideRightGlow = true
 defaultSettings.sideLeftGlow = true
 defaultSettings.sideGlowPulse = true
@@ -1436,6 +1443,23 @@ core.SideOptionsTable = {
 			max = 60,
 			step = 1
 		},
+		prioHeader = {
+			type = "header",
+			name = L["Priority"],
+			order = 30
+		},
+		prioDesc = {
+			type = "description",
+			name = L["The higher the priority, the closer to the nameplate. With more auras than icons, the lowest priorities are the ones left out."],
+			order = 31
+		},
+		sidePrioCC = { type = "range", name = L["Crowd control"], order = 32, min = 1, max = 10, step = 1 },
+		sidePrioInterrupt = { type = "range", name = L["Interrupt lockouts"], order = 33, min = 1, max = 10, step = 1 },
+		sidePrioRoot = { type = "range", name = L["Roots"], order = 34, min = 1, max = 10, step = 1 },
+		sidePrioImmunity = { type = "range", name = L["Immunities"], order = 35, min = 1, max = 10, step = 1 },
+		sidePrioDefensive = { type = "range", name = L["Defensive buffs"], order = 36, min = 1, max = 10, step = 1 },
+		sidePrioOffensive = { type = "range", name = L["Offensive buffs"], order = 37, min = 1, max = 10, step = 1 },
+		sidePrioOther = { type = "range", name = L["Other buffs"], order = 38, min = 1, max = 10, step = 1 },
 		catHeader = {
 			type = "header",
 			name = L["What goes in the rows"],

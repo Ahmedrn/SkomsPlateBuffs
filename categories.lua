@@ -412,6 +412,15 @@ core.SpellCategory = {
     [65925] = "buff_other", -- (was buff_off) Unrelenting Assault (2/2)
     [69369] = "buff_other", -- (was buff_off) Predator's Swiftness
     -- buff_other
+    [23493] = "buff_other", -- Battleground Heal buff (restored, was buff_def)
+    [23451] = "buff_other", -- Battleground Speed buff (restored, was buff_off)
+    [1742] = "buff_other", -- Cower (Pet) (restored, was buff_def)
+    [27089] = "buff_other", -- Drink (restored, was buff_other)
+    [43183] = "buff_other", -- Drink (restored, was buff_other)
+    [57073] = "buff_other", -- Drink (restored, was buff_other)
+    [53476] = "buff_other", -- Intervene (Pet) (restored, was buff_def)
+    [53480] = "buff_other", -- Roar of Sacrifice (Hunter Pet Skill) (restored, was buff_def)
+    [26064] = "buff_other", -- Shell Shield (Pet) (restored, was buff_def)
     [71] = "buff_other", -- Defensive Stance
     [453] = "buff_other", -- Mind Soothe
     [676] = "buff_other", -- Disarm

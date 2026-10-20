@@ -203,3 +203,5 @@ L["Glow on the right row"] = true
 L["Glow on the left row"] = true
 L["Pulsing glow"] = true
 L["The glow fades in and out. Without it the glow stays steady."] = true
+L["Priority"] = true
+L["The higher the priority, the closer to the nameplate. With more auras than icons, the lowest priorities are the ones left out."] = true

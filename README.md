@@ -6,7 +6,7 @@ Enemy nameplate auras, laid out the way you decide. Based on PlateBuffs (see Cre
 - **Left row** and **right row**: one row each, 3 icons by default.
 - **Up to four rows above the plate**, each with its own number of icons and size.
 - Every row picks what it shows: crowd control, roots, interrupt lockouts, immunities, defensive buffs, offensive buffs,
-  other buffs, and "everything the classic filters allow" (the PlateBuffs filters and its spell list), optionally
+  other buffs, and "Other tracked auras" (the old PlateBuffs list: DoTs, poisons, ...), optionally
   **only your own auras**.
 - An aura goes to the first row that takes it (left, right, then the top rows in order).
 

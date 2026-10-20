@@ -1150,7 +1150,7 @@ local ROW_CATS = {
 	{ "buff_def", "Defensive buffs" },
 	{ "buff_off", "Offensive buffs" },
 	{ "buff_other", "Other buffs" },
-	{ "classic", "Everything the classic filters allow" },
+	{ "classic", "Other tracked auras" },
 }
 
 local function RowOptions(rowKey, order)
@@ -1203,6 +1203,9 @@ local function RowOptions(rowKey, order)
 	}
 	for i, c in ipairs(ROW_CATS) do
 		group.args[c[1]] = { type = "toggle", name = L[c[2]], order = 20 + i, width = "full" }
+		if c[1] == "classic" then
+			group.args[c[1]].desc = L["Auras from the Other tracked auras list in the Spells tab (DoTs, poisons, ...), and whatever Show Buffs / Show Debuffs in Display conditions lets through."]
+		end
 	end
 	return group
 end

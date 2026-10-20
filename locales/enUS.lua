@@ -282,3 +282,4 @@ L["Space between rows"] = true
 L["Spells"] = true
 L["Test"] = true
 L["The border glow fades in and out. Without it the glow stays steady."] = true
+L["Auras from the Other tracked auras list in the Spells tab (DoTs, poisons, ...), and whatever Show Buffs / Show Debuffs in Display conditions lets through."] = true

@@ -228,6 +228,7 @@ local function CategoryGlowArgs(cat, order, prefix)
 		[prefix .. "glowColor"] = {
 			type = "color",
 			name = L["Glow color"],
+			desc = L["Used when the glow color is set to By category (Main settings, Appearance)."],
 			order = order + 1,
 			get = function() local c = cg().color or WHITE; return c[1], c[2], c[3] end,
 			set = function(_, r, g, b) cg().color = { r, g, b }; Changed() end,

@@ -216,6 +216,21 @@ local function ConfigureClockOverlay(frame)
 end
 
 -- Called when spell frames are shown.
+-- colours by the nature of the aura (dispel type; physical when it has none) and by category
+local function TypeColor(debuffType, isDebuff)
+	if debuffType == "Magic" then return P.color2 end
+	if debuffType == "Curse" then return P.color3 end
+	if debuffType == "Disease" then return P.color4 end
+	if debuffType == "Poison" then return P.color5 end
+	if debuffType == "Interrupt" then return P.color7 end
+	return isDebuff and P.color1 or P.color6
+end
+
+local function CategoryColor(f)
+	local cg = P.catGlow[f.myDebuff and "mydebuffs" or f.cat or "tracked"]
+	return cg and cg.color
+end
+
 local function iconOnShow(self)
 	self:SetAlpha(1)
 	self.cdText, self.cdR, self.cdG, self.cdB = nil
@@ -327,7 +342,13 @@ local function iconOnShow(self)
 		UpdateStackSize(self, P.stackSize * increase)
 	end
 
-	if self.isDebuff then
+	local borderMode = P.borderColorMode
+	if borderMode == "custom" or borderMode == "category" then
+		local c = (borderMode == "custom" and P.borderCustomColor) or CategoryColor(self) or P.color6
+		self.skin:SetVertexColor(c[1], c[2], c[3], c[4] or 1)
+		self.skin:Show()
+		self.msqborder:Show()
+	elseif self.isDebuff then
 		local color = self.debuffType or ""
 		if color then
 			if P.colorByType then
@@ -904,6 +925,7 @@ local function GetLCG()
 end
 
 local WHITE = {1, 1, 1}
+local YELLOW = {1, 0.85, 0.15}
 local LCG_START = { pixel = "PixelGlow_Start", shine = "AutoCastGlow_Start", button = "ButtonGlow_Start", proc = "ProcGlow_Start" }
 local LCG_STOP = { pixel = "PixelGlow_Stop", shine = "AutoCastGlow_Stop", button = "ButtonGlow_Stop", proc = "ProcGlow_Stop" }
 local GLOW_KEY = "SPB"
@@ -913,7 +935,16 @@ local function ResolveGlow(rec)
 	local o = P.spellGlow[rec.name or ""]
 	local cg = P.catGlow[rec.myDebuff and "mydebuffs" or rec.cat or "tracked"]
 	local gtype = (o and o.type) or (cg and cg.type) or "none"
-	local color = (o and o.color) or (cg and cg.color) or WHITE
+	-- the spell's own colour wins; otherwise the mode decides. nil = the native (retail yellow) look of the style
+	local color = o and o.color
+	if not color then
+		local mode = P.glowColorMode
+		if mode == "type" then
+			color = TypeColor(rec.debuffType, rec.isDebuff)
+		elseif mode == "category" then
+			color = cg and cg.color
+		end
+	end
 	return gtype, color
 end
 
@@ -936,6 +967,7 @@ local function StopGlow(f)
 end
 
 local function StartBorderGlow(f, color)
+	color = color or YELLOW
 	if not f.sideGlow then
 		f.sideGlow = f.icon:CreateTexture(nil, "OVERLAY")
 		f.sideGlow:SetTexture("Interface\\Buttons\\UI-ActionButton-Border")
@@ -962,7 +994,7 @@ local function StartBorderGlow(f, color)
 end
 
 local function ApplyGlow(f, gtype, color)
-	if gtype == "none" or not color then
+	if gtype == "none" then
 		StopGlow(f)
 		return
 	end
@@ -971,7 +1003,7 @@ local function ApplyGlow(f, gtype, color)
 		if not (lcg and lcg[LCG_START[gtype]]) then gtype = "border" end
 	end
 	local size = f.rowSize or 28
-	local key = gtype .. size .. ":" .. color[1] .. color[2] .. color[3] .. tostring(P.sideGlowPulse)
+	local key = gtype .. size .. ":" .. (color and (color[1] .. color[2] .. color[3]) or "native") .. tostring(P.sideGlowPulse)
 	if f.glowKey == key then return end
 	StopGlow(f)
 	f.glowType, f.glowKey = gtype, key
@@ -979,7 +1011,7 @@ local function ApplyGlow(f, gtype, color)
 		StartBorderGlow(f, color)
 		return
 	end
-	local c = { color[1], color[2], color[3], 1 }
+	local c = color and { color[1], color[2], color[3], 1 } or nil
 	local icon = f.icon
 	if gtype == "pixel" then
 		LCG.PixelGlow_Start(icon, c, nil, nil, nil, 2, 0, 0, false, GLOW_KEY)
@@ -997,11 +1029,11 @@ local SHOWCASE_STYLES = {
 	{ "none", "No glow" }, { "border", "Border" }, { "pixel", "Pixel glow" },
 	{ "shine", "Autocast shine" }, { "button", "Action button glow" }, { "proc", "Proc glow" },
 }
-local SHOWCASE_COLORS = { { 1, 0.8, 0.2 }, { 1, 0.3, 0.3 }, { 0.2, 1, 0.3 }, { 0.4, 0.8, 1 }, { 0.8, 0.3, 0.8 } }
+local SHOWCASE_COLORS = { false, { 1, 0.3, 0.3 }, { 0.2, 1, 0.3 }, { 0.4, 0.8, 1 }, { 0.8, 0.3, 0.8 } }   -- false = the native (yellow) look
 local showcase, showcaseColor = nil, 1
 
 local function ShowcaseApply()
-	local color = SHOWCASE_COLORS[showcaseColor]
+	local color = SHOWCASE_COLORS[showcaseColor] or nil
 	for _, f in ipairs(showcase.samples) do
 		ApplyGlow(f, f.style, color)
 	end
@@ -1081,6 +1113,8 @@ end
 
 local function SetRowIcon(f, rec, size, glow)
 	f.rowSize = size
+	f.cat = rec.cat
+	f.myDebuff = rec.myDebuff
 	f.spellName = rec.name or ""
 	f.sID = rec.sID or ""
 	f.expirationTime = rec.expirationTime or 0

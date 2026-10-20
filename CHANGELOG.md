@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.0 (2026-10-20)
+- **Glow color mode** (Main settings > Appearance > Glow): *Default* = the style's own look, yellow as in retail (new default); *By spell type* (physical, magic, curse, disease, poison, using the border type colours); *By category* (the category colours of the Spells tab). A colour set on a spell always wins.
+- **Border color mode** (Appearance): *By spell type* (as before), *By category*, or *Custom color* (one colour for every icon, dark by default: 12% grey). Replaces the "Color debuff by type" switch.
+- The glow showcase starts on the native yellow look.
+
 ## 1.8.1 (2026-10-20)
 - **Default glows:** Proc glow for crowd control, disarms, interrupts and offensive buffs; Action button glow for immunities, spell immunities and defensive buffs. The other categories keep the border (or none). Colours are unchanged. Only applies to settings you have not changed yourself.
 

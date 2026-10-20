@@ -26,7 +26,7 @@ The classic PlateBuffs bars are gone: the rows replace them.
 Per category and per spell: none, border (optionally pulsing), pixel glow, autocast shine, action button glow, proc glow
 (the same styles as WeakAuras). The last four need `LibCustomGlow-1.0`, which comes with WeakAuras; without it they are drawn
 as the border.
-To compare them: Position > Glow showcase, or `/spb glow`.
+Glow colour: native yellow (retail look, default), by spell type, or by category. Border colour: by spell type, by category, or one custom (dark) colour. To compare glows: Position > Glow showcase, or `/spb glow`.
 
 ## Install
 1. Delete or disable the original **PlateBuffs** (two copies would draw on the same plates).

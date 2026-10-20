@@ -74,6 +74,9 @@ defaultSettings.biggerSelfSpells = false
 defaultSettings.borderTexture = "Interface\\AddOns\\SkomsPlateBuffs\\media\\DefaultBorder.blp"
 defaultSettings.borderTextureBuff = "Interface\\AddOns\\SkomsPlateBuffs\\media\\DefaultBorder.blp"
 defaultSettings.colorByType = true
+defaultSettings.borderColorMode = "type"                        -- type (physical, magic, ...), category, custom
+defaultSettings.borderCustomColor = { 0.12, 0.12, 0.12, 1 }     -- the dark look
+defaultSettings.glowColorMode = "default"                       -- default (native yellow), type, category
 defaultSettings.color1 = {0.80, 0.00, 0.00, 1.00}
 defaultSettings.color2 = {0.20, 0.60, 1.00, 1.00}
 defaultSettings.color3 = {0.60, 0.00, 1.00, 1.00}
@@ -1406,6 +1409,38 @@ do
 		if style.args[k] then style.args[k].hidden = true end
 	end
 	core.DisplayOptionsTable.order = 2
+	-- colours: of the border, and of the glow
+	local function recolor() core:ResetSideRows() end
+	style.args.colorByType.hidden = true
+	style.args.borderColorMode = {
+		type = "select",
+		name = L["Border color"],
+		desc = L["By spell type: physical, magic, curse, disease, poison (the colours below). By category: the category colours of the Spells tab. Custom: one colour for every icon."],
+		order = 10.5,
+		values = { type = L["By spell type"], category = L["By category"], custom = L["Custom color"] },
+		get = function() return P.borderColorMode end,
+		set = function(_, v) P.borderColorMode = v; recolor() end,
+	}
+	style.args.borderCustomColor = {
+		type = "color",
+		name = L["Custom border color"],
+		desc = L["Dark by default."],
+		order = 10.6,
+		hasAlpha = true,
+		disabled = function() return P.borderColorMode ~= "custom" end,
+		get = function() local c = P.borderCustomColor; return c[1], c[2], c[3], c[4] or 1 end,
+		set = function(_, r, g, b, a) P.borderCustomColor = { r, g, b, a }; recolor() end,
+	}
+	style.args.glowHeader = { type = "header", name = L["Glow"], order = 200 }
+	style.args.glowColorMode = {
+		type = "select",
+		name = L["Glow color"],
+		desc = L["Default: the style's own look (yellow, as in retail). By spell type: physical, magic, curse, disease, poison. By category: the category colours of the Spells tab. A colour set on a spell always wins."],
+		order = 201,
+		values = { default = L["Default (yellow)"], type = L["By spell type"], category = L["By category"] },
+		get = function() return P.glowColorMode end,
+		set = function(_, v) P.glowColorMode = v; recolor() end,
+	}
 	-- Show buffs / Show debuffs / Show interrupts: each row decides now (Buffs and debuffs, Only my auras, categories)
 	for _, k in ipairs{ "displayHeader", "defaultBuffShow", "defaultDebuffShow", "showInterrupts" } do
 		if core.DisplayOptionsTable.args[k] then core.DisplayOptionsTable.args[k].hidden = true end

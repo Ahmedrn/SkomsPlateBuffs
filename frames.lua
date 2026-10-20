@@ -803,8 +803,7 @@ function core:UpdateWantedCategories()
 						if cat == "immunity" then WantedCats.immunity_spell = true end
 					end
 				end
-				if row.cats.tracked then tracked = true end
-				if row.cats.any then
+					if row.cats.any then
 					local level = row.onlyMine and "mine" or "all"
 					if row.show ~= "debuffs" and buffs ~= "all" then buffs = level end
 					if row.show ~= "buffs" and debuffs ~= "all" then debuffs = level end
@@ -831,13 +830,6 @@ local function IsHardCC(rec)
 	return c == "cc" or c == "interrupt"
 end
 
--- is the aura on the "Other tracked auras" list (and not a spell that has a category)?
-local function IsTracked(rec)
-	if CategorizedNames[rec.name or ""] then return false end
-	local o = core:HaveSpellOpts(rec.name, rec.sID)
-	return o ~= nil and o.show ~= 3
-end
-
 -- does the row take this record?
 local function RowAccepts(row, rec)
 	if row.myDebuffs then return false end   -- filled by the My debuffs pass
@@ -848,7 +840,6 @@ local function RowAccepts(row, rec)
 	local cats = row.cats
 	if rec.cat and cats[ROWKEY_OF_CAT[rec.cat] or rec.cat] then return true end
 	if rec.main == false then return false end
-	if cats.tracked and IsTracked(rec) then return true end
 	return cats.any and true or false
 end
 

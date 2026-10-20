@@ -425,57 +425,6 @@ core.defaultSettings = {
 	}
 }
 local spellOpts = core.defaultSettings.profile.spellOpts
-for i = 1, table_getn(spellList1) do
-	local spellID = spellList1[i]
-	local spellName = GetSpellInfo(spellID)
-	if spellName then
-		spellOpts[spellName] = {
-			spellID = spellID,
-			increase = iconScale1,
-			show = showCondition1,
-		}
-	end
-end
-for i = 1, table_getn(spellList2) do
-	local spellID = spellList2[i]
-	local spellName = GetSpellInfo(spellID)
-	if spellName then
-		spellOpts[spellName] = {
-			spellID = spellID,
-			increase = iconScale2,
-			show = showCondition2,
-		}
-	end
-end
-for i = 1, table_getn(spellList3) do
-	local spellID = spellList3[i]
-	local spellName = GetSpellInfo(spellID)
-	if spellName then
-		spellOpts[spellName] = {
-			spellID = spellID,
-			increase = iconScale3,
-			show = showCondition3,
-		}
-	end
-end
-for i = 1, table_getn(spellList4) do
-	local spellID = spellList4[i]
-	local spellName = GetSpellInfo(spellID)
-	if spellName then
-		spellOpts[spellName] = {
-			spellID = spellID,
-			increase = iconScale4,
-			show = showCondition4,
-		}
-	end
-end
-for i = 1, table_getn(CheckSpellID) do
-	local spellID = CheckSpellID[i]
-	local spellName = GetSpellInfo(spellID)
-	if spellOpts[spellName] then
-		spellOpts[spellName].grabid = true
-	end
-end
 
 -- Nameplates with these names are totems. By default we ignore totem nameplates.
 local totemList = {

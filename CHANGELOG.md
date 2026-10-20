@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.6.0 (2026-10-20)
+- **"Other tracked auras" is gone.** Everything the old list knew now has a category: crowd control (bombs, Hungering Cold, Holy Wrath, Ravage, Sonic Blast), defensives (Free Action), offensives (Brutal/Focused Assault, Tidal Force, Sweeping Strikes, Bestial Wrath), The Beast Within, and Other buffs (flags, HoTs, Blessings, Speed). The class debuffs of the old list live in My debuffs. The tab, the row option and the default list are removed.
+- **Extra top row 1** shows Other buffs by default (28 px, buffs only).
+- **Fixed** an error when "Print row auras in chat" was on.
+
 ## 1.5.0 (2026-10-20)
 - **Top row = My debuffs.** A switch on the top row. It shows your own debuffs (hard crowd control stays on the right row) and hides the "Show in this row" section. In the Spells tab, a new **My debuffs** group lists them (your class's debuffs first, then every debuff you apply) with show/hide, size multiplier, priority and glow per spell.
 - The right row shows other players' snares and healing reduction; yours go to the top row.

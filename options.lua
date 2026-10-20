@@ -35,7 +35,6 @@ function core:OnEnable()
 	P = self.db.profile
 	prev_OnEnable(self)
 	P = self.db.profile
-	self:BuildSpellUI()
 end
 
 local defaultSettings = core.defaultSettings.profile
@@ -162,7 +161,7 @@ defaultSettings.spellGlow = {}
 
 -- the rows: left and right hold one row each, above the plate there are up to four.
 -- cats: which categories the row shows; "classic" = whatever the classic filters / Bar spells list let through.
-defaultSettings.topRowCount = 1
+defaultSettings.topRowCount = 2
 defaultSettings.rowLeft = {
 	enabled = true, max = 3, size = 32, glow = true, onlyMine = false, show = "buffs",
 	cats = { immunity = true, buff_def = true, buff_off = true }
@@ -180,8 +179,8 @@ defaultSettings.rowTop1 = {
 defaultSettings.myDebuffs = {}
 defaultSettings.myDebuffHidden = {}
 defaultSettings.rowTop2 = {
-	enabled = true, max = 4, size = 24, glow = false, onlyMine = false, show = "all",
-	cats = { tracked = true }
+	enabled = true, max = 4, size = 28, glow = true, onlyMine = false, show = "buffs",
+	cats = { buff_other = true }
 }
 defaultSettings.rowTop3 = {
 	enabled = true, max = 4, size = 24, glow = false, onlyMine = false, show = "all",
@@ -1173,12 +1172,10 @@ local ROW_CATS = {
 	{ "buff_def", "Defensive buffs" },
 	{ "buff_off", "Offensive buffs" },
 	{ "buff_other", "Other buffs" },
-	{ "tracked", "Other tracked auras" },
 	{ "any", "Any other aura" },
 }
 
 local ROW_CAT_DESC = {
-	tracked = "Auras from the Other tracked auras list in the Spells tab (DoTs, poisons, ...).",
 	any = "Every aura no earlier row took. Combine it with Only my auras and Debuffs only to get \"my debuffs\".",
 }
 

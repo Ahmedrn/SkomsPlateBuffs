@@ -651,7 +651,7 @@ core.SideSpellsOptionsTable = {
 	args = {
 		desc = {
 			type = "description",
-			name = L["Every spell the rows can show, by category. Pick a category on the left for its priority and glow, and its spells. Switch a spell off, move it to another category, give it its own priority or glow, or add spells by ID. Other tracked auras holds the classic PlateBuffs list."],
+			name = L["Every spell the rows can show, by category. Pick a category on the left for its priority and glow, and its spells. Switch a spell off, move it to another category, give it its own priority or glow, or add spells by ID."],
 			order = 1,
 		},
 		tools = {
@@ -720,15 +720,6 @@ function core:BuildSideSpellUI()
 		end
 	end
 	core:BuildMyDebuffsUI()
-end
-
--- the old PlateBuffs spell list (DoTs, poisons, ...) is the last category: "Other tracked auras"
-do
-	local tracked = core.SpellOptionsTable
-	tracked.name = L["Other tracked auras"]
-	tracked.order = 100
-	for k, v in pairs(CategoryGlowArgs("tracked", 40, "keep_")) do tracked.args[k] = v end
-	core.SideSpellsOptionsTable.args.tracked = tracked
 end
 
 core.CoreOptionsTable.args.spells = core.SideSpellsOptionsTable

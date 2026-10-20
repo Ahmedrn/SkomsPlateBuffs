@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.0 (2026-10-20)
+- **Dispellable buffs get their own glow** (Appearance > Glow): Magic buffs on enemies that your class can remove (priest, shaman, mage, warlock, warrior with Shield Slam). Scope: Other buffs only (default) or all buffs except immunities; own style and colour (pixel glow, purple by default). A glow set on one spell wins. Classes that cannot dispel buffs never see it.
+- Buffs keep their dispel type (Magic, ...) in the records now, which also makes "glow by spell type" work for buffs.
+
 ## 1.9.3 (2026-10-20)
 - **Feign Death** is back as a Defensive buff, **Earth Shield** (all ranks) is back in Shields next to Sacred Shield: both matter for tracking arena enemies.
 

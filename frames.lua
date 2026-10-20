@@ -938,10 +938,29 @@ local LCG_START = { pixel = "PixelGlow_Start", shine = "AutoCastGlow_Start", but
 local LCG_STOP = { pixel = "PixelGlow_Stop", shine = "AutoCastGlow_Stop", button = "ButtonGlow_Stop", proc = "ProcGlow_Stop" }
 local GLOW_KEY = "SPB"
 
--- the glow a record gets: the spell's own setting, else its category's
+-- classes that can remove a Magic buff from an enemy: priest (Dispel Magic), shaman (Purge), mage (Spellsteal),
+-- warlock (Devour Magic), warrior (Shield Slam)
+local DISPEL_CLASSES = { WARRIOR = true, PRIEST = true, SHAMAN = true, MAGE = true, WARLOCK = true }
+local canDispel
+local function CanDispelBuffs()
+	if canDispel == nil then
+		local class = select(2, UnitClass("player"))
+		if not class then return false end
+		canDispel = DISPEL_CLASSES[class] and true or false
+		core.CanDispelBuffs = canDispel
+	end
+	return canDispel
+end
+
+-- the glow a record gets: the spell's own setting, else the "dispellable buff" glow, else its category's
 local function ResolveGlow(rec)
 	local o = P.spellGlow[rec.name or ""]
 	local cg = P.catGlow[rec.myDebuff and "mydebuffs" or rec.cat or "tracked"]
+	-- a Magic buff on an enemy that the player's class can remove
+	if not (o and o.type) and P.dispelGlow and not rec.isDebuff and rec.debuffType == "Magic" and CanDispelBuffs() then
+		local inScope = rec.cat == "buff_other" or (P.dispelGlowScope == "all" and rec.cat ~= "immunity" and rec.cat ~= "immunity_spell")
+		if inScope then return P.dispelGlowType, (o and o.color) or P.dispelGlowColor end
+	end
 	local gtype = (o and o.type) or (cg and cg.type) or "none"
 	-- the spell's own colour wins; otherwise the mode decides. nil = the native (retail yellow) look of the style
 	local color = o and o.color

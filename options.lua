@@ -76,6 +76,10 @@ defaultSettings.borderTextureBuff = "Interface\\AddOns\\SkomsPlateBuffs\\media\\
 defaultSettings.colorByType = true
 defaultSettings.borderColorMode = "type"                        -- type (physical, magic, ...), category, custom
 defaultSettings.borderCustomColor = { 0.12, 0.12, 0.12, 1 }     -- the dark look
+defaultSettings.dispelGlow = true                              -- glow on Magic buffs the player's class can dispel
+defaultSettings.dispelGlowScope = "other"                       -- other (Other buffs) or all (every buff but immunities)
+defaultSettings.dispelGlowType = "pixel"
+defaultSettings.dispelGlowColor = { 0.75, 0.4, 1 }
 defaultSettings.glowColorMode = "default"                       -- default (native yellow), type, category
 defaultSettings.color1 = {0.80, 0.00, 0.00, 1.00}
 defaultSettings.color2 = {0.20, 0.60, 1.00, 1.00}
@@ -1440,6 +1444,42 @@ do
 		values = { default = L["Default (yellow)"], type = L["By spell type"], category = L["By category"] },
 		get = function() return P.glowColorMode end,
 		set = function(_, v) P.glowColorMode = v; recolor() end,
+	}
+	local function noDispel() return not P.dispelGlow end
+	style.args.dispelGlow = {
+		type = "toggle",
+		name = L["Highlight buffs I can dispel"],
+		desc = L["Magic buffs on enemies that your class can remove (Dispel Magic, Purge, Spellsteal, Devour Magic, Shield Slam) get their own glow. Classes that cannot dispel buffs never see it."],
+		order = 202,
+		width = "full",
+		get = function() return P.dispelGlow end,
+		set = function(_, v) P.dispelGlow = v; recolor() end,
+	}
+	style.args.dispelGlowScope = {
+		type = "select",
+		name = L["Which buffs"],
+		order = 203,
+		disabled = noDispel,
+		values = { other = L["Other buffs only"], all = L["All buffs except immunities"] },
+		get = function() return P.dispelGlowScope end,
+		set = function(_, v) P.dispelGlowScope = v; recolor() end,
+	}
+	style.args.dispelGlowType = {
+		type = "select",
+		name = L["Glow"],
+		order = 204,
+		disabled = noDispel,
+		values = { border = L["Border"], pixel = L["Pixel glow"], shine = L["Autocast shine"], button = L["Action button glow"], proc = L["Proc glow"] },
+		get = function() return P.dispelGlowType end,
+		set = function(_, v) P.dispelGlowType = v; recolor() end,
+	}
+	style.args.dispelGlowColor = {
+		type = "color",
+		name = L["Glow color"],
+		order = 205,
+		disabled = noDispel,
+		get = function() local c = P.dispelGlowColor; return c[1], c[2], c[3] end,
+		set = function(_, r, g, b) P.dispelGlowColor = { r, g, b }; recolor() end,
 	}
 	-- Show buffs / Show debuffs / Show interrupts: each row decides now (Buffs and debuffs, Only my auras, categories)
 	for _, k in ipairs{ "displayHeader", "defaultBuffShow", "defaultDebuffShow", "showInterrupts" } do

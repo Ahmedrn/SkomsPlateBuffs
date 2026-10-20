@@ -180,6 +180,8 @@ local function AddSpellToGUID(dstGUID, spellID, spellName, texture, duration, sr
 	if isDebuff then
 		rec.isDebuff = true
 		rec.debuffType = debuffType or "none"
+	else
+		rec.debuffType = debuffType or "none"   -- the dispel type of a buff (Magic, ...)
 	end
 	t[#t + 1] = rec
 	return true
@@ -317,7 +319,7 @@ local function CollectAuras(unitID, GUID, filter)
 				duration = duration,
 				playerCast = (unitCaster == "player") and 1,
 				stackCount = count,
-				debuffType = isDebuff and debuffType,
+				debuffType = debuffType,
 				isDebuff = isDebuff,
 				sID = spellId,
 				srcGUID = srcGUID,

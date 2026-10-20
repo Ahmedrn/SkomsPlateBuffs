@@ -332,3 +332,8 @@ L["Default (yellow)"] = true
 L["Default: the style's own look (yellow, as in retail). By spell type: physical, magic, curse, disease, poison. By category: the category colours of the Spells tab. A colour set on a spell always wins."] = true
 L["Used when the glow color is set to By category (Main settings, Appearance)."] = true
 L["Multiplies the row's icon size for this spell (1 = the row's size). Used in the top rows only."] = true
+L["All buffs except immunities"] = true
+L["Highlight buffs I can dispel"] = true
+L["Magic buffs on enemies that your class can remove (Dispel Magic, Purge, Spellsteal, Devour Magic, Shield Slam) get their own glow. Classes that cannot dispel buffs never see it."] = true
+L["Other buffs only"] = true
+L["Which buffs"] = true

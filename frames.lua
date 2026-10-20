@@ -308,10 +308,10 @@ local function iconOnShow(self)
 		end
 	end
 
-	if self.sideRow then
-		-- side rows have their own icon size; the fonts follow it
-		increase = P.sideIconSize / math_max(1, P.iconSize)
-		UpdateIconSize(self, P.sideIconSize, P.sideIconSize)
+	if self.rowSize then
+		-- rows have their own icon size; the fonts follow it
+		increase = self.rowSize / math_max(1, P.iconSize)
+		UpdateIconSize(self, self.rowSize, self.rowSize)
 	elseif self.playerCast and P.biggerSelfSpells then
 		UpdateIconSize(self, (P.iconSize * increase * 1.2), (P.iconSize2 * increase * 1.2))
 	else
@@ -757,13 +757,54 @@ local function SortFunc(a, b)
 end
 
 ----------------------------------------------------------------------------------------------
--- Side rows: crowd control on the right of the plate, important buffs on the left
+-- Rows: one row on the left, one on the right, and up to four rows above the plate.
+-- Every row picks its own content (categories, "only mine"), its own size and its own number of icons.
 ----------------------------------------------------------------------------------------------
-local sideFrames = {}   -- [plate] = { parent = Frame, right = { icon frames }, left = { icon frames } }
+local sideFrames = {}   -- [plate] = { parent = Frame, rows = { [rowKey] = { icon frames } } }
 core.sideFrames = sideFrames
-local mainScratch, rightScratch, leftScratch = {}, {}, {}
 
--- priority of a category on the side rows (adjustable in the options): higher goes closer to the nameplate
+local ROW_KEYS = { "rowLeft", "rowRight", "rowTop1", "rowTop2", "rowTop3", "rowTop4" }
+core.RowKeys = ROW_KEYS
+
+local rowScratch = {}   -- [rowKey] = records this plate puts in the row
+for _, key in ipairs(ROW_KEYS) do rowScratch[key] = {} end
+local mainScratch = {}
+local EMPTY = {}
+
+-- categories the rows ask for: the combat log only keeps a category some row shows
+core.WantedCats = core.WantedCats or {}
+local WantedCats = core.WantedCats
+
+function core:UpdateWantedCategories()
+	wipe(WantedCats)
+	local any = false
+	for _, key in ipairs(ROW_KEYS) do
+		local row = P[key]
+		if row and row.enabled then
+			for cat, on in pairs(row.cats) do
+				if on and cat ~= "classic" then
+					WantedCats[cat] = true
+					any = true
+					if cat == "immunity" then WantedCats.immunity_spell = true end
+				end
+			end
+		end
+	end
+	core.AnyCategoryWanted = any
+end
+
+-- categories that share one checkbox
+local ROWKEY_OF_CAT = { immunity_spell = "immunity" }
+
+-- does the row take this record? ("classic" = whatever the classic filters and the Bar spells list let through)
+local function RowAccepts(row, rec)
+	if row.onlyMine and not rec.playerCast then return false end
+	local cats = row.cats
+	if rec.cat and cats[ROWKEY_OF_CAT[rec.cat] or rec.cat] then return true end
+	return cats.classic and rec.main ~= false
+end
+
+-- priority of a category (adjustable in the options): higher goes closer to the nameplate / first in the row
 local PRIORITY_KEY = {
 	cc = "sidePrioCC", interrupt = "sidePrioInterrupt", root = "sidePrioRoot",
 	immunity = "sidePrioImmunity", immunity_spell = "sidePrioImmunity",
@@ -784,6 +825,7 @@ end
 local function sideSort(a, b)
 	local pa, pb = RecPriority(a), RecPriority(b)
 	if pa ~= pb then return pa > pb end
+	if (a.playerCast or 0) ~= (b.playerCast or 0) then return (a.playerCast or 0) > (b.playerCast or 0) end
 	local ea, eb = a.expirationTime or 0, b.expirationTime or 0
 	if ea ~= eb then return ea > eb end
 	return (a.sID or 0) < (b.sID or 0)
@@ -796,7 +838,7 @@ local function GetSideFrames(plate)
 			plate.PB_parentFrame = CreateFrame("Frame", nil, plate)
 			plate.PB_parentFrame:SetAllPoints(plate)
 		end
-		s = { right = {}, left = {} }
+		s = { rows = {} }
 		s.parent = CreateFrame("Frame", nil, plate.PB_parentFrame)
 		s.parent:SetAllPoints(plate.PB_parentFrame)
 		sideFrames[plate] = s
@@ -812,7 +854,7 @@ local function SideAnchor(plate)
 	return plate
 end
 
--- glow around a side-row icon: tinted by category, optionally pulsing
+-- glow around an icon: tinted by category, optionally pulsing
 local GLOW_COLORS = {
 	cc = {1, 0.3, 0.3}, root = {1, 0.65, 0.2}, interrupt = {1, 0.5, 0},
 	immunity = {0.4, 0.8, 1}, immunity_spell = {0.4, 0.8, 1},
@@ -841,7 +883,7 @@ local function UpdateSideGlow(f, rec)
 	end
 	local c = GLOW_COLORS[rec.cat or ""] or GLOW_COLORS.buff_other
 	f.sideGlow:SetVertexColor(c[1], c[2], c[3])
-	local size = P.sideIconSize * 1.7
+	local size = (f.rowSize or 28) * 1.7
 	f.sideGlow:SetWidth(size)
 	f.sideGlow:SetHeight(size)
 	f.sideGlow:SetAlpha(0.9)
@@ -853,78 +895,103 @@ local function UpdateSideGlow(f, rec)
 	end
 end
 
-local function LayoutSide(plate, s, side, list, enabled)
-	local frames = s[side]
-	local n = enabled and math_min(#list, P.sideIconsPerRow) or 0
+local function SetRowIcon(f, rec, size, glow)
+	f.rowSize = size
+	f.spellName = rec.name or ""
+	f.sID = rec.sID or ""
+	f.expirationTime = rec.expirationTime or 0
+	f.duration = rec.duration
+	f.stackCount = rec.stackCount or 0
+	f.isDebuff = rec.isDebuff
+	f.debuffType = rec.debuffType
+	f.playerCast = rec.playerCast
+	f.scale = rec.scale or 1
+	if f.iconPath ~= rec.icon then
+		f.iconPath = rec.icon
+		f.texture:SetTexture(rec.icon)
+	end
+	if f:IsShown() then
+		iconOnShow(f)
+	else
+		f:Show()
+	end
+	iconOnUpdate(f, 1)
+	UpdateSideGlow(f, (glow and rec.cat) and rec or nil)
+end
+
+-- Lays one row out. Rows above the plate stack upwards from topY; returns the next topY.
+local function LayoutRow(plate, s, key, row, list, topY)
+	local frames = s.rows[key]
+	if not frames then
+		frames = {}
+		s.rows[key] = frames
+	end
+	local n = math_min(#list, row.max or 3)
 	if #list > 1 then table_sort(list, sideSort) end
-	local anchor = SideAnchor(plate)
+	local size = row.size or 28
 	local padX, padY = P.intervalX or 12, P.intervalY or 12
+	local isTop = key ~= "rowLeft" and key ~= "rowRight"
+	local anchor = isTop and (plate.PB_parentFrame or plate) or SideAnchor(plate)
 	for i = 1, n do
 		local f = frames[i]
 		if not f then
 			f = CreateBuffFrame(s.parent, plate)
-			f.sideRow = side
 			frames[i] = f
 		end
 		f:SetParent(s.parent)
 		f:ClearAllPoints()
-		if side == "right" then
+		if key == "rowRight" then
 			if i == 1 then
 				f:SetPoint("LEFT", anchor, "RIGHT", P.sideOffsetX - padX / 2, P.sideOffsetY - padY / 2)
 			else
 				f:SetPoint("LEFT", frames[i - 1], "RIGHT", P.sideSpacing - padX, 0)
 			end
-		else
+		elseif key == "rowLeft" then
 			if i == 1 then
 				f:SetPoint("RIGHT", anchor, "LEFT", -P.sideOffsetX + padX / 2, P.sideOffsetY - padY / 2)
 			else
 				f:SetPoint("RIGHT", frames[i - 1], "LEFT", -P.sideSpacing + padX, 0)
 			end
-		end
-		local rec = list[i]
-		f.spellName = rec.name or ""
-		f.sID = rec.sID or ""
-		f.expirationTime = rec.expirationTime or 0
-		f.duration = rec.duration
-		f.stackCount = rec.stackCount or 0
-		f.isDebuff = rec.isDebuff
-		f.debuffType = rec.debuffType
-		f.playerCast = rec.playerCast
-		f.scale = rec.scale or 1
-		if f.iconPath ~= rec.icon then
-			f.iconPath = rec.icon
-			f.texture:SetTexture(rec.icon)
-		end
-		if f:IsShown() then
-			iconOnShow(f)
 		else
-			f:Show()
+			-- centred above the plate, where the classic bars sit; the icon is at the top of its frame
+			local xc = (i - (n + 1) / 2) * (size + P.topSpacing)
+			f:SetPoint("TOP", anchor, P.plateAnchorPoint, P.barOffsetX + xc, P.barOffsetY + padY + topY + size)
 		end
-		iconOnUpdate(f, 1)
-		local glowOn = (side == "right" and P.sideRightGlow) or (side == "left" and P.sideLeftGlow)
-		UpdateSideGlow(f, glowOn and rec or nil)
+		SetRowIcon(f, list[i], size, row.glow)
 	end
 	for i = n + 1, #frames do frames[i]:Hide() end
+	if isTop and n > 0 then topY = topY + size + P.topRowSpacing end
+	return topY
 end
 
-function core:UpdateSideRows(plate, rightList, leftList)
-	local wantRight = P.sideRightEnabled and #rightList > 0
-	local wantLeft = P.sideLeftEnabled and #leftList > 0
-	if not sideFrames[plate] and not (wantRight or wantLeft) then return end
-	local s = GetSideFrames(plate)
-	LayoutSide(plate, s, "right", rightList, P.sideRightEnabled)
-	LayoutSide(plate, s, "left", leftList, P.sideLeftEnabled)
+function core:UpdateSideRows(plate)
+	local s = sideFrames[plate]
+	if not s then
+		local any = false
+		for _, key in ipairs(ROW_KEYS) do
+			if P[key].enabled and #rowScratch[key] > 0 then any = true break end
+		end
+		if not any then return end
+		s = GetSideFrames(plate)
+	end
+	local topY = P.topOffsetY or 0
+	for _, key in ipairs(ROW_KEYS) do
+		local row = P[key]
+		topY = LayoutRow(plate, s, key, row, row.enabled and rowScratch[key] or EMPTY, topY)
+	end
 end
 
 function core:HideSideRows(plate)
 	local s = sideFrames[plate]
 	if not s then return end
-	for i = 1, #s.right do s.right[i]:Hide() end
-	for i = 1, #s.left do s.left[i]:Hide() end
+	for _, frames in pairs(s.rows) do
+		for i = 1, #frames do frames[i]:Hide() end
+	end
 end
 
--- Options changed: hide the side rows and lay every plate out again.
+-- Options changed: hide the rows and lay every plate out again.
 function core:ResetSideRows()
+	self:UpdateWantedCategories()
 	for plate in pairs(sideFrames) do self:HideSideRows(plate) end
 	self:ShowAllKnownSpells()
 end
@@ -940,19 +1007,27 @@ function core:AddBuffsToPlate(plate, GUID)
 		return
 	end
 	table_sort(t, SortFunc)
-	-- split the records: main bars above the plate, and the left / right side rows
-	local mainList, rightList, leftList = mainScratch, rightScratch, leftScratch
+	-- hand every record to the first row that takes it; what no row takes goes to the classic bars (if they are on)
+	local mainList = mainScratch
 	for i = #mainList, 1, -1 do mainList[i] = nil end
-	for i = #rightList, 1, -1 do rightList[i] = nil end
-	for i = #leftList, 1, -1 do leftList[i] = nil end
+	for _, key in ipairs(ROW_KEYS) do
+		local l = rowScratch[key]
+		for i = #l, 1, -1 do l[i] = nil end
+	end
+	local useClassic = P.useClassicBars
 	for i = 1, #t do
 		local r = t[i]
-		if r.side == "right" then
-			rightList[#rightList + 1] = r
-		elseif r.side == "left" then
-			leftList[#leftList + 1] = r
+		local claimed = false
+		for _, key in ipairs(ROW_KEYS) do
+			local row = P[key]
+			if row.enabled and RowAccepts(row, r) then
+				local l = rowScratch[key]
+				l[#l + 1] = r
+				claimed = true
+				break
+			end
 		end
-		if r.main ~= false and not (r.side and P.sideHideInMain) then
+		if not claimed and useClassic and r.main ~= false then
 			mainList[#mainList + 1] = r
 		end
 	end
@@ -988,7 +1063,7 @@ function core:AddBuffsToPlate(plate, GUID)
 			end
 		end
 	end
-	self:UpdateSideRows(plate, rightList, leftList)
+	self:UpdateSideRows(plate)
 	UpdateAllBarSizes(plate)
 end
 

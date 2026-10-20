@@ -121,22 +121,10 @@ defaultSettings.fadeMinDuration = 6
 defaultSettings.increase = 1
 
 -- side rows (left: important buffs, right: crowd control)
-defaultSettings.sideRightEnabled = true
-defaultSettings.sideLeftEnabled = true
-defaultSettings.sideIconSize = 28
-defaultSettings.sideIconsPerRow = 4
 defaultSettings.sideSpacing = 2
 defaultSettings.sideOffsetX = 2
 defaultSettings.sideOffsetY = 0
 defaultSettings.sideAnchorHealthBar = true
-defaultSettings.sideHideInMain = true
-defaultSettings.sideCatCC = true
-defaultSettings.sideCatRoot = true
-defaultSettings.sideCatInterrupt = true
-defaultSettings.sideCatImmunity = true
-defaultSettings.sideCatDefensive = true
-defaultSettings.sideCatOffensive = true
-defaultSettings.sideCatOther = false
 defaultSettings.sidePrioCC = 9
 defaultSettings.sidePrioInterrupt = 7
 defaultSettings.sidePrioRoot = 5
@@ -144,10 +132,39 @@ defaultSettings.sidePrioImmunity = 9
 defaultSettings.sidePrioDefensive = 7
 defaultSettings.sidePrioOffensive = 6
 defaultSettings.sidePrioOther = 2
-defaultSettings.sideRightGlow = true
-defaultSettings.sideLeftGlow = true
 defaultSettings.sideGlowPulse = true
 defaultSettings.sideHideNoDuration = true
+defaultSettings.topSpacing = 2
+defaultSettings.topRowSpacing = 2
+defaultSettings.topOffsetY = 0
+defaultSettings.useClassicBars = false
+
+-- the rows: left and right hold one row each, above the plate there are up to four.
+-- cats: which categories the row shows; "classic" = whatever the classic filters / Bar spells list let through.
+defaultSettings.rowLeft = {
+	enabled = true, max = 3, size = 28, glow = true, onlyMine = false,
+	cats = { immunity = true, buff_def = true, buff_off = true }
+}
+defaultSettings.rowRight = {
+	enabled = true, max = 3, size = 28, glow = true, onlyMine = false,
+	cats = { cc = true, root = true, interrupt = true }
+}
+defaultSettings.rowTop1 = {
+	enabled = true, max = 6, size = 24, glow = false, onlyMine = true,
+	cats = { classic = true }
+}
+defaultSettings.rowTop2 = {
+	enabled = true, max = 4, size = 24, glow = false, onlyMine = false,
+	cats = { classic = true }
+}
+defaultSettings.rowTop3 = {
+	enabled = false, max = 4, size = 24, glow = false, onlyMine = false,
+	cats = {}
+}
+defaultSettings.rowTop4 = {
+	enabled = false, max = 4, size = 24, glow = false, onlyMine = false,
+	cats = {}
+}
 
 core.CoreOptionsTable = {
 	name = core.title,
@@ -1327,151 +1344,158 @@ core.SpellOptionsTable = {
 	}
 }
 
+local ROW_TITLES = {
+	rowLeft = "Left row",
+	rowRight = "Right row",
+	rowTop1 = "Top row 1",
+	rowTop2 = "Top row 2",
+	rowTop3 = "Top row 3",
+	rowTop4 = "Top row 4",
+}
+
+local ROW_CATS = {
+	{ "cc", "Crowd control" },
+	{ "root", "Roots" },
+	{ "interrupt", "Interrupt lockouts" },
+	{ "immunity", "Immunities" },
+	{ "buff_def", "Defensive buffs" },
+	{ "buff_off", "Offensive buffs" },
+	{ "buff_other", "Other buffs" },
+	{ "classic", "Everything the classic filters allow" },
+}
+
+local function RowOptions(rowKey, order)
+	local isTop = rowKey ~= "rowLeft" and rowKey ~= "rowRight"
+	local function row() return P[rowKey] end
+	local isCat = {}
+	for _, c in ipairs(ROW_CATS) do isCat[c[1]] = true end
+
+	local group = {
+		type = "group",
+		name = L[ROW_TITLES[rowKey]],
+		order = order,
+		get = function(info)
+			local k = info[#info]
+			if isCat[k] then return row().cats[k] end
+			return row()[k]
+		end,
+		set = function(info, v)
+			local k = info[#info]
+			if isCat[k] then
+				row().cats[k] = v and true or nil
+			else
+				row()[k] = v
+			end
+			core:ResetSideRows()
+		end,
+		args = {
+			enabled = { type = "toggle", name = L["Enabled"], order = 1 },
+			max = { type = "range", name = L["Max icons"], order = 2, min = 1, max = isTop and 12 or 6, step = 1 },
+			size = { type = "range", name = L["Icon size"], order = 3, min = 12, max = 64, step = 1 },
+			glow = {
+				type = "toggle",
+				name = L["Glow"],
+				desc = L["Glow around the icons of the categories (not around other auras)."],
+				order = 4
+			},
+			onlyMine = {
+				type = "toggle",
+				name = L["Only my auras"],
+				desc = L["Only show auras you cast."],
+				order = 5
+			},
+			catHeader = { type = "header", name = L["Show in this row"], order = 10 },
+			catDesc = {
+				type = "description",
+				name = L["An aura goes to the first row that takes it (left, right, then the top rows in order)."],
+				order = 11
+			},
+		}
+	}
+	for i, c in ipairs(ROW_CATS) do
+		group.args[c[1]] = { type = "toggle", name = L[c[2]], order = 20 + i, width = "full" }
+	end
+	return group
+end
+
 core.SideOptionsTable = {
 	type = "group",
-	name = L["Side rows"],
+	name = L["Rows"],
 	order = 6,
-	get = function(info)
-		return P[info[#info]]
-	end,
-	set = function(info, v)
-		P[info[#info]] = v
-		core:ResetSideRows()
-	end,
+	childGroups = "tab",
 	args = {
-		header = {
-			type = "header",
-			name = L["Side rows"],
-			order = 1
+		general = {
+			type = "group",
+			name = L["General"],
+			order = 1,
+			get = function(info)
+				return P[info[#info]]
+			end,
+			set = function(info, v)
+				P[info[#info]] = v
+				core:ResetSideRows()
+			end,
+			args = {
+				desc = {
+					type = "description",
+					name = L["Each row shows the categories you choose. Left and right are one row each, above the plate there are up to four rows. Which spells belong to which category is set in the Side spells tab."],
+					order = 1
+				},
+				useClassicBars = {
+					type = "toggle",
+					name = L["Also show the classic bars"],
+					desc = L["Show what no row takes in the classic PlateBuffs bars (Style settings and Position tabs)."],
+					width = "full",
+					order = 2
+				},
+				sideAnchorHealthBar = {
+					type = "toggle",
+					name = L["Anchor the left and right rows to the health bar"],
+					desc = L["Off: anchor them to the whole nameplate frame."],
+					width = "full",
+					order = 3
+				},
+				sideHideNoDuration = {
+					type = "toggle",
+					name = L["Hide buffs without a duration"],
+					desc = L["Forms, stances and other permanent buffs are not shown in category rows."],
+					width = "full",
+					order = 4
+				},
+				sideGlowPulse = {
+					type = "toggle",
+					name = L["Pulsing glow"],
+					desc = L["The glow fades in and out. Without it the glow stays steady."],
+					order = 5
+				},
+				posHeader = { type = "header", name = L["Position"], order = 10 },
+				sideSpacing = { type = "range", name = L["Left and right: spacing"], order = 11, min = -10, max = 30, step = 1 },
+				sideOffsetX = { type = "range", name = L["Left and right: offset X"], order = 12, min = -60, max = 60, step = 1 },
+				sideOffsetY = { type = "range", name = L["Left and right: offset Y"], order = 13, min = -60, max = 60, step = 1 },
+				topSpacing = { type = "range", name = L["Top rows: spacing"], order = 14, min = -10, max = 30, step = 1 },
+				topRowSpacing = { type = "range", name = L["Top rows: space between rows"], order = 15, min = -10, max = 30, step = 1 },
+				topOffsetY = { type = "range", name = L["Top rows: extra offset Y"], desc = L["On top of the Position tab offsets."], order = 16, min = -60, max = 60, step = 1 },
+				prioHeader = { type = "header", name = L["Priority"], order = 30 },
+				prioDesc = {
+					type = "description",
+					name = L["The higher the priority, the closer to the nameplate. With more auras than icons, the lowest priorities are the ones left out."],
+					order = 31
+				},
+				sidePrioCC = { type = "range", name = L["Crowd control"], order = 32, min = 1, max = 10, step = 1 },
+				sidePrioInterrupt = { type = "range", name = L["Interrupt lockouts"], order = 33, min = 1, max = 10, step = 1 },
+				sidePrioRoot = { type = "range", name = L["Roots"], order = 34, min = 1, max = 10, step = 1 },
+				sidePrioImmunity = { type = "range", name = L["Immunities"], order = 35, min = 1, max = 10, step = 1 },
+				sidePrioDefensive = { type = "range", name = L["Defensive buffs"], order = 36, min = 1, max = 10, step = 1 },
+				sidePrioOffensive = { type = "range", name = L["Offensive buffs"], order = 37, min = 1, max = 10, step = 1 },
+				sidePrioOther = { type = "range", name = L["Other buffs"], order = 38, min = 1, max = 10, step = 1 },
+			}
 		},
-		desc = {
-			type = "description",
-			name = L["Crowd control goes in a row to the right of the nameplate, important buffs in a row to the left. They are shown in addition to the normal rows above the plate."],
-			order = 2
-		},
-		sideRightEnabled = {
-			type = "toggle",
-			name = L["Right row: crowd control"],
-			order = 3
-		},
-		sideLeftEnabled = {
-			type = "toggle",
-			name = L["Left row: important buffs"],
-			order = 4
-		},
-		sideHideInMain = {
-			type = "toggle",
-			name = L["Hide them from the rows above the plate"],
-			desc = L["An aura shown on a side row is not repeated in the normal rows."],
-			order = 5
-		},
-		sideAnchorHealthBar = {
-			type = "toggle",
-			name = L["Anchor to the health bar"],
-			desc = L["Anchor the side rows to the health bar instead of the whole nameplate frame."],
-			order = 6
-		},
-		sideHideNoDuration = {
-			type = "toggle",
-			name = L["Hide left row auras without a duration"],
-			desc = L["Forms, stances and other permanent buffs are not shown on the left row."],
-			order = 7
-		},
-		glowHeader = {
-			type = "header",
-			name = L["Glow"],
-			order = 8
-		},
-		sideRightGlow = {
-			type = "toggle",
-			name = L["Glow on the right row"],
-			order = 8.1
-		},
-		sideLeftGlow = {
-			type = "toggle",
-			name = L["Glow on the left row"],
-			order = 8.2
-		},
-		sideGlowPulse = {
-			type = "toggle",
-			name = L["Pulsing glow"],
-			desc = L["The glow fades in and out. Without it the glow stays steady."],
-			order = 8.3
-		},
-		sizeHeader = {
-			type = "header",
-			name = L["Size and position"],
-			order = 10
-		},
-		sideIconSize = {
-			type = "range",
-			name = L["Icon size"],
-			order = 11,
-			min = 12,
-			max = 64,
-			step = 1
-		},
-		sideIconsPerRow = {
-			type = "range",
-			name = L["Icons per row"],
-			order = 12,
-			min = 1,
-			max = 8,
-			step = 1
-		},
-		sideSpacing = {
-			type = "range",
-			name = L["Spacing"],
-			order = 13,
-			min = -6,
-			max = 12,
-			step = 1
-		},
-		sideOffsetX = {
-			type = "range",
-			name = L["Offset X"],
-			order = 14,
-			min = -60,
-			max = 60,
-			step = 1
-		},
-		sideOffsetY = {
-			type = "range",
-			name = L["Offset Y"],
-			order = 15,
-			min = -60,
-			max = 60,
-			step = 1
-		},
-		prioHeader = {
-			type = "header",
-			name = L["Priority"],
-			order = 30
-		},
-		prioDesc = {
-			type = "description",
-			name = L["The higher the priority, the closer to the nameplate. With more auras than icons, the lowest priorities are the ones left out."],
-			order = 31
-		},
-		sidePrioCC = { type = "range", name = L["Crowd control"], order = 32, min = 1, max = 10, step = 1 },
-		sidePrioInterrupt = { type = "range", name = L["Interrupt lockouts"], order = 33, min = 1, max = 10, step = 1 },
-		sidePrioRoot = { type = "range", name = L["Roots"], order = 34, min = 1, max = 10, step = 1 },
-		sidePrioImmunity = { type = "range", name = L["Immunities"], order = 35, min = 1, max = 10, step = 1 },
-		sidePrioDefensive = { type = "range", name = L["Defensive buffs"], order = 36, min = 1, max = 10, step = 1 },
-		sidePrioOffensive = { type = "range", name = L["Offensive buffs"], order = 37, min = 1, max = 10, step = 1 },
-		sidePrioOther = { type = "range", name = L["Other buffs"], order = 38, min = 1, max = 10, step = 1 },
-		catHeader = {
-			type = "header",
-			name = L["What goes in the rows"],
-			order = 20
-		},
-		sideCatCC = { type = "toggle", name = L["Crowd control"], order = 21 },
-		sideCatRoot = { type = "toggle", name = L["Roots"], order = 22 },
-		sideCatInterrupt = { type = "toggle", name = L["Interrupt lockouts"], order = 23 },
-		sideCatImmunity = { type = "toggle", name = L["Immunities"], order = 24 },
-		sideCatDefensive = { type = "toggle", name = L["Defensive buffs"], order = 25 },
-		sideCatOffensive = { type = "toggle", name = L["Offensive buffs"], order = 26 },
-		sideCatOther = { type = "toggle", name = L["Other buffs"], order = 27 }
+		rowLeft = RowOptions("rowLeft", 2),
+		rowRight = RowOptions("rowRight", 3),
+		rowTop1 = RowOptions("rowTop1", 4),
+		rowTop2 = RowOptions("rowTop2", 5),
+		rowTop3 = RowOptions("rowTop3", 6),
+		rowTop4 = RowOptions("rowTop4", 7),
 	}
 }
 

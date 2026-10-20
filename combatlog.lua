@@ -54,24 +54,14 @@ local EventFrame = CreateFrame("Frame")
 
 local P
 
--- Side rows: which auras go to the left / right row. Returns "right" or "left" and the category, or nil.
-local CATEGORY_OPTION = {
-	cc = "sideCatCC", root = "sideCatRoot", interrupt = "sideCatInterrupt",
-	immunity = "sideCatImmunity", immunity_spell = "sideCatImmunity",
-	buff_def = "sideCatDefensive", buff_off = "sideCatOffensive", buff_other = "sideCatOther",
-}
+-- Rows: an aura gets a category when the spell list knows it and at least one row shows that category.
+-- (The row it ends up in is decided when the plate is laid out, see frames.lua.)
+local WantedCats = core.WantedCats
 
-local function SideForSpell(spellID, spellName, isDebuff)
+local function SideForSpell(spellID, spellName)
 	local cat = SpellCategory[spellID] or (spellName and SpellCategoryByName[spellName])
-	if not cat then return end
-	local side = CategorySide[cat]
-	if side == "right" then
-		if not (isDebuff and P.sideRightEnabled) then return end
-	else
-		if isDebuff or not P.sideLeftEnabled then return end
-	end
-	if not P[CATEGORY_OPTION[cat]] then return end
-	return side, cat
+	if not cat or not WantedCats[cat] then return end
+	return true, cat
 end
 do
 	local prev_OnEnable = core.OnEnable
@@ -279,7 +269,7 @@ local function CollectAuras(unitID, GUID, filter)
 	local name, icon, count, duration, expirationTime, unitCaster, spellId, debuffType, srcGUID, drType, shouldAdd, scale, spellOpts, _
 	local isDebuff = filter == "HARMFUL" or nil
 	local defaultShow = isDebuff and P.defaultDebuffShow or P.defaultBuffShow
-	local sideOn = isDebuff and P.sideRightEnabled or (not isDebuff and P.sideLeftEnabled)
+	local sideOn = core.AnyCategoryWanted
 	if defaultShow == 5 and not sideOn then return end
 	local trackDR = isDebuff and not hasModernAPI
 	local isPlayerControlled = trackDR and UnitPlayerControlled(unitID)
@@ -313,7 +303,7 @@ local function CollectAuras(unitID, GUID, filter)
 						or (defaultShow == 4 and unitCaster == "player")
 		end
 		local side, cat = SideForSpell(spellId, name, isDebuff and true or false)
-		if side == "left" and P.sideHideNoDuration and duration == 0 and not ((spellDuration[spellId] or 0) > 0) then
+		if side and CategorySide[cat] == "left" and P.sideHideNoDuration and duration == 0 and not ((spellDuration[spellId] or 0) > 0) then
 			side, cat = nil, nil
 		end
 		if shouldAdd or side then
@@ -502,7 +492,7 @@ local function HandleAuraApply(srcGUID, srcFlags, dstGUID, dstName, dstFlags, sp
 	if mainOff and not side then return end
 	local duration = GetDuration(spellID, srcGUID, dstGUID, FlagIsPlayerControlled(srcFlags), FlagIsPlayerControlled(dstFlags)) or 0
 	-- an aura on the left row that has no duration (a form, a stance, a permanent buff) is noise
-	if side == "left" and duration == 0 and P.sideHideNoDuration then
+	if side and CategorySide[cat] == "left" and duration == 0 and P.sideHideNoDuration then
 		side, cat = nil, nil
 		if mainOff then return duration end
 	end
@@ -611,7 +601,7 @@ end
 function EventFrame:SPELL_INTERRUPT(srcGUID, srcFlags, dstGUID, dstName, dstFlags, spellID, spellName)
 	local duration = InterruptsDuration[spellID]
 	if not duration then return end
-	local side = (P.sideRightEnabled and P.sideCatInterrupt) and "right" or nil
+	local side = WantedCats.interrupt and true or nil
 	if not (P.showInterrupts or side) then return end
 	duration = duration * (1 - P.interruptsReduction)
 	if not FlagIsPlayer(dstFlags) then return end

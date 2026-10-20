@@ -21,6 +21,7 @@ do
 		prev_OnEnable(self)
 		P = self.db.profile
 		self:RebuildSpellCategories()
+		self:UpdateWantedCategories()
 		self:BuildSideSpellUI()
 	end
 end

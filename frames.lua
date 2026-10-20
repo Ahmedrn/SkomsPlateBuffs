@@ -794,6 +794,47 @@ local function SideAnchor(plate)
 	return plate
 end
 
+-- glow around a side-row icon: tinted by category, optionally pulsing
+local GLOW_COLORS = {
+	cc = {1, 0.3, 0.3}, root = {1, 0.65, 0.2}, interrupt = {1, 0.5, 0},
+	immunity = {0.4, 0.8, 1}, immunity_spell = {0.4, 0.8, 1},
+	buff_def = {0.2, 1, 0.3}, buff_off = {1, 0.25, 0.25}, buff_other = {0.8, 0.8, 0.8},
+}
+
+local function UpdateSideGlow(f, rec)
+	if not rec then
+		if f.sideGlow then
+			f.sideGlow:Hide()
+			f.sideGlowAnim:Stop()
+		end
+		return
+	end
+	if not f.sideGlow then
+		f.sideGlow = f.icon:CreateTexture(nil, "OVERLAY")
+		f.sideGlow:SetTexture("Interface\\Buttons\\UI-ActionButton-Border")
+		f.sideGlow:SetBlendMode("ADD")
+		f.sideGlow:SetPoint("CENTER", f.icon, "CENTER", 0, 0)
+		f.sideGlowAnim = f.sideGlow:CreateAnimationGroup()
+		f.sideGlowAnim:SetLooping("BOUNCE")
+		local a = f.sideGlowAnim:CreateAnimation("Alpha")
+		a:SetChange(-0.55)
+		a:SetDuration(0.7)
+		a:SetOrder(1)
+	end
+	local c = GLOW_COLORS[rec.cat or ""] or GLOW_COLORS.buff_other
+	f.sideGlow:SetVertexColor(c[1], c[2], c[3])
+	local size = P.sideIconSize * 1.7
+	f.sideGlow:SetWidth(size)
+	f.sideGlow:SetHeight(size)
+	f.sideGlow:SetAlpha(0.9)
+	f.sideGlow:Show()
+	if P.sideGlowPulse then
+		if not f.sideGlowAnim:IsPlaying() then f.sideGlowAnim:Play() end
+	else
+		f.sideGlowAnim:Stop()
+	end
+end
+
 local function LayoutSide(plate, s, side, list, enabled)
 	local frames = s[side]
 	local n = enabled and math_min(#list, P.sideIconsPerRow) or 0
@@ -842,6 +883,8 @@ local function LayoutSide(plate, s, side, list, enabled)
 			f:Show()
 		end
 		iconOnUpdate(f, 1)
+		local glowOn = (side == "right" and P.sideRightGlow) or (side == "left" and P.sideLeftGlow)
+		UpdateSideGlow(f, glowOn and rec or nil)
 	end
 	for i = n + 1, #frames do frames[i]:Hide() end
 end

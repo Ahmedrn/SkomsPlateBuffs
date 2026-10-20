@@ -310,6 +310,9 @@ local function CollectAuras(unitID, GUID, filter)
 						or (defaultShow == 4 and unitCaster == "player")
 		end
 		local side, cat = SideForSpell(spellId, name, isDebuff and true or false)
+		if side == "left" and P.sideHideNoDuration and duration == 0 and not ((spellDuration[spellId] or 0) > 0) then
+			side, cat = nil, nil
+		end
 		if shouldAdd or side then
 			table_insert(guidBuffs[GUID], {
 				name = name,
@@ -495,6 +498,11 @@ local function HandleAuraApply(srcGUID, srcFlags, dstGUID, dstName, dstFlags, sp
 	local mainOff = (auraType == "BUFF" and P.defaultBuffShow == 5) or (isDebuff and P.defaultDebuffShow == 5)
 	if mainOff and not side then return end
 	local duration = GetDuration(spellID, srcGUID, dstGUID, FlagIsPlayerControlled(srcFlags), FlagIsPlayerControlled(dstFlags)) or 0
+	-- an aura on the left row that has no duration (a form, a stance, a permanent buff) is noise
+	if side == "left" and duration == 0 and P.sideHideNoDuration then
+		side, cat = nil, nil
+		if mainOff then return duration end
+	end
 	local expirationTime = duration ~= 0 and GetTime() + duration or 0
 	local texture = GetSpellIcon(spellID)
 	local debuffType = GetDebuffType(spellID)

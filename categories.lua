@@ -491,3 +491,18 @@ do
         end
     end
 end
+
+-- durations the PlateBuffs data does not have for spells kept on the left row
+do
+    local extraDuration = {
+        [1020] = 12, [5573] = 12,   -- Divine Shield
+        [12975] = 20,               -- Last Stand
+        [20729] = 12,               -- Blessing of Sacrifice
+        [31850] = 10, [31852] = 10, -- Ardent Defender
+        [53271] = 4,                -- Master's Call
+        [49016] = 30,               -- Unholy Frenzy
+    }
+    for id, d in pairs(extraDuration) do
+        if not core.spellDuration[id] then core.spellDuration[id] = d end
+    end
+end

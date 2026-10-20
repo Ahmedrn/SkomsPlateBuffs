@@ -137,6 +137,10 @@ defaultSettings.sideCatImmunity = true
 defaultSettings.sideCatDefensive = true
 defaultSettings.sideCatOffensive = true
 defaultSettings.sideCatOther = false
+defaultSettings.sideRightGlow = true
+defaultSettings.sideLeftGlow = true
+defaultSettings.sideGlowPulse = true
+defaultSettings.sideHideNoDuration = true
 
 core.CoreOptionsTable = {
 	name = core.title,
@@ -1359,6 +1363,33 @@ core.SideOptionsTable = {
 			name = L["Anchor to the health bar"],
 			desc = L["Anchor the side rows to the health bar instead of the whole nameplate frame."],
 			order = 6
+		},
+		sideHideNoDuration = {
+			type = "toggle",
+			name = L["Hide left row auras without a duration"],
+			desc = L["Forms, stances and other permanent buffs are not shown on the left row."],
+			order = 7
+		},
+		glowHeader = {
+			type = "header",
+			name = L["Glow"],
+			order = 8
+		},
+		sideRightGlow = {
+			type = "toggle",
+			name = L["Glow on the right row"],
+			order = 8.1
+		},
+		sideLeftGlow = {
+			type = "toggle",
+			name = L["Glow on the left row"],
+			order = 8.2
+		},
+		sideGlowPulse = {
+			type = "toggle",
+			name = L["Pulsing glow"],
+			desc = L["The glow fades in and out. Without it the glow stays steady."],
+			order = 8.3
 		},
 		sizeHeader = {
 			type = "header",

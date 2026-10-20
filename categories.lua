@@ -4,8 +4,6 @@ local folder, core = ...
 -- Generated from the BigDebuffs WotLK spell list (Jordon, Tsoukie): spell id -> category.
 -- Ranks of one spell are listed individually; the spell name is matched as well (see below).
 core.SpellCategory = {
-    -- disarm (added)
-    [50541] = "disarm", -- Snatch - Bird of Prey
     -- snare / healing_reduction (added)
     [1715] = "snare", -- Hamstring
     [2974] = "snare", -- Wing Clip
@@ -168,10 +166,10 @@ core.SpellCategory = {
     [50613] = "cc", -- Arcane Torrent (Runic Power)
     [51209] = "cc", -- Hungering Cold
     [51514] = "cc", -- Hex
-    [51722] = "disarm", -- Dismantle
+    [51722] = "cc", -- Dismantle
     [51724] = "cc", -- Sap
-    [53359] = "disarm", -- Chimera Shot - Scorpid (Disarm)
-    [53543] = "disarm", -- Snatch (Pet Disarm)
+    [53359] = "cc", -- Chimera Shot - Scorpid (Disarm)
+    [53543] = "cc", -- Snatch (Pet Disarm)
     [53562] = "cc", -- Ravage (Pet)
     [55021] = "cc", -- Improved Counterspell
     [58861] = "cc", -- Bash (Spirit Wolf)
@@ -181,8 +179,8 @@ core.SpellCategory = {
     [61721] = "cc",
     [63529] = "cc", -- Silenced - Shield of the Templar
     [64044] = "cc", -- Psychic Horror (Horrify)
-    [64058] = "disarm", -- Psychic Horror (Disarm)
-    [64346] = "disarm", -- Fiery Payback (Fire Mage Disarm)
+    [64058] = "cc", -- Psychic Horror (Disarm)
+    [64346] = "cc", -- Fiery Payback (Fire Mage Disarm)
     [71319] = "cc",
     -- root
     [122] = "root", -- Frost Nova
@@ -260,7 +258,7 @@ core.SpellCategory = {
     [6552] = "interrupt", -- Pummel
     [6554] = "interrupt",
     [13491] = "interrupt", -- Iron Knuckles
-    [15752] = "disarm", -- Linken's Boomerang Disarm
+    [15752] = "interrupt", -- Linken's Boomerang Disarm
     [16979] = "interrupt", -- Feral Charge (Druid)
     [19244] = "interrupt", -- Spell Lock - Rank 1 (Warlock)
     [19647] = "interrupt", -- Spell Lock - Rank 2 (Warlock)
@@ -447,7 +445,7 @@ core.SpellCategory = {
     [26064] = "buff_other", -- Shell Shield (Pet) (restored, was buff_def)
     [71] = "buff_other", -- Defensive Stance
     [453] = "buff_other", -- Mind Soothe
-    [676] = "disarm", -- Disarm
+    [676] = "buff_other", -- Disarm
     [768] = "buff_other", -- Cat Form
     [770] = "buff_other", -- Faerie Fire
     [783] = "buff_other", -- Travel Form
@@ -461,7 +459,7 @@ core.SpellCategory = {
     [13222] = "healing_reduction", -- Wound Poison II
     [13223] = "healing_reduction", -- Wound Poison III
     [13224] = "healing_reduction", -- Wound Poison IV
-    [14251] = "disarm", -- Riposte (Rogue)
+    [14251] = "buff_other", -- Riposte (Rogue)
     [16857] = "buff_other", -- Faerie Fire (Feral)
     [19434] = "healing_reduction", -- Aimed Shot
     [20900] = "buff_other",
@@ -503,11 +501,11 @@ core.SpellCategory = {
 
 -- which row a category goes to, and its priority inside the row (higher first)
 core.CategorySide = {
-    cc = "right", root = "right", interrupt = "right", snare = "right", healing_reduction = "right", disarm = "right",
+    cc = "right", root = "right", interrupt = "right", snare = "right", healing_reduction = "right",
     immunity = "left", immunity_spell = "left", buff_def = "left", buff_off = "left", buff_other = "left",
 }
 core.CategoryPriority = {
-    cc = 6, interrupt = 5, root = 3, snare = 3, healing_reduction = 4, disarm = 5,
+    cc = 6, interrupt = 5, root = 3, snare = 3, healing_reduction = 4,
     immunity = 6, immunity_spell = 6, buff_def = 5, buff_off = 4, buff_other = 1,
 }
 

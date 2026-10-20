@@ -4,7 +4,6 @@
 - **Top rows on demand:** one top row by default, "Add a top row" for more (up to six), "Remove this row" on the last one.
 - **Per row: Buffs and debuffs / Debuffs only / Buffs only, and Only my auras.** New content "Any other aura" (everything no earlier row took). Top row 1 by default is "my debuffs". The old Show Buffs / Show Debuffs / Show Interrupts settings are gone from Display conditions; the rows decide.
 - **New categories:** Snares (Hamstring, Wing Clip, Frostbolt, Cone of Cold, Chains of Ice, ...; slows that were filed as roots moved here) and Healing reduction (Mortal Strike, Wound Poison, Aimed Shot, ...).
-- **New category: Disarms** (Disarm, Dismantle, Riposte, Snatch, Chimera Shot - Scorpid, Fiery Payback, Psychic Horror disarm, Linken's Boomerang). The warrior Disarm was filed under Other buffs and never showed. Ticked in the default right row.
 - **"Other tracked auras" no longer repeats spells that have a category** (about 125 duplicates), in the Spells tab and in the rows.
 - **Icon size multiplier per spell** in the Spells tab (for example Hamstring at 1.5x). Rows size each icon individually; top rows share one bottom line.
 - **Spells tab layout like BigDebuffs:** each category has its priority and glow and a small add-by-ID box; tools (print row auras, reset the list) are a separate group. Duration field for spells you add.

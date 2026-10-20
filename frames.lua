@@ -769,6 +769,7 @@ core.RowKeys = ROW_KEYS
 local rowScratch = {}   -- [rowKey] = records this plate puts in the row
 for _, key in ipairs(ROW_KEYS) do rowScratch[key] = {} end
 local EMPTY = {}
+local claimOrder = {}
 
 -- a top row is active when it is switched on and within the number of top rows the user added
 local function RowActive(key)
@@ -1138,11 +1139,20 @@ function core:AddBuffsToPlate(plate, GUID)
 		local l = rowScratch[key]
 		for i = #l, 1, -1 do l[i] = nil end
 	end
+	-- rows set to "Only my auras" are checked first, so "my debuffs" keeps them even when another row also wants their category
+	local order = claimOrder
+	for i = #order, 1, -1 do order[i] = nil end
+	for _, key in ipairs(ROW_KEYS) do
+		if RowActive(key) and P[key].onlyMine then order[#order + 1] = key end
+	end
+	for _, key in ipairs(ROW_KEYS) do
+		if RowActive(key) and not P[key].onlyMine then order[#order + 1] = key end
+	end
 	for i = 1, #t do
 		local r = t[i]
-		for _, key in ipairs(ROW_KEYS) do
-			local row = P[key]
-			if RowActive(key) and RowAccepts(row, r) then
+		for j = 1, #order do
+			local key = order[j]
+			if RowAccepts(P[key], r) then
 				local l = rowScratch[key]
 				l[#l + 1] = r
 				break

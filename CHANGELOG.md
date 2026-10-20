@@ -7,6 +7,7 @@
 - **"Other tracked auras" no longer repeats spells that have a category** (about 125 duplicates), in the Spells tab and in the rows.
 - **Icon size multiplier per spell** in the Spells tab (for example Hamstring at 1.5x). Rows size each icon individually; top rows share one bottom line.
 - **Spells tab layout like BigDebuffs:** each category has its priority and glow and a small add-by-ID box; tools (print row auras, reset the list) are a separate group. Duration field for spells you add.
+- **Rows set to "Only my auras" are filled first**, so "my debuffs" on top keeps your own Hamstring or Mortal Strike even when the right row also shows snares / healing reduction.
 - **Fixed** an error in test mode (a plate refreshed itself while its icons were being laid out).
 
 ## 1.3.0 (2026-10-20)

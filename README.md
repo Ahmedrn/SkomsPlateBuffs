@@ -11,7 +11,7 @@ Enemy nameplate auras, laid out the way you decide. Based on PlateBuffs (see Cre
   - **Any other aura**: everything no earlier row took.
 - Per row: buffs and debuffs / debuffs only / buffs only, and **only my auras**.
   Top row 1 = *Any other aura* + *Debuffs only* + *Only my auras* is "my debuffs".
-- An aura goes to the first row that takes it (left, right, then the top rows in order).
+- An aura goes to the first row that takes it. Rows set to *Only my auras* are checked first, then left, right and the top rows in order.
 
 Default set-up: left = immunities, defensive and offensive cooldowns; right = crowd control, roots, interrupts; top 1 = my debuffs.
 The classic PlateBuffs bars are gone: the rows replace them.

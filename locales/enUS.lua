@@ -303,3 +303,4 @@ L["Snares"] = true
 L["Healing reduction"] = true
 L["Icon size multiplier"] = true
 L["Multiplies the row's icon size for this spell (1 = the row's size). Used in every row that shows it."] = true
+L["An aura goes to the first row that takes it. Rows set to Only my auras come first, then left, right and the top rows in order."] = true

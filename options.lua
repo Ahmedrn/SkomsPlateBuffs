@@ -1260,7 +1260,7 @@ local function RowOptions(rowKey, order)
 			catHeader = { type = "header", name = L["Show in this row"], order = 10 },
 			catDesc = {
 				type = "description",
-				name = L["An aura goes to the first row that takes it (left, right, then the top rows in order)."],
+				name = L["An aura goes to the first row that takes it. Rows set to Only my auras come first, then left, right and the top rows in order."],
 				order = 11
 			},
 		}

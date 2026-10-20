@@ -7,7 +7,7 @@ PlateBuffs with two extra rows beside the enemy nameplate, in the style of the r
 
 The normal PlateBuffs rows above the plate keep working exactly as before. Everything about the side rows is in the
 **Side rows** tab of the PlateBuffs options (`/pb`): on/off per side, icon size, icons per row, spacing, X/Y offsets,
-anchoring (health bar or whole plate), which categories go in the rows, and whether an aura shown on a side row is
+anchoring (health bar or whole plate), glow (steady or pulsing, tinted by category), which categories go in the rows, and whether an aura shown on a side row is
 hidden from the rows above the plate (default: yes).
 
 ## Install

@@ -187,6 +187,10 @@ end
 
 -- /da function brings up the UI options
 function core:MySlashProcessorFunc(input)
+	if input and input:lower():find("glow") then
+		self:ToggleGlowShowcase()
+		return
+	end
 	InterfaceOptionsFrame_OpenToCategory(self.title)
 	InterfaceOptionsFrame_OpenToCategory(self.title)
 end

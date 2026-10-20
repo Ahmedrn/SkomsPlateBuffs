@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.1 (2026-10-20)
+- **Glow showcase:** a movable window with every glow style (none, border, pixel, autocast shine, action button, proc) on a sample icon, and a button to cycle the colour. Open it from Position > Glow showcase, or with `/spb glow`.
+
 ## 1.7.0 (2026-10-20)
 - **New category: Speed boosts** (Sprint, Dash, Aspect of the Cheetah and the Pack, Ghost Wolf, Blazing Speed, Nitro Boosts, Shadowstep, Body and Soul). Sprint and the Dashes moved here from Offensive / Other buffs. Permanent ones (aspects, Ghost Wolf) show even without a duration. Ticked on Extra top row 1 by default.
 - Icon size multiplier moves in steps of 0.25.

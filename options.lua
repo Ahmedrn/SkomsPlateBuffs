@@ -1372,6 +1372,13 @@ core.PositionOptionsTable = {
 		topOffsetX = { type = "range", name = L["Offset X"], order = 13, min = -100, max = 100, step = 1 },
 		topOffsetY = { type = "range", name = L["Offset Y"], order = 14, min = -60, max = 100, step = 1 },
 		testHeader = { type = "header", name = L["Test"], order = 20 },
+		glowShowcase = {
+			type = "execute",
+			name = L["Glow showcase"],
+			desc = L["Opens a window with every glow style on a sample icon, to compare them. Also /spb glow."],
+			order = 22,
+			func = function() core:ToggleGlowShowcase() end,
+		},
 		iconTestMode = {
 			type = "toggle",
 			name = L["Test Mode"],

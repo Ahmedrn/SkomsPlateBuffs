@@ -318,3 +318,5 @@ L["Your own debuffs on enemies, except hard crowd control (stuns, fears, disarms
 L["Every spell the rows can show, by category. Pick a category on the left for its priority and glow, and its spells. Switch a spell off, move it to another category, give it its own priority or glow, or add spells by ID."] = true
 L["Disarms"] = true
 L["Speed boosts"] = true
+L["Glow showcase"] = true
+L["Opens a window with every glow style on a sample icon, to compare them. Also /spb glow."] = true

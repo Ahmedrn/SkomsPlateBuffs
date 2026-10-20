@@ -992,6 +992,93 @@ local function ApplyGlow(f, gtype, color)
 	end
 end
 
+-- Glow showcase (Position tab > Glow showcase, or /spb glow): every style on a sample icon, to compare them.
+local SHOWCASE_STYLES = {
+	{ "none", "No glow" }, { "border", "Border" }, { "pixel", "Pixel glow" },
+	{ "shine", "Autocast shine" }, { "button", "Action button glow" }, { "proc", "Proc glow" },
+}
+local SHOWCASE_COLORS = { { 1, 0.8, 0.2 }, { 1, 0.3, 0.3 }, { 0.2, 1, 0.3 }, { 0.4, 0.8, 1 }, { 0.8, 0.3, 0.8 } }
+local showcase, showcaseColor = nil, 1
+
+local function ShowcaseApply()
+	local color = SHOWCASE_COLORS[showcaseColor]
+	for _, f in ipairs(showcase.samples) do
+		ApplyGlow(f, f.style, color)
+	end
+end
+
+function core:ToggleGlowShowcase()
+	if not showcase then
+		local panel = CreateFrame("Frame", "SkomsPlateBuffsGlowShowcase", UIParent)
+		panel:SetWidth(#SHOWCASE_STYLES * 80 + 30)
+		panel:SetHeight(170)
+		panel:SetPoint("CENTER", UIParent, "CENTER", 0, 160)
+		panel:SetFrameStrata("DIALOG")
+		panel:SetBackdrop({
+			bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			tile = true, tileSize = 32, edgeSize = 32,
+			insets = { left = 8, right = 8, top = 8, bottom = 8 },
+		})
+		panel:EnableMouse(true)
+		panel:SetMovable(true)
+		panel:RegisterForDrag("LeftButton")
+		panel:SetScript("OnDragStart", panel.StartMoving)
+		panel:SetScript("OnDragStop", panel.StopMovingOrSizing)
+
+		local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+		title:SetPoint("TOP", panel, "TOP", 0, -14)
+		title:SetText("SkomsPlateBuffs: glow showcase (drag to move)")
+
+		local close = CreateFrame("Button", nil, panel, "UIPanelCloseButton")
+		close:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -4, -4)
+
+		local colorButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+		colorButton:SetWidth(110)
+		colorButton:SetHeight(22)
+		colorButton:SetPoint("BOTTOM", panel, "BOTTOM", 0, 14)
+		colorButton:SetText("Next color")
+		colorButton:SetScript("OnClick", function()
+			showcaseColor = showcaseColor % #SHOWCASE_COLORS + 1
+			ShowcaseApply()
+		end)
+
+		local note = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+		note:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -16, 18)
+		note:SetText(GetLCG() and "" or "LibCustomGlow not found: styles fall back to the border")
+
+		panel.samples = {}
+		for i, style in ipairs(SHOWCASE_STYLES) do
+			local f = CreateFrame("Frame", nil, panel)
+			f:SetWidth(40)
+			f:SetHeight(40)
+			f:SetPoint("TOP", panel, "TOPLEFT", 15 + (i - 0.5) * 80, -52)
+			f.icon = CreateFrame("Frame", nil, f)
+			f.icon:SetAllPoints(f)
+			f.texture = f.icon:CreateTexture(nil, "BACKGROUND")
+			f.texture:SetAllPoints(f.icon)
+			f.texture:SetTexture("Interface\\Icons\\Spell_Holy_DivineShield")
+			f.rowSize = 40
+			f.style = style[1]
+			local label = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+			label:SetPoint("TOP", f, "BOTTOM", 0, -12)
+			label:SetText(style[2])
+			panel.samples[i] = f
+		end
+		panel:SetScript("OnHide", function()
+			for _, f in ipairs(panel.samples) do ApplyGlow(f, "none") end
+		end)
+		panel:SetScript("OnShow", ShowcaseApply)
+		showcase = panel
+		panel:Hide()
+	end
+	if showcase:IsShown() then
+		showcase:Hide()
+	else
+		showcase:Show()
+	end
+end
+
 local function SetRowIcon(f, rec, size, glow)
 	f.rowSize = size
 	f.spellName = rec.name or ""

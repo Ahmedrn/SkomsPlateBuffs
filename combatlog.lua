@@ -346,7 +346,7 @@ function core:CollectUnitInfo(unitID)
 	CollectAuras(unitID, GUID, "HARMFUL")
 	if core.iconTestMode == true then
 		for j = table_getn(guidBuffs[GUID]), 1, -1 do
-			for t = 1, P.iconsPerBar - 1 do
+			for t = 1, 2 do
 				table_insert(guidBuffs[GUID], j, guidBuffs[GUID][j]) --reinsert the entry abunch of times.
 			end
 		end

@@ -768,7 +768,6 @@ core.RowKeys = ROW_KEYS
 
 local rowScratch = {}   -- [rowKey] = records this plate puts in the row
 for _, key in ipairs(ROW_KEYS) do rowScratch[key] = {} end
-local mainScratch = {}
 local EMPTY = {}
 
 -- categories the rows ask for: the combat log only keeps a category some row shows
@@ -807,7 +806,7 @@ end
 -- priority of a category (adjustable in the options): higher goes closer to the nameplate / first in the row
 local PRIORITY_KEY = {
 	cc = "sidePrioCC", interrupt = "sidePrioInterrupt", root = "sidePrioRoot",
-	immunity = "sidePrioImmunity", immunity_spell = "sidePrioImmunity",
+	immunity = "sidePrioImmunity", immunity_spell = "sidePrioImmunitySpell",
 	buff_def = "sidePrioDefensive", buff_off = "sidePrioOffensive", buff_other = "sidePrioOther",
 }
 
@@ -854,21 +853,48 @@ local function SideAnchor(plate)
 	return plate
 end
 
--- glow around an icon: tinted by category, optionally pulsing
-local GLOW_COLORS = {
-	cc = {1, 0.3, 0.3}, root = {1, 0.65, 0.2}, interrupt = {1, 0.5, 0},
-	immunity = {0.4, 0.8, 1}, immunity_spell = {0.4, 0.8, 1},
-	buff_def = {0.2, 1, 0.3}, buff_off = {1, 0.25, 0.25}, buff_other = {0.8, 0.8, 0.8},
-}
+-- Glow around an icon. Per category and per spell (Spells tab): none, a simple border (optionally pulsing), or one of the
+-- LibCustomGlow styles (pixel glow, autocast shine, action button glow, proc glow). LibCustomGlow-1.0 comes with
+-- WeakAuras; without it every style falls back to the border.
+local LCG
+local function GetLCG()
+	LCG = LCG or LibStub("LibCustomGlow-1.0", true)
+	return LCG
+end
 
-local function UpdateSideGlow(f, rec)
-	if not rec then
+local WHITE = {1, 1, 1}
+local LCG_START = { pixel = "PixelGlow_Start", shine = "AutoCastGlow_Start", button = "ButtonGlow_Start", proc = "ProcGlow_Start" }
+local LCG_STOP = { pixel = "PixelGlow_Stop", shine = "AutoCastGlow_Stop", button = "ButtonGlow_Stop", proc = "ProcGlow_Stop" }
+local GLOW_KEY = "SPB"
+
+-- the glow a record gets: the spell's own setting, else its category's
+local function ResolveGlow(rec)
+	local o = P.spellGlow[rec.name or ""]
+	local cg = P.catGlow[rec.cat or "tracked"]
+	local gtype = (o and o.type) or (cg and cg.type) or "none"
+	local color = (o and o.color) or (cg and cg.color) or WHITE
+	return gtype, color
+end
+
+local function StopGlow(f)
+	local t = f.glowType
+	if not t then return end
+	f.glowType, f.glowKey = nil, nil
+	if t == "border" then
 		if f.sideGlow then
 			f.sideGlow:Hide()
 			f.sideGlowAnim:Stop()
 		end
 		return
 	end
+	local lcg = LCG
+	local stop = lcg and lcg[LCG_STOP[t]]
+	if stop then
+		if t == "button" then stop(f.icon) else stop(f.icon, GLOW_KEY) end
+	end
+end
+
+local function StartBorderGlow(f, color)
 	if not f.sideGlow then
 		f.sideGlow = f.icon:CreateTexture(nil, "OVERLAY")
 		f.sideGlow:SetTexture("Interface\\Buttons\\UI-ActionButton-Border")
@@ -881,8 +907,7 @@ local function UpdateSideGlow(f, rec)
 		a:SetDuration(0.7)
 		a:SetOrder(1)
 	end
-	local c = GLOW_COLORS[rec.cat or ""] or GLOW_COLORS.buff_other
-	f.sideGlow:SetVertexColor(c[1], c[2], c[3])
+	f.sideGlow:SetVertexColor(color[1], color[2], color[3])
 	local size = (f.rowSize or 28) * 1.7
 	f.sideGlow:SetWidth(size)
 	f.sideGlow:SetHeight(size)
@@ -892,6 +917,37 @@ local function UpdateSideGlow(f, rec)
 		if not f.sideGlowAnim:IsPlaying() then f.sideGlowAnim:Play() end
 	else
 		f.sideGlowAnim:Stop()
+	end
+end
+
+local function ApplyGlow(f, gtype, color)
+	if gtype == "none" or not color then
+		StopGlow(f)
+		return
+	end
+	if gtype ~= "border" then
+		local lcg = GetLCG()
+		if not (lcg and lcg[LCG_START[gtype]]) then gtype = "border" end
+	end
+	local size = f.rowSize or 28
+	local key = gtype .. size .. ":" .. color[1] .. color[2] .. color[3] .. tostring(P.sideGlowPulse)
+	if f.glowKey == key then return end
+	StopGlow(f)
+	f.glowType, f.glowKey = gtype, key
+	if gtype == "border" then
+		StartBorderGlow(f, color)
+		return
+	end
+	local c = { color[1], color[2], color[3], 1 }
+	local icon = f.icon
+	if gtype == "pixel" then
+		LCG.PixelGlow_Start(icon, c, nil, nil, nil, 2, 0, 0, false, GLOW_KEY)
+	elseif gtype == "shine" then
+		LCG.AutoCastGlow_Start(icon, c, nil, nil, nil, 0, 0, GLOW_KEY)
+	elseif gtype == "button" then
+		LCG.ButtonGlow_Start(icon, c)
+	elseif gtype == "proc" then
+		LCG.ProcGlow_Start(icon, { color = c, startAnim = false, key = GLOW_KEY })
 	end
 end
 
@@ -916,7 +972,12 @@ local function SetRowIcon(f, rec, size, glow)
 		f:Show()
 	end
 	iconOnUpdate(f, 1)
-	UpdateSideGlow(f, (glow and rec.cat) and rec or nil)
+	if glow then
+		local gtype, color = ResolveGlow(rec)
+		ApplyGlow(f, gtype, color)
+	else
+		ApplyGlow(f, "none")
+	end
 end
 
 -- Lays one row out. Rows above the plate stack upwards from topY; returns the next topY.
@@ -953,9 +1014,9 @@ local function LayoutRow(plate, s, key, row, list, topY)
 				f:SetPoint("RIGHT", frames[i - 1], "LEFT", -P.sideSpacing + padX, 0)
 			end
 		else
-			-- centred above the plate, where the classic bars sit; the icon is at the top of its frame
+			-- centred above the plate; the icon is at the top of its frame
 			local xc = (i - (n + 1) / 2) * (size + P.topSpacing)
-			f:SetPoint("TOP", anchor, P.plateAnchorPoint, P.barOffsetX + xc, P.barOffsetY + padY + topY + size)
+			f:SetPoint("TOP", anchor, "TOP", P.topOffsetX + xc, P.topOffsetY + topY + size)
 		end
 		SetRowIcon(f, list[i], size, row.glow)
 	end
@@ -974,7 +1035,7 @@ function core:UpdateSideRows(plate)
 		if not any then return end
 		s = GetSideFrames(plate)
 	end
-	local topY = P.topOffsetY or 0
+	local topY = 0
 	for _, key in ipairs(ROW_KEYS) do
 		local row = P[key]
 		topY = LayoutRow(plate, s, key, row, row.enabled and rowScratch[key] or EMPTY, topY)
@@ -998,98 +1059,34 @@ end
 
 -- Show spells on a plate linked to a GUID.
 function core:AddBuffsToPlate(plate, GUID)
-	if not buffFrames[plate] or not buffFrames[plate][P.iconsPerBar] then
-		self:BuildBuffFrame(plate)
-	end
 	local t = guidBuffs[GUID]
 	if not t then
 		self:HideSideRows(plate)
 		return
 	end
 	table_sort(t, SortFunc)
-	-- hand every record to the first row that takes it; what no row takes goes to the classic bars (if they are on)
-	local mainList = mainScratch
-	for i = #mainList, 1, -1 do mainList[i] = nil end
+	-- hand every record to the first row that takes it
 	for _, key in ipairs(ROW_KEYS) do
 		local l = rowScratch[key]
 		for i = #l, 1, -1 do l[i] = nil end
 	end
-	local useClassic = P.useClassicBars
 	for i = 1, #t do
 		local r = t[i]
-		local claimed = false
 		for _, key in ipairs(ROW_KEYS) do
 			local row = P[key]
 			if row.enabled and RowAccepts(row, r) then
 				local l = rowScratch[key]
 				l[#l + 1] = r
-				claimed = true
 				break
-			end
-		end
-		if not claimed and useClassic and r.main ~= false then
-			mainList[#mainList + 1] = r
-		end
-	end
-	local frames = buffFrames[plate]
-	local f, rec
-	for i = 1, P.numBars * P.iconsPerBar do
-		f = frames[i]
-		if f then
-			rec = mainList[i]
-			if rec then
-				f.spellName = rec.name or ""
-				f.sID = rec.sID or ""
-				f.expirationTime = rec.expirationTime or 0
-				f.duration = rec.duration
-				f.stackCount = rec.stackCount or 0
-				f.isDebuff = rec.isDebuff
-				f.debuffType = rec.debuffType
-				f.playerCast = rec.playerCast
-				f.scale = rec.scale or 1
-				if f.iconPath ~= rec.icon then
-					f.iconPath = rec.icon
-					f.texture:SetTexture(rec.icon)
-				end
-				-- Show() only fires OnShow on a hidden frame; call it directly otherwise.
-				if f:IsShown() then
-					iconOnShow(f)
-				else
-					f:Show()
-				end
-				iconOnUpdate(f, 1)
-			else
-				f:Hide()
 			end
 		end
 	end
 	self:UpdateSideRows(plate)
-	UpdateAllBarSizes(plate)
 end
 
 -- Display a question mark icon since we don't know the GUID of the plate/mob.
 function core:AddUnknownIcon(plate)
-	if not buffFrames[plate] then
-		self:BuildBuffFrame(plate, nil, true)
-	end
-
-	buffFrames[plate][1].spellName = false
-	buffFrames[plate][1].expirationTime = 0
-	buffFrames[plate][1].duration = 0
-	buffFrames[plate][1].stackCount = 0
-	buffFrames[plate][1].isDebuff = false
-	buffFrames[plate][1].debuffType = false
-	buffFrames[plate][1].playerCast = false
-
-	buffFrames[plate][1].iconPath = unknownIconPath
-	buffFrames[plate][1].texture:SetTexture(unknownIconPath)
-
-	if buffFrames[plate][1]:IsShown() then
-		buffFrames[plate][1]:Hide()
-	end
-	buffFrames[plate][1]:Show()
-
-	UpdateAllBarSizes(plate)
+	-- the question mark icon lived on the classic bars, which are gone
 end
 
 function core:SetFrameLevel(frame)

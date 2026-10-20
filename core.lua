@@ -103,17 +103,16 @@ function core:OnInitialize()
 	local config = LibStub("AceConfig-3.0")
 	local dialog = LibStub("AceConfigDialog-3.0")
 
+	-- one options window: Main settings, Position, Spells, Profiles, About
+	local optionsTable = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+	optionsTable.order = 90
+	self.CoreOptionsTable.args.profiles = optionsTable
+	self.AboutOptionsTable.order = 91
+	self.CoreOptionsTable.args.about = self.AboutOptionsTable
+	if LDS then LDS:EnhanceOptions(optionsTable, self.db) end
+
 	config:RegisterOptionsTable(self.title, self.CoreOptionsTable)
 	dialog:AddToBlizOptions(self.title, self.title)
-
-	local optionsTable = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-	config:RegisterOptionsTable(self.title .. "Profile", optionsTable)
-	dialog:AddToBlizOptions(self.title .. "Profile", L["Profiles"], self.title)
-
-	config:RegisterOptionsTable(self.title .. "About", self.AboutOptionsTable)
-	dialog:AddToBlizOptions(self.title .. "About", L["About"], self.title)
-
-	if LDS then LDS:EnhanceOptions(optionsTable, self.db) end
 end
 
 do

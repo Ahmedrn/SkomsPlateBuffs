@@ -136,8 +136,23 @@ defaultSettings.sideGlowPulse = true
 defaultSettings.sideHideNoDuration = true
 defaultSettings.topSpacing = 2
 defaultSettings.topRowSpacing = 2
-defaultSettings.topOffsetY = 0
-defaultSettings.useClassicBars = false
+defaultSettings.topOffsetX = 0
+defaultSettings.topOffsetY = 10
+defaultSettings.sidePrioImmunitySpell = 9
+
+-- glow per category (type: none, border, pixel, shine, button, proc) and per spell (by name, overrides the category)
+defaultSettings.catGlow = {
+	cc = { type = "border", color = { 1, 0.3, 0.3 } },
+	root = { type = "border", color = { 1, 0.65, 0.2 } },
+	interrupt = { type = "border", color = { 1, 0.5, 0 } },
+	immunity = { type = "border", color = { 0.4, 0.8, 1 } },
+	immunity_spell = { type = "border", color = { 0.4, 0.8, 1 } },
+	buff_def = { type = "border", color = { 0.2, 1, 0.3 } },
+	buff_off = { type = "border", color = { 1, 0.25, 0.25 } },
+	buff_other = { type = "none", color = { 0.8, 0.8, 0.8 } },
+	tracked = { type = "none", color = { 1, 1, 0.3 } },
+}
+defaultSettings.spellGlow = {}
 
 -- the rows: left and right hold one row each, above the plate there are up to four.
 -- cats: which categories the row shows; "classic" = whatever the classic filters / Bar spells list let through.
@@ -1065,232 +1080,6 @@ core.DefaultSpellOptionsTable = {
 	}
 }
 
-core.BarOptionsTable = {
-	type = "group",
-	name = L["Position settings"],
-	order = 4,
-	childGroups = "tab",
-	get = function(info)
-		local key = info[#info]
-		return P[key]
-	end,
-	set = function(info, v)
-		local key = info[#info]
-		P[key] = v
-	end,
-	args = {
-		positionHeader = {
-			type = "header",
-			name = L["Position settings"],
-			order = 1
-		},
-		blank1 = {
-			type = "description",
-			name = "",
-			order = 2
-		},
-		barAnchorPoint = {
-			type = "select",
-			name = L["Buff frame's Anchor Point"],
-			order = 3,
-			desc = L["Point of the buff frame that gets anchored to the nameplate.\ndefault = Bottom"],
-			values = {
-				TOP = L["Top"],
-				BOTTOM = L["Bottom"],
-				TOPLEFT = L["Top Left"],
-				BOTTOMLEFT = L["Bottom Left"],
-				TOPRIGHT = L["Top Right"],
-				BOTTOMRIGHT = L["Bottom Right"]
-			},
-			set = function(info, val)
-				P.barAnchorPoint = val
-				core:ResetAllBarPoints()
-			end
-		},
-		plateAnchorPoint = {
-			type = "select",
-			name = L["Nameplate's Anchor Point"],
-			order = 4,
-			desc = L["Point of the nameplate our buff frame gets anchored to.\ndefault = Top"],
-			values = {
-				TOP = L["Top"],
-				BOTTOM = L["Bottom"],
-				TOPLEFT = L["Top Left"],
-				BOTTOMLEFT = L["Bottom Left"],
-				TOPRIGHT = L["Top Right"],
-				BOTTOMRIGHT = L["Bottom Right"]
-			},
-			set = function(info, val)
-				P.plateAnchorPoint = val
-				core:ResetAllBarPoints()
-			end
-		},
-		blank2 = {
-			type = "description",
-			name = "",
-			order = 5
-		},
-		barOffsetX = {
-			type = "range",
-			name = L["Offset X"],
-			desc = L["Offset of the buff frame containing all icons."],
-			order = 6,
-			min = -150,
-			max = 150,
-			step = 1,
-			set = function(info, val)
-				P.barOffsetX = val
-				core:ResetAllBarPoints()
-			end
-		},
-		barOffsetY = {
-			type = "range",
-			name = L["Offset Y"],
-			desc = L["Offset of the buff frame containing all icons."],
-			order = 7,
-			min = -150,
-			max = 150,
-			step = 1,
-			set = function(info, val)
-				P.barOffsetY = val
-				core:ResetAllBarPoints()
-			end
-		},
-		blank3 = {
-			type = "description",
-			name = "",
-			order = 8
-		},
-		iconsPerBar = {
-			type = "range",
-			name = L["Icons per row"],
-			desc = L["Number of icons to display per row."],
-			order = 9,
-			min = 1,
-			max = 16,
-			step = 1,
-			set = function(info, val)
-				P.iconsPerBar = val
-				core:ResetAllPlateIcons()
-				core:ShowAllKnownSpells()
-			end
-		},
-		numBars = {
-			type = "range",
-			name = L["Max rows"],
-			desc = L["Max number of rows to show."],
-			order = 10,
-			min = 1,
-			max = 4,
-			step = 1,
-			set = function(info, val)
-				P.numBars = val
-				core:ResetAllPlateIcons()
-				core:UpdateBarsBackground()
-				core:ShowAllKnownSpells()
-			end
-		},
-		blank4 = {
-			type = "description",
-			name = "",
-			order = 11
-		},
-		intervalX = {
-			type = "range",
-			name = L["Spacing X"],
-			desc = L["Change spacing between icons."],
-			order = 12,
-			min = 0,
-			max = 80,
-			step = 1,
-			set = function(info, val)
-				P.intervalX = val
-				core:ResetIconSizes()
-				core:ResetAllPlateIcons()
-				core:ShowAllKnownSpells()
-			end
-		},
-		intervalY = {
-			type = "range",
-			name = L["Spacing Y"],
-			desc = L["Change spacing between icons."],
-			order = 13,
-			min = 0,
-			max = 80,
-			step = 1,
-			set = function(info, val)
-				P.intervalY = val
-				core:ResetIconSizes()
-				core:ResetAllPlateIcons()
-				core:ShowAllKnownSpells()
-			end
-		},
-		blank5 = {
-			type = "description",
-			name = "",
-			order = 14
-		},
-		barGrowth = {
-			type = "select",
-			name = L["Row Growth"],
-			desc = L["Which way do the bars grow, up or down."],
-			order = 15,
-			values = {L["Up"], L["Down"]},
-			set = function(info, val)
-				P.barGrowth = val
-				core:ResetAllBarPoints()
-			end
-		},
-		shrinkBar = {
-			type = "toggle",
-			name = L["Center Horizontally"],
-			desc = L["Horizontally center the bar if not full."],
-			order = 16,
-			set = function(info, val)
-				P.shrinkBar = val
-				core:UpdateAllPlateBarSizes()
-			end
-		},
-		blank6 = {
-			type = "description",
-			name = "\n",
-			order = 17
-		},
-		iconTestMode = {
-			type = "toggle",
-			name = L["Test Mode"],
-			desc = L["For each spell on someone, multiply it by the number of icons per bar.\nThis option won't be saved at logout."],
-			order = 18,
-			get = function()
-				return core.iconTestMode
-			end,
-			set = function()
-				core.iconTestMode = not core.iconTestMode
-			end
-		},
-		showBarBackground = {
-			type = "toggle",
-			name = L["Show bar background"],
-			desc = L["Show the area where spell icons will be. This is to help you configure the bars."],
-			order = 19,
-			set = function(info, val)
-				P.showBarBackground = val
-				core:UpdateBarsBackground()
-			end
-		},
-		blank7 = {
-			type = "description",
-			name = "",
-			order = 20
-		},
-		blank8 = {
-			type = "description",
-			name = "",
-			order = 21
-		},
-	}
-}
-
 local tmpNewName = ""
 local tmpNewID = ""
 
@@ -1418,92 +1207,116 @@ local function RowOptions(rowKey, order)
 	return group
 end
 
-core.SideOptionsTable = {
+core.RowsOptionsTable = {
 	type = "group",
 	name = L["Rows"],
-	order = 6,
-	childGroups = "tab",
+	order = 1,
+	get = function(info)
+		return P[info[#info]]
+	end,
+	set = function(info, v)
+		P[info[#info]] = v
+		core:ResetSideRows()
+	end,
 	args = {
-		general = {
-			type = "group",
-			name = L["General"],
-			order = 1,
-			get = function(info)
-				return P[info[#info]]
-			end,
-			set = function(info, v)
-				P[info[#info]] = v
-				core:ResetSideRows()
-			end,
-			args = {
-				desc = {
-					type = "description",
-					name = L["Each row shows the categories you choose. Left and right are one row each, above the plate there are up to four rows. Which spells belong to which category is set in the Side spells tab."],
-					order = 1
-				},
-				useClassicBars = {
-					type = "toggle",
-					name = L["Also show the classic bars"],
-					desc = L["Show what no row takes in the classic PlateBuffs bars (Style settings and Position tabs)."],
-					width = "full",
-					order = 2
-				},
-				sideAnchorHealthBar = {
-					type = "toggle",
-					name = L["Anchor the left and right rows to the health bar"],
-					desc = L["Off: anchor them to the whole nameplate frame."],
-					width = "full",
-					order = 3
-				},
-				sideHideNoDuration = {
-					type = "toggle",
-					name = L["Hide buffs without a duration"],
-					desc = L["Forms, stances and other permanent buffs are not shown in category rows."],
-					width = "full",
-					order = 4
-				},
-				sideGlowPulse = {
-					type = "toggle",
-					name = L["Pulsing glow"],
-					desc = L["The glow fades in and out. Without it the glow stays steady."],
-					order = 5
-				},
-				posHeader = { type = "header", name = L["Position"], order = 10 },
-				sideSpacing = { type = "range", name = L["Left and right: spacing"], order = 11, min = -10, max = 30, step = 1 },
-				sideOffsetX = { type = "range", name = L["Left and right: offset X"], order = 12, min = -60, max = 60, step = 1 },
-				sideOffsetY = { type = "range", name = L["Left and right: offset Y"], order = 13, min = -60, max = 60, step = 1 },
-				topSpacing = { type = "range", name = L["Top rows: spacing"], order = 14, min = -10, max = 30, step = 1 },
-				topRowSpacing = { type = "range", name = L["Top rows: space between rows"], order = 15, min = -10, max = 30, step = 1 },
-				topOffsetY = { type = "range", name = L["Top rows: extra offset Y"], desc = L["On top of the Position tab offsets."], order = 16, min = -60, max = 60, step = 1 },
-				prioHeader = { type = "header", name = L["Priority"], order = 30 },
-				prioDesc = {
-					type = "description",
-					name = L["The higher the priority, the closer to the nameplate. With more auras than icons, the lowest priorities are the ones left out."],
-					order = 31
-				},
-				sidePrioCC = { type = "range", name = L["Crowd control"], order = 32, min = 1, max = 10, step = 1 },
-				sidePrioInterrupt = { type = "range", name = L["Interrupt lockouts"], order = 33, min = 1, max = 10, step = 1 },
-				sidePrioRoot = { type = "range", name = L["Roots"], order = 34, min = 1, max = 10, step = 1 },
-				sidePrioImmunity = { type = "range", name = L["Immunities"], order = 35, min = 1, max = 10, step = 1 },
-				sidePrioDefensive = { type = "range", name = L["Defensive buffs"], order = 36, min = 1, max = 10, step = 1 },
-				sidePrioOffensive = { type = "range", name = L["Offensive buffs"], order = 37, min = 1, max = 10, step = 1 },
-				sidePrioOther = { type = "range", name = L["Other buffs"], order = 38, min = 1, max = 10, step = 1 },
-			}
+		desc = {
+			type = "description",
+			name = L["Each row shows the categories you choose. Left and right are one row each, above the plate there are up to four rows. An aura goes to the first row that takes it. Which spells belong to which category, their priority and their glow are set in the Spells tab."],
+			order = 1
 		},
-		rowLeft = RowOptions("rowLeft", 2),
-		rowRight = RowOptions("rowRight", 3),
-		rowTop1 = RowOptions("rowTop1", 4),
-		rowTop2 = RowOptions("rowTop2", 5),
-		rowTop3 = RowOptions("rowTop3", 6),
-		rowTop4 = RowOptions("rowTop4", 7),
+		sideHideNoDuration = {
+			type = "toggle",
+			name = L["Hide buffs without a duration"],
+			desc = L["Forms, stances and other permanent buffs are not shown in category rows."],
+			width = "full",
+			order = 2
+		},
+		sideGlowPulse = {
+			type = "toggle",
+			name = L["Pulsing border glow"],
+			desc = L["The border glow fades in and out. Without it the glow stays steady."],
+			width = "full",
+			order = 3
+		},
+		rowLeft = RowOptions("rowLeft", 10),
+		rowRight = RowOptions("rowRight", 11),
+		rowTop1 = RowOptions("rowTop1", 12),
+		rowTop2 = RowOptions("rowTop2", 13),
+		rowTop3 = RowOptions("rowTop3", 14),
+		rowTop4 = RowOptions("rowTop4", 15),
 	}
 }
 
-core.CoreOptionsTable.args.display  = core.DisplayOptionsTable
-core.CoreOptionsTable.args.style    = core.DefaultSpellOptionsTable
-core.CoreOptionsTable.args.position = core.BarOptionsTable
-core.CoreOptionsTable.args.spells   = core.SpellOptionsTable
-core.CoreOptionsTable.args.side     = core.SideOptionsTable
+core.PositionOptionsTable = {
+	type = "group",
+	name = L["Position"],
+	order = 2,
+	get = function(info)
+		return P[info[#info]]
+	end,
+	set = function(info, v)
+		P[info[#info]] = v
+		core:ResetSideRows()
+	end,
+	args = {
+		sideHeader = { type = "header", name = L["Left and right rows"], order = 1 },
+		sideAnchorHealthBar = {
+			type = "toggle",
+			name = L["Anchor to the health bar"],
+			desc = L["Off: anchor to the whole nameplate frame."],
+			width = "full",
+			order = 2
+		},
+		sideSpacing = { type = "range", name = L["Spacing"], order = 3, min = -10, max = 30, step = 1 },
+		sideOffsetX = { type = "range", name = L["Offset X"], order = 4, min = -60, max = 60, step = 1 },
+		sideOffsetY = { type = "range", name = L["Offset Y"], order = 5, min = -60, max = 60, step = 1 },
+		topHeader = { type = "header", name = L["Rows above the plate"], order = 10 },
+		topSpacing = { type = "range", name = L["Spacing"], order = 11, min = -10, max = 30, step = 1 },
+		topRowSpacing = { type = "range", name = L["Space between rows"], order = 12, min = -10, max = 30, step = 1 },
+		topOffsetX = { type = "range", name = L["Offset X"], order = 13, min = -100, max = 100, step = 1 },
+		topOffsetY = { type = "range", name = L["Offset Y"], order = 14, min = -60, max = 100, step = 1 },
+		testHeader = { type = "header", name = L["Test"], order = 20 },
+		iconTestMode = {
+			type = "toggle",
+			name = L["Test Mode"],
+			desc = L["For each spell on someone, multiply it by 3.\nThis option won't be saved at logout."],
+			order = 21,
+			get = function()
+				return core.iconTestMode
+			end,
+			set = function()
+				core.iconTestMode = not core.iconTestMode
+			end
+		},
+	}
+}
+
+-- Main settings: rows, display conditions, appearance (the old Display conditions and Style settings tabs, minus the classic-bar parts)
+do
+	local style = core.DefaultSpellOptionsTable
+	style.name = L["Appearance"]
+	style.order = 3
+	for _, k in ipairs{ "iconSize", "iconSize2", "biggerSelfSpells", "interruptsScale" } do
+		if style.args[k] then style.args[k].hidden = true end
+	end
+	core.DisplayOptionsTable.order = 2
+	if core.DisplayOptionsTable.args.unknownSpellDataIcon then core.DisplayOptionsTable.args.unknownSpellDataIcon.hidden = true end
+
+	core.MainOptionsTable = {
+		type = "group",
+		name = L["Main settings"],
+		order = 1,
+		childGroups = "tree",
+		args = {
+			rows = core.RowsOptionsTable,
+			display = core.DisplayOptionsTable,
+			style = style,
+		}
+	}
+end
+
+core.CoreOptionsTable.args.main     = core.MainOptionsTable
+core.CoreOptionsTable.args.position = core.PositionOptionsTable
 
 do
 	local _spelliconcache = {}
@@ -1526,7 +1339,7 @@ do
 		local SpellOptionsTable = core.SpellOptionsTable
 		
 		for key in pairs(SpellOptionsTable.args) do
-			if key ~= "inputName" and key ~= "addName" then
+			if key ~= "inputName" and key ~= "addName" and not key:find("^keep_") then
 				SpellOptionsTable.args[key] = nil
 			end
 		end
@@ -1688,6 +1501,11 @@ do
 					return type(P.spellOpts[info[#info-1]].spellID) ~= "number"
 				end
 			}
+			if core.SpellGlowArgs then
+				for k, v in pairs(core.SpellGlowArgs(spellName, 11)) do
+					SpellOptionsTable.args[spellName].args[k] = v
+				end
+			end
 			SpellOptionsTable.args[spellName].args.removeSpell = {
 				type = "execute",
 				order = 10,

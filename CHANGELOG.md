@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0 (2026-10-20)
+- **Classic bars removed.** The rows are the only display. The unknown-plate question mark icon went with them.
+- **One options window:** Main settings (Rows, Display conditions, Appearance), Position, Spells, Profiles, About. The old Position settings and Bar spells tabs are folded in.
+- **Spells tab** is a category tree. Each category has its priority and glow; each spell has show, category, priority and glow. The old PlateBuffs spell list is the last group, "Other tracked auras".
+- **Glow per category and per spell:** none, border, pixel glow, autocast shine, action button glow, proc glow (via LibCustomGlow-1.0 from WeakAuras, border fallback). Custom color per spell.
+- Spell immunities have their own priority setting.
+
 ## 1.2.0 (2026-10-20)
 - **Rows rework.** Left and right are one row each (3 icons by default); above the plate there are up to four rows. Every row chooses its categories, its size, its max icons, glow and "only my auras". An aura goes to the first row that takes it.
 - New category "everything the classic filters allow" so a top row can show your own debuffs and another row everyone else's (a rogue's Wound Poison next to your Mortal Strike).

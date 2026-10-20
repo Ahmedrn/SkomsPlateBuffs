@@ -38,7 +38,7 @@ local CATEGORIES = {
 	{ "root", "Roots", "sidePrioRoot" },
 	{ "interrupt", "Interrupt lockouts", "sidePrioInterrupt" },
 	{ "immunity", "Immunities", "sidePrioImmunity" },
-	{ "immunity_spell", "Spell immunities", "sidePrioImmunity" },
+	{ "immunity_spell", "Spell immunities", "sidePrioImmunitySpell" },
 	{ "buff_def", "Defensive buffs", "sidePrioDefensive" },
 	{ "buff_off", "Offensive buffs", "sidePrioOffensive" },
 	{ "buff_other", "Other buffs", "sidePrioOther" },
@@ -137,6 +137,137 @@ local function CollectEntries()
 	return entries
 end
 
+-- ---------------------------------------------------------------------------------------------------------
+-- glow controls (per category, per spell)
+-- ---------------------------------------------------------------------------------------------------------
+local WHITE = { 1, 1, 1 }
+local GLOW_VALUES = {
+	none = L["No glow"],
+	border = L["Border"],
+	pixel = L["Pixel glow"],
+	shine = L["Autocast shine"],
+	button = L["Action button glow"],
+	proc = L["Proc glow"],
+}
+local GLOW_SORTING = { "none", "border", "pixel", "shine", "button", "proc" }
+local SPELL_GLOW_VALUES = { default = L["Same as the category"] }
+for k, v in pairs(GLOW_VALUES) do SPELL_GLOW_VALUES[k] = v end
+local SPELL_GLOW_SORTING = { "default", "none", "border", "pixel", "shine", "button", "proc" }
+local GLOW_DESC = L["Pixel glow, autocast shine, action button glow and proc glow need LibCustomGlow-1.0 (it comes with WeakAuras). Without it they are drawn as the border."]
+
+-- glow of a category
+local function CategoryGlowArgs(cat, order, prefix)
+	prefix = prefix or ""
+	local function cg()
+		local t = P.catGlow[cat]
+		if not t then
+			t = { type = "none", color = { 1, 1, 1 } }
+			P.catGlow[cat] = t
+		end
+		return t
+	end
+	return {
+		[prefix .. "glowType"] = {
+			type = "select",
+			name = L["Glow"],
+			desc = GLOW_DESC,
+			order = order,
+			values = GLOW_VALUES,
+			sorting = GLOW_SORTING,
+			get = function() return cg().type or "none" end,
+			set = function(_, v) cg().type = v; Changed() end,
+		},
+		[prefix .. "glowColor"] = {
+			type = "color",
+			name = L["Glow color"],
+			order = order + 1,
+			get = function() local c = cg().color or WHITE; return c[1], c[2], c[3] end,
+			set = function(_, r, g, b) cg().color = { r, g, b }; Changed() end,
+		},
+	}
+end
+
+-- glow of one spell (by name): overrides the category
+function core.SpellGlowArgs(name, order)
+	local function cur() return P.spellGlow[name] end
+	local function make()
+		local t = P.spellGlow[name]
+		if not t then
+			t = {}
+			P.spellGlow[name] = t
+		end
+		return t
+	end
+	local function tidy()
+		local t = P.spellGlow[name]
+		if t and t.type == nil and t.color == nil then P.spellGlow[name] = nil end
+	end
+	return {
+		glowType = {
+			type = "select",
+			name = L["Glow"],
+			desc = GLOW_DESC,
+			order = order,
+			values = SPELL_GLOW_VALUES,
+			sorting = SPELL_GLOW_SORTING,
+			get = function() local t = cur(); return (t and t.type) or "default" end,
+			set = function(_, v)
+				if v == "default" then
+					local t = cur()
+					if t then t.type = nil end
+					tidy()
+				else
+					make().type = v
+				end
+				Changed()
+			end,
+		},
+		glowCustomColor = {
+			type = "toggle",
+			name = L["Custom glow color"],
+			order = order + 1,
+			get = function() local t = cur(); return t and t.color ~= nil end,
+			set = function(_, v)
+				if v then
+					make().color = { 1, 1, 1 }
+				else
+					local t = cur()
+					if t then t.color = nil end
+					tidy()
+				end
+				Changed()
+			end,
+		},
+		glowColor = {
+			type = "color",
+			name = L["Glow color"],
+			order = order + 2,
+			disabled = function() local t = cur(); return not (t and t.color) end,
+			get = function() local t = cur(); local c = (t and t.color) or WHITE; return c[1], c[2], c[3] end,
+			set = function(_, r, g, b) make().color = { r, g, b }; Changed() end,
+		},
+	}
+end
+
+-- settings of a category group: priority and glow
+local function CategoryArgs(cat)
+	local args = {
+		catHeader = { type = "header", name = L["Category settings"], order = 1 },
+		catPriority = {
+			type = "range",
+			name = L["Priority"],
+			desc = L["The higher the priority, the closer to the nameplate. With more auras than icons, the lowest priorities are the ones left out."],
+			order = 2,
+			min = 1, max = 10, step = 1,
+			get = function() return P[CATEGORY_PRIO[cat]] end,
+			set = function(_, v) P[CATEGORY_PRIO[cat]] = v; Changed() end,
+		},
+		spellsHeader = { type = "header", name = L["Spells"], order = 9 },
+	}
+	for k, v in pairs(CategoryGlowArgs(cat, 3)) do args[k] = v end
+	return args
+end
+
 local function EntryOptions(e)
 	local name = e.name
 	local function eff() return P.sideSpells[name] end
@@ -232,6 +363,13 @@ local function EntryOptions(e)
 					},
 				},
 			},
+			glowGroup = {
+				type = "group",
+				inline = true,
+				name = L["Glow"],
+				order = 3.5,
+				args = core.SpellGlowArgs(name, 1),
+			},
 			reset = {
 				type = "execute",
 				name = L["Reset this spell"],
@@ -264,13 +402,13 @@ local addID, addCat, addDuration = "", "buff_def", ""
 
 core.SideSpellsOptionsTable = {
 	type = "group",
-	name = L["Side spells"],
-	order = 7,
+	name = L["Spells"],
+	order = 3,
 	childGroups = "tree",
 	args = {
 		desc = {
 			type = "description",
-			name = L["Every spell the side rows can show. Pick a category on the left to see its spells. Switch a spell off, move it to another category, or give it its own priority."],
+			name = L["Every spell the rows can show, by category. Pick a category on the left for its priority and glow, and its spells. Switch a spell off, move it to another category, give it its own priority or glow, or add spells by ID. Other tracked auras holds the classic PlateBuffs list."],
 			order = 1,
 		},
 		debug = {
@@ -357,7 +495,7 @@ function core:BuildSideSpellUI()
 
 	local groups = {}
 	for i, c in ipairs(CATEGORIES) do
-		local g = { type = "group", name = L[c[2]], order = 10 + i, args = {} }
+		local g = { type = "group", name = L[c[2]], order = 10 + i, args = CategoryArgs(c[1]) }
 		groups[c[1]] = g
 		args["cat_" .. c[1]] = g
 	end
@@ -379,9 +517,18 @@ function core:BuildSideSpellUI()
 		local g = groups[c[1]]
 		g.name = L[c[2]] .. " (" .. (count[c[1]] or 0) .. ")"
 		if not count[c[1]] then
-			g.args.empty = { type = "description", name = L["No spells in this category."], order = 1 }
+			g.args.empty = { type = "description", name = L["No spells in this category."], order = 10 }
 		end
 	end
 end
 
-core.CoreOptionsTable.args.sidespells = core.SideSpellsOptionsTable
+-- the old PlateBuffs spell list (DoTs, poisons, ...) is the last category: "Other tracked auras"
+do
+	local tracked = core.SpellOptionsTable
+	tracked.name = L["Other tracked auras"]
+	tracked.order = 100
+	for k, v in pairs(CategoryGlowArgs("tracked", 40, "keep_")) do tracked.args[k] = v end
+	core.SideSpellsOptionsTable.args.tracked = tracked
+end
+
+core.CoreOptionsTable.args.spells = core.SideSpellsOptionsTable

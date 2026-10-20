@@ -140,6 +140,7 @@ defaultSettings.topOffsetX = 0
 defaultSettings.topOffsetY = 10
 defaultSettings.sidePrioImmunitySpell = 9
 defaultSettings.sidePrioSnare = 4
+defaultSettings.sidePrioDisarm = 6
 defaultSettings.sidePrioHealing = 5
 defaultSettings.spellScale = {}
 
@@ -148,6 +149,7 @@ defaultSettings.catGlow = {
 	cc = { type = "border", color = { 1, 0.3, 0.3 } },
 	root = { type = "border", color = { 1, 0.65, 0.2 } },
 	snare = { type = "border", color = { 0.7, 0.9, 0.3 } },
+	disarm = { type = "border", color = { 0.95, 0.75, 0.2 } },
 	healing_reduction = { type = "border", color = { 0.8, 0.3, 0.8 } },
 	interrupt = { type = "border", color = { 1, 0.5, 0 } },
 	immunity = { type = "border", color = { 0.4, 0.8, 1 } },
@@ -168,7 +170,7 @@ defaultSettings.rowLeft = {
 }
 defaultSettings.rowRight = {
 	enabled = true, max = 3, size = 28, glow = true, onlyMine = false, show = "all",
-	cats = { cc = true, root = true, interrupt = true }
+	cats = { cc = true, root = true, interrupt = true, disarm = true }
 }
 -- top row 1: my debuffs. The other top rows start empty-ish; the user adds them.
 defaultSettings.rowTop1 = {
@@ -1163,6 +1165,7 @@ local ROW_CATS = {
 	{ "cc", "Crowd control" },
 	{ "root", "Roots" },
 	{ "snare", "Snares" },
+	{ "disarm", "Disarms" },
 	{ "healing_reduction", "Healing reduction" },
 	{ "interrupt", "Interrupt lockouts" },
 	{ "immunity", "Immunities" },

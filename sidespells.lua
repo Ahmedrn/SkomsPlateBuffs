@@ -37,6 +37,7 @@ local CATEGORIES = {
 	{ "cc", "Crowd control", "sidePrioCC" },
 	{ "root", "Roots", "sidePrioRoot" },
 	{ "snare", "Snares", "sidePrioSnare" },
+	{ "disarm", "Disarms", "sidePrioDisarm" },
 	{ "healing_reduction", "Healing reduction", "sidePrioHealing" },
 	{ "interrupt", "Interrupt lockouts", "sidePrioInterrupt" },
 	{ "immunity", "Immunities", "sidePrioImmunity" },

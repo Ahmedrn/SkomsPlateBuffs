@@ -1169,8 +1169,8 @@ function core:BuildBuffFrame(plate, reset, onlyOne)
 		end
 	end
 
-	if not plate.PlateBuffsIsHooked then
-		plate.PlateBuffsIsHooked = true
+	if not plate.SkomsPlateBuffsIsHooked then
+		plate.SkomsPlateBuffsIsHooked = true
 		plate:HookScript("OnSizeChanged", function(self, w, h) core:ResetPlateBarPoints(self) end)
 	end
 end

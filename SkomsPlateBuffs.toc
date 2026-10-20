@@ -1,9 +1,9 @@
 ## Interface: 30300
 ## Title: SkomsPlateBuffs
-## Notes: PlateBuffs with two extra rows beside the nameplate: crowd control on the right, important buffs on the left. Replaces PlateBuffs.
+## Notes: Enemy nameplate auras with rows beside the plate: crowd control on the right, important buffs on the left. Based on PlateBuffs; replaces it.
 ## Version: 1.1.0 (based on PlateBuffs 1.19.5 r238)
 ## Author: Cyprias (original PlateBuffs)
-## SavedVariables: PB_DB
+## SavedVariables: SkomsPlateBuffsDB, PB_DB
 ## OptionalDeps: LibStub, CallbackHandler-1.0, LibNameplates-1.0
 
 ## X-Backporter: Kader

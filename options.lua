@@ -297,7 +297,7 @@ core.DisplayOptionsTable = {
 		blacklistTotems = {
 			type = "toggle",
 			name = L["Blacklist Totems"],
-			desc = L["Ignore PlateBuffs on totem nameplates"],
+			desc = L["Ignore SkomsPlateBuffs on totem nameplates"],
 			order = 19
 		},
 		playerCombatWithOnly = {

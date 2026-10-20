@@ -3,7 +3,7 @@ local folder, core = ...
 
 LibStub("AceAddon-3.0"):NewAddon(core, folder, "AceConsole-3.0", "AceEvent-3.0")
 
-core.title = "PlateBuffs"
+core.title = "SkomsPlateBuffs"
 core.version = GetAddOnMetadata(folder, "X-Packaged-Version") or ""
 core.titleFull = core.title .. " " .. core.version
 core.addonDir = "Interface\\AddOns\\" .. folder .. "\\"
@@ -79,12 +79,22 @@ core.IsTargetPlate = IsTargetPlate
 core.IteratePlates = IteratePlates
 
 function core:OnInitialize()
-	self.db = LibStub("AceDB-3.0"):New("PB_DB", core.defaultSettings, select(2, UnitClass("player")) or true)
+	-- settings made before the rename lived in PB_DB: take them over once
+	if not SkomsPlateBuffsDB and type(PB_DB) == "table" then
+		local function copy(t)
+			local c = {}
+			for k, v in pairs(t) do c[k] = type(v) == "table" and copy(v) or v end
+			return c
+		end
+		SkomsPlateBuffsDB = copy(PB_DB)
+	end
+	self.db = LibStub("AceDB-3.0"):New("SkomsPlateBuffsDB", core.defaultSettings, select(2, UnitClass("player")) or true)
 	self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
 	self.db.RegisterCallback(self, "OnProfileDeleted", "OnProfileChanged")
-	self:RegisterChatCommand("pb", "MySlashProcessorFunc")
+	self:RegisterChatCommand("spb", "MySlashProcessorFunc")
+	self:RegisterChatCommand("skomsplatebuffs", "MySlashProcessorFunc")
 
 	SetCVar("ShowClassColorInNameplate", 1) -- "Class Colors in Nameplates" must be enabled to identify enemy players
 

@@ -7,7 +7,7 @@ Enemy nameplate auras, laid out the way you decide. Based on PlateBuffs (see Cre
 - **Top row** above the plate, and **extra top rows** you add (up to five more). Each has its own number of icons and size.
 - **Top row = My debuffs** (a switch on the row): your own debuffs on enemies, except hard crowd control (stuns, fears, silences, disarms, interrupts), which stays on the right row. Which ones, their size and their glow are set in the Spells tab, *My debuffs*. The list starts with your class's debuffs and grows with every debuff you apply.
 - Every row picks what it shows:
-  - categories: crowd control, disarms, roots, snares, healing reduction, interrupt lockouts, immunities, defensive, offensive, speed boosts and other buffs;
+  - categories: crowd control, disarms, roots, snares, healing reduction, interrupt lockouts, immunities, defensive, shields, offensive, speed boosts and other buffs;
   - **Any other aura**: everything no earlier row took.
 - Per row: buffs and debuffs / debuffs only / buffs only, and **only my auras**.
 - An aura goes to the first row that takes it. Rows set to *Only my auras* are checked first, then left, right and the top rows in order.

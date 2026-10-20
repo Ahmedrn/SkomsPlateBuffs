@@ -43,6 +43,7 @@ local CATEGORIES = {
 	{ "immunity", "Immunities", "sidePrioImmunity" },
 	{ "immunity_spell", "Spell immunities", "sidePrioImmunitySpell" },
 	{ "buff_def", "Defensive buffs", "sidePrioDefensive" },
+	{ "shield", "Shields", "sidePrioShield" },
 	{ "buff_off", "Offensive buffs", "sidePrioOffensive" },
 	{ "speed", "Speed boosts", "sidePrioSpeed" },
 	{ "buff_other", "Other buffs", "sidePrioOther" },

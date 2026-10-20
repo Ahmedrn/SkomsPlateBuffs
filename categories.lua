@@ -4,6 +4,7 @@ local folder, core = ...
 -- Generated from the BigDebuffs WotLK spell list (Jordon, Tsoukie): spell id -> category.
 -- Ranks of one spell are listed individually; the spell name is matched as well (see below).
 core.SpellCategory = {
+    [47753] = "shield", -- Divine Aegis
     -- speed (added)
     [61684] = "speed", -- Dash (pet)
     [2645] = "speed", -- Ghost Wolf
@@ -33,7 +34,7 @@ core.SpellCategory = {
     [48451] = "buff_other", -- Lifebloom (from the old tracked list)
     [48441] = "buff_other", -- Rejuvenation (from the old tracked list)
     [53563] = "buff_other", -- Beacon of Light (from the old tracked list)
-    [53601] = "buff_other", -- Sacred Shield (from the old tracked list)
+    [53601] = "shield", -- Sacred Shield (from the old tracked list)
     [41635] = "buff_other", -- Prayer of Mending (from the old tracked list)
     [49284] = "buff_other", -- Earth Shield (from the old tracked list)
     [61301] = "buff_other", -- Riptide (from the old tracked list)
@@ -337,49 +338,49 @@ core.SpellCategory = {
     [48707] = "immunity_spell", -- Anti-Magic Shell
     [49039] = "immunity_spell", -- Lichborne
     -- buff_def
-    [17] = "buff_other", -- (was buff_def) Power Word: Shield
-    [543] = "buff_other", -- (was buff_def) Fire Ward
-    [592] = "buff_other", -- (was buff_def) Power Word: Shield
-    [600] = "buff_other", -- (was buff_def) Power Word: Shield
+    [17] = "shield", -- (was buff_def) Power Word: Shield
+    [543] = "shield", -- (was buff_def) Fire Ward
+    [592] = "shield", -- (was buff_def) Power Word: Shield
+    [600] = "shield", -- (was buff_def) Power Word: Shield
     [871] = "buff_def", -- Shield Wall
     [1044] = "buff_def", -- Blessing of Freedom
-    [1463] = "buff_other", -- (was buff_def) Mana Shield
+    [1463] = "shield", -- (was buff_def) Mana Shield
     [2565] = "buff_other", -- (was buff_def) Shield Block
     [3411] = "buff_other", -- (was buff_def) Intervene
-    [3747] = "buff_other", -- (was buff_def) Power Word: Shield
+    [3747] = "shield", -- (was buff_def) Power Word: Shield
     [5277] = "buff_def", -- Evasion
     [5384] = "buff_other", -- (was buff_def) Feign Death
-    [6065] = "buff_other", -- (was buff_def) Power Word: Shield
-    [6066] = "buff_other", -- (was buff_def) Power Word: Shield
-    [6143] = "buff_other", -- (was buff_def) Frost Ward
-    [6229] = "buff_other", -- (was buff_def) Shadow Ward
+    [6065] = "shield", -- (was buff_def) Power Word: Shield
+    [6066] = "shield", -- (was buff_def) Power Word: Shield
+    [6143] = "shield", -- (was buff_def) Frost Ward
+    [6229] = "shield", -- (was buff_def) Shadow Ward
     [6346] = "buff_other", -- (was buff_def) Fear Ward
     [6940] = "buff_def", -- Blessing of Sacrifice
     [7812] = "buff_def", -- Sacrifice
-    [8457] = "buff_other", -- (was buff_def) Fire Ward
-    [8458] = "buff_other", -- (was buff_def) Fire Ward
-    [8461] = "buff_other", -- (was buff_def) Frost Ward
-    [8462] = "buff_other", -- (was buff_def) Frost Ward
-    [8494] = "buff_other", -- (was buff_def) Mana Shield
-    [8495] = "buff_other", -- (was buff_def) Mana Shield
-    [10177] = "buff_other", -- (was buff_def) Frost Ward
-    [10191] = "buff_other", -- (was buff_def) Mana Shield
-    [10192] = "buff_other", -- (was buff_def) Mana Shield
-    [10193] = "buff_other", -- (was buff_def) Mana Shield
-    [10223] = "buff_other", -- (was buff_def) Fire Ward
-    [10225] = "buff_other", -- (was buff_def) Fire Ward
-    [10898] = "buff_other", -- (was buff_def) Power Word: Shield
-    [10899] = "buff_other", -- (was buff_def) Power Word: Shield
-    [10900] = "buff_other", -- (was buff_def) Power Word: Shield
-    [10901] = "buff_other", -- (was buff_def) Power Word: Shield
-    [11426] = "buff_def", -- Ice Barrier
-    [11739] = "buff_other", -- (was buff_def) Shadow Ward
-    [11740] = "buff_other", -- (was buff_def) Shadow Ward
+    [8457] = "shield", -- (was buff_def) Fire Ward
+    [8458] = "shield", -- (was buff_def) Fire Ward
+    [8461] = "shield", -- (was buff_def) Frost Ward
+    [8462] = "shield", -- (was buff_def) Frost Ward
+    [8494] = "shield", -- (was buff_def) Mana Shield
+    [8495] = "shield", -- (was buff_def) Mana Shield
+    [10177] = "shield", -- (was buff_def) Frost Ward
+    [10191] = "shield", -- (was buff_def) Mana Shield
+    [10192] = "shield", -- (was buff_def) Mana Shield
+    [10193] = "shield", -- (was buff_def) Mana Shield
+    [10223] = "shield", -- (was buff_def) Fire Ward
+    [10225] = "shield", -- (was buff_def) Fire Ward
+    [10898] = "shield", -- (was buff_def) Power Word: Shield
+    [10899] = "shield", -- (was buff_def) Power Word: Shield
+    [10900] = "shield", -- (was buff_def) Power Word: Shield
+    [10901] = "shield", -- (was buff_def) Power Word: Shield
+    [11426] = "shield", -- Ice Barrier
+    [11739] = "shield", -- (was buff_def) Shadow Ward
+    [11740] = "shield", -- (was buff_def) Shadow Ward
     [12975] = "buff_def", -- Last Stand
     [12976] = "buff_def", -- Last Stand
-    [13031] = "buff_def",
-    [13032] = "buff_def",
-    [13033] = "buff_def",
+    [13031] = "shield",
+    [13032] = "shield",
+    [13033] = "shield",
     [14278] = "buff_other", -- (was buff_def) Ghostly Strike
     [14751] = "buff_other", -- (was buff_def) Inner Focus
     [14892] = "buff_other", -- (was buff_def) Inspiration
@@ -398,12 +399,12 @@ core.SpellCategory = {
     [20729] = "buff_def",
     [22812] = "buff_def", -- Barkskin
     [22842] = "buff_def", -- Frenzied Regeneration
-    [25217] = "buff_other", -- (was buff_def) Power Word: Shield
-    [25218] = "buff_other", -- (was buff_def) Power Word: Shield
+    [25217] = "shield", -- (was buff_def) Power Word: Shield
+    [25218] = "shield", -- (was buff_def) Power Word: Shield
     [26669] = "buff_def",
     [27046] = "buff_other", -- (was buff_def) Mend Pet
-    [28609] = "buff_other", -- (was buff_def) Frost Ward
-    [28610] = "buff_other", -- (was buff_def) Shadow Ward
+    [28609] = "shield", -- (was buff_def) Frost Ward
+    [28610] = "shield", -- (was buff_def) Shadow Ward
     [30299] = "buff_other", -- (was buff_def) Nether Protection
     [30301] = "buff_other", -- (was buff_def) Nether Protection
     [30823] = "buff_def", -- Shamanistic Rage
@@ -411,8 +412,8 @@ core.SpellCategory = {
     [31842] = "buff_other", -- (was buff_def) Divine Illumination
     [31852] = "buff_def", -- Ardent Defender
     [33206] = "buff_def", -- Pain Suppression
-    [43010] = "buff_other", -- (was buff_def) Fire Ward
-    [43012] = "buff_other", -- (was buff_def) Frost Ward
+    [43010] = "shield", -- (was buff_def) Fire Ward
+    [43012] = "shield", -- (was buff_def) Frost Ward
     [45182] = "buff_other", -- (was buff_def) Cheating Death
     [47788] = "buff_def", -- Guardian Spirit
     [48792] = "buff_def", -- Icebound Fortitude
@@ -473,8 +474,8 @@ core.SpellCategory = {
     [53201] = "buff_other", -- (was buff_off) Starfall
     [54748] = "buff_other", -- (was buff_off) Burning Determination (Interrupt/Silence Immunity)
     [60503] = "buff_other", -- (was buff_off) Taste for Blood
-    [64849] = "buff_other", -- (was buff_off) Unrelenting Assault (1/2)
-    [65925] = "buff_other", -- (was buff_off) Unrelenting Assault (2/2)
+    [64849] = "healing_reduction", -- (was buff_off) Unrelenting Assault (1/2)
+    [65925] = "healing_reduction", -- (was buff_off) Unrelenting Assault (2/2)
     [69369] = "buff_other", -- (was buff_off) Predator's Swiftness
     -- buff_other
     [23493] = "buff_other", -- Battleground Heal buff (restored, was buff_def)
@@ -523,32 +524,32 @@ core.SpellCategory = {
     [33357] = "speed", -- Dash
     [33891] = "buff_other", -- Tree of Life
     [41425] = "buff_other", -- Hypothermia
-    [43039] = "buff_other", -- Ice Barrier
+    [43039] = "shield", -- Ice Barrier
     [47485] = "buff_other",
     [47486] = "healing_reduction",
     [47986] = "buff_other", -- Sacrifice
-    [48065] = "buff_other", -- Power Word: Shield
-    [48066] = "buff_other",
+    [48065] = "shield", -- Power Word: Shield
+    [48066] = "shield",
     [49049] = "buff_other",
     [49050] = "healing_reduction",
     [53312] = "buff_other", -- Nature's Grasp
     [54428] = "buff_other", -- Divine Plea
-    [55277] = "buff_other", -- Stoneclaw Totem (Absorb)
+    [55277] = "shield", -- Stoneclaw Totem (Absorb)
     [56112] = "healing_reduction", -- Furious Attacks
     [57974] = "healing_reduction", -- Wound Poison VI
     [57975] = "healing_reduction", -- Wound Poison VII
-    [58597] = "buff_other", -- Sacred Shield Proc
+    [58597] = "shield", -- Sacred Shield Proc
     [58875] = "buff_other", -- Spirit Walk (Spirit Wolf)
     [59578] = "buff_other", -- The Art of War
 }
 
 -- which row a category goes to, and its priority inside the row (higher first)
 core.CategorySide = {
-    cc = "right", root = "right", interrupt = "right", snare = "right", healing_reduction = "right", disarm = "right", speed = "right",
+    cc = "right", root = "right", interrupt = "right", snare = "right", healing_reduction = "right", disarm = "right", speed = "right", shield = "left",
     immunity = "left", immunity_spell = "left", buff_def = "left", buff_off = "left", buff_other = "left",
 }
 core.CategoryPriority = {
-    cc = 6, interrupt = 5, root = 3, snare = 3, healing_reduction = 4, disarm = 5, speed = 2,
+    cc = 6, interrupt = 5, root = 3, snare = 3, healing_reduction = 4, disarm = 5, speed = 2, shield = 4,
     immunity = 6, immunity_spell = 6, buff_def = 5, buff_off = 4, buff_other = 1,
 }
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.0 (2026-10-20)
+- **New category: Shields** (absorbs): Power Word: Shield, Mana Shield, Ice Barrier, Fire / Frost / Shadow Ward, Sacred Shield, Stoneclaw Totem absorb, Divine Aegis (45 spell ids, all ranks). Priority 5; ticked on Extra top row 1 by default.
+- **Unrelenting Assault** (all three ids) is Healing reduction, not Other buffs.
+
 ## 1.7.1 (2026-10-20)
 - **Glow showcase:** a movable window with every glow style (none, border, pixel, autocast shine, action button, proc) on a sample icon, and a button to cycle the colour. Open it from Position > Glow showcase, or with `/spb glow`.
 

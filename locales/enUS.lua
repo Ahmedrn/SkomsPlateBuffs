@@ -320,3 +320,4 @@ L["Disarms"] = true
 L["Speed boosts"] = true
 L["Glow showcase"] = true
 L["Opens a window with every glow style on a sample icon, to compare them. Also /spb glow."] = true
+L["Shields"] = true

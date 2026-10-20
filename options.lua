@@ -1185,6 +1185,12 @@ end
 
 local MAX_TOP_ROWS = 6
 
+local function AddTopRow()
+	P.topRowCount = math.min(MAX_TOP_ROWS, (P.topRowCount or 1) + 1)
+	core:ResetSideRows()
+	NotifyOptions()
+end
+
 local function RowOptions(rowKey, order)
 	local topIndex = tonumber(rowKey:match("^rowTop(%d+)$"))
 	local function row() return P[rowKey] end
@@ -1232,10 +1238,18 @@ local function RowOptions(rowKey, order)
 				desc = L["Glow around the icons of the categories (not around other auras)."],
 				order = 6
 			},
+			addRow = {
+				type = "execute",
+				name = L["Add a top row"],
+				desc = L["Rows above the nameplate. Each one has its own content, size and number of icons."],
+				order = 7,
+				hidden = function() return (P.topRowCount or 1) >= MAX_TOP_ROWS end,
+				func = AddTopRow,
+			},
 			remove = {
 				type = "execute",
 				name = L["Remove this row"],
-				order = 7,
+				order = 7.5,
 				hidden = function() return not (topIndex and topIndex > 1 and topIndex == (P.topRowCount or 1)) end,
 				func = function()
 					P.topRowCount = math.max(1, (P.topRowCount or 1) - 1)
@@ -1296,11 +1310,7 @@ core.RowsOptionsTable = {
 			desc = L["Rows above the nameplate. Each one has its own content, size and number of icons."],
 			order = 4,
 			hidden = function() return (P.topRowCount or 1) >= MAX_TOP_ROWS end,
-			func = function()
-				P.topRowCount = (P.topRowCount or 1) + 1
-				core:ResetSideRows()
-				NotifyOptions()
-			end,
+			func = AddTopRow,
 		},
 		rowLeft = RowOptions("rowLeft", 10),
 		rowRight = RowOptions("rowRight", 11),

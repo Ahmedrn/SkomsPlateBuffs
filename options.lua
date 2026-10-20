@@ -32,6 +32,7 @@ local L = core.L or LibStub("AceLocale-3.0"):GetLocale(folder, true)
 local P = {}
 local prev_OnEnable = core.OnEnable
 function core:OnEnable()
+	P = self.db.profile
 	prev_OnEnable(self)
 	P = self.db.profile
 	self:BuildSpellUI()

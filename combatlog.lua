@@ -76,6 +76,7 @@ end
 do
 	local prev_OnEnable = core.OnEnable
 	function core:OnEnable()
+		P = self.db.profile
 		prev_OnEnable(self)
 		P = self.db.profile
 		playerGUID = UnitGUID("player")

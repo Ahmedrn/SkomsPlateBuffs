@@ -55,6 +55,7 @@ local IsTargetPlate = core.IsTargetPlate
 do
 	local OnEnable = core.OnEnable
 	function core:OnEnable()
+		P = self.db.profile
 		OnEnable(self)
 		P = self.db.profile --this can change on profile change.
 		MSQ = core.MSQ or LibStub("LibButtonFacade", true) or LibStub("Masque", true)

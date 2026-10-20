@@ -775,8 +775,14 @@ local function CatPriority(cat)
 	return (key and P[key]) or CategoryPriority[cat or ""] or 0
 end
 
+local SpellPriorityByName = core.SpellPriorityByName
+
+local function RecPriority(rec)
+	return SpellPriorityByName[rec.name or ""] or CatPriority(rec.cat)
+end
+
 local function sideSort(a, b)
-	local pa, pb = CatPriority(a.cat), CatPriority(b.cat)
+	local pa, pb = RecPriority(a), RecPriority(b)
 	if pa ~= pb then return pa > pb end
 	local ea, eb = a.expirationTime or 0, b.expirationTime or 0
 	if ea ~= eb then return ea > eb end

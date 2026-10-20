@@ -163,6 +163,9 @@ local function AddSpellToGUID(dstGUID, spellID, spellName, texture, duration, sr
 	if #t > 0 then
 		core:RemoveOldSpells(dstGUID)
 	end
+	if side and P.sideDebug then
+		print("|cff33ff99" .. core.title .. "|r: " .. tostring(spellName) .. " (" .. tostring(spellID) .. ") -> " .. side .. " / " .. tostring(cat))
+	end
 	local i = GUIDBuffIndex(dstGUID, spellID, srcGUID)
 	if i then
 		t[i].duration = duration or 0

@@ -515,3 +515,9 @@ do
         if not core.spellDuration[id] then core.spellDuration[id] = d end
     end
 end
+
+-- the defaults as shipped: the live tables above are rebuilt from these plus the user's changes (sidespells.lua)
+core.SpellCategoryDefault = {}
+for id, cat in pairs(core.SpellCategory) do core.SpellCategoryDefault[id] = cat end
+-- per-spell priority overrides, by spell name
+core.SpellPriorityByName = {}

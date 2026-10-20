@@ -1279,7 +1279,7 @@ local tmpNewID = ""
 
 core.SpellOptionsTable = {
 	type = "group",
-	name = L["Specific Spells"],
+	name = L["Bar spells"],
 	order = 5,
 	args = {
 		inputName = {

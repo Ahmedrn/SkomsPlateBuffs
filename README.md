@@ -1,26 +1,27 @@
-# SkomsPlateBuffs 1.3.0 (WoW 3.3.5a)
+# SkomsPlateBuffs 1.4.0 (WoW 3.3.5a)
 
 Enemy nameplate auras, laid out the way you decide. Based on PlateBuffs (see Credits), inspired by the retail addon MiniCC.
 
 ## Rows
 - **Left row** and **right row**: one row each, 3 icons by default.
-- **Up to four rows above the plate**, each with its own number of icons and size.
-- Every row picks what it shows: crowd control, roots, interrupt lockouts, immunities, defensive buffs, offensive buffs,
-  other buffs, and "Other tracked auras" (the old PlateBuffs list: DoTs, poisons, ...), optionally
-  **only your own auras**.
+- **Top rows** above the plate: you start with one and add more (up to six). Each has its own number of icons and size.
+- Every row picks what it shows:
+  - categories: crowd control, roots, snares, healing reduction, interrupt lockouts, immunities, defensive, offensive and other buffs;
+  - **Other tracked auras**: the old PlateBuffs list (DoTs, poisons, ...);
+  - **Any other aura**: everything no earlier row took.
+- Per row: buffs and debuffs / debuffs only / buffs only, and **only my auras**.
+  Top row 1 = *Any other aura* + *Debuffs only* + *Only my auras* is "my debuffs".
 - An aura goes to the first row that takes it (left, right, then the top rows in order).
 
-Default set-up: left = immunities, defensive and offensive cooldowns; right = crowd control, roots, interrupts;
-top 1 = your own auras; top 2 = everyone else's (a rogue's Wound Poison, for example).
+Default set-up: left = immunities, defensive and offensive cooldowns; right = crowd control, roots, interrupts; top 1 = my debuffs.
 The classic PlateBuffs bars are gone: the rows replace them.
 
 ## Options (`/spb`)
-- **Main settings:** Rows (per row: on/off, max icons, size, glow, only mine, categories), Display conditions, Appearance
-  (border, duration and stack text, clock, blink, fade).
+- **Main settings:** Rows (per row: on/off, max icons, size, show, only mine, glow, categories), Display conditions, Appearance.
 - **Position:** left/right and top offsets and spacing, test mode.
-- **Spells:** a tree by category, like the BigDebuffs spells tab. Each category has its priority and glow; each spell has
-  show on/off, category, custom priority and its own glow. Add spells by ID, remove them, reset. The last group, *Other tracked
-  auras*, is the classic PlateBuffs list (DoTs, poisons, ...) with its Always / Mine only / Never choice.
+- **Spells:** a tree by category, like the BigDebuffs spells tab. Each category has its priority and glow and an add-by-ID box;
+  each spell has show on/off, category, priority, icon size multiplier (for example Hamstring 1.5x) and its own glow.
+  The last group, *Other tracked auras*, is the classic PlateBuffs list. Spells that have a category are not repeated there.
 - **Profiles** and **About**.
 
 ## Glow

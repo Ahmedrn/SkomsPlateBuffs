@@ -139,11 +139,16 @@ defaultSettings.topRowSpacing = 2
 defaultSettings.topOffsetX = 0
 defaultSettings.topOffsetY = 10
 defaultSettings.sidePrioImmunitySpell = 9
+defaultSettings.sidePrioSnare = 4
+defaultSettings.sidePrioHealing = 5
+defaultSettings.spellScale = {}
 
 -- glow per category (type: none, border, pixel, shine, button, proc) and per spell (by name, overrides the category)
 defaultSettings.catGlow = {
 	cc = { type = "border", color = { 1, 0.3, 0.3 } },
 	root = { type = "border", color = { 1, 0.65, 0.2 } },
+	snare = { type = "border", color = { 0.7, 0.9, 0.3 } },
+	healing_reduction = { type = "border", color = { 0.8, 0.3, 0.8 } },
 	interrupt = { type = "border", color = { 1, 0.5, 0 } },
 	immunity = { type = "border", color = { 0.4, 0.8, 1 } },
 	immunity_spell = { type = "border", color = { 0.4, 0.8, 1 } },
@@ -156,28 +161,38 @@ defaultSettings.spellGlow = {}
 
 -- the rows: left and right hold one row each, above the plate there are up to four.
 -- cats: which categories the row shows; "classic" = whatever the classic filters / Bar spells list let through.
+defaultSettings.topRowCount = 1
 defaultSettings.rowLeft = {
-	enabled = true, max = 3, size = 28, glow = true, onlyMine = false,
+	enabled = true, max = 3, size = 28, glow = true, onlyMine = false, show = "all",
 	cats = { immunity = true, buff_def = true, buff_off = true }
 }
 defaultSettings.rowRight = {
-	enabled = true, max = 3, size = 28, glow = true, onlyMine = false,
+	enabled = true, max = 3, size = 28, glow = true, onlyMine = false, show = "all",
 	cats = { cc = true, root = true, interrupt = true }
 }
+-- top row 1: my debuffs. The other top rows start empty-ish; the user adds them.
 defaultSettings.rowTop1 = {
-	enabled = true, max = 6, size = 24, glow = false, onlyMine = true,
-	cats = { classic = true }
+	enabled = true, max = 6, size = 24, glow = false, onlyMine = true, show = "debuffs",
+	cats = { any = true }
 }
 defaultSettings.rowTop2 = {
-	enabled = true, max = 4, size = 24, glow = false, onlyMine = false,
-	cats = { classic = true }
+	enabled = true, max = 4, size = 24, glow = false, onlyMine = false, show = "all",
+	cats = { tracked = true }
 }
 defaultSettings.rowTop3 = {
-	enabled = false, max = 4, size = 24, glow = false, onlyMine = false,
+	enabled = true, max = 4, size = 24, glow = false, onlyMine = false, show = "all",
 	cats = {}
 }
 defaultSettings.rowTop4 = {
-	enabled = false, max = 4, size = 24, glow = false, onlyMine = false,
+	enabled = true, max = 4, size = 24, glow = false, onlyMine = false, show = "all",
+	cats = {}
+}
+defaultSettings.rowTop5 = {
+	enabled = true, max = 4, size = 24, glow = false, onlyMine = false, show = "all",
+	cats = {}
+}
+defaultSettings.rowTop6 = {
+	enabled = true, max = 4, size = 24, glow = false, onlyMine = false, show = "all",
 	cats = {}
 }
 
@@ -1140,21 +1155,38 @@ local ROW_TITLES = {
 	rowTop2 = "Top row 2",
 	rowTop3 = "Top row 3",
 	rowTop4 = "Top row 4",
+	rowTop5 = "Top row 5",
+	rowTop6 = "Top row 6",
 }
 
 local ROW_CATS = {
 	{ "cc", "Crowd control" },
 	{ "root", "Roots" },
+	{ "snare", "Snares" },
+	{ "healing_reduction", "Healing reduction" },
 	{ "interrupt", "Interrupt lockouts" },
 	{ "immunity", "Immunities" },
 	{ "buff_def", "Defensive buffs" },
 	{ "buff_off", "Offensive buffs" },
 	{ "buff_other", "Other buffs" },
-	{ "classic", "Other tracked auras" },
+	{ "tracked", "Other tracked auras" },
+	{ "any", "Any other aura" },
 }
 
+local ROW_CAT_DESC = {
+	tracked = "Auras from the Other tracked auras list in the Spells tab (DoTs, poisons, ...).",
+	any = "Every aura no earlier row took. Combine it with Only my auras and Debuffs only to get \"my debuffs\".",
+}
+
+local function NotifyOptions()
+	local registry = LibStub("AceConfigRegistry-3.0", true)
+	if registry then registry:NotifyChange(core.title) end
+end
+
+local MAX_TOP_ROWS = 6
+
 local function RowOptions(rowKey, order)
-	local isTop = rowKey ~= "rowLeft" and rowKey ~= "rowRight"
+	local topIndex = tonumber(rowKey:match("^rowTop(%d+)$"))
 	local function row() return P[rowKey] end
 	local isCat = {}
 	for _, c in ipairs(ROW_CATS) do isCat[c[1]] = true end
@@ -1163,6 +1195,7 @@ local function RowOptions(rowKey, order)
 		type = "group",
 		name = L[ROW_TITLES[rowKey]],
 		order = order,
+		hidden = topIndex and function() return topIndex > (P.topRowCount or 1) end or nil,
 		get = function(info)
 			local k = info[#info]
 			if isCat[k] then return row().cats[k] end
@@ -1179,19 +1212,36 @@ local function RowOptions(rowKey, order)
 		end,
 		args = {
 			enabled = { type = "toggle", name = L["Enabled"], order = 1 },
-			max = { type = "range", name = L["Max icons"], order = 2, min = 1, max = isTop and 12 or 6, step = 1 },
+			max = { type = "range", name = L["Max icons"], order = 2, min = 1, max = topIndex and 12 or 6, step = 1 },
 			size = { type = "range", name = L["Icon size"], order = 3, min = 12, max = 64, step = 1 },
-			glow = {
-				type = "toggle",
-				name = L["Glow"],
-				desc = L["Glow around the icons of the categories (not around other auras)."],
-				order = 4
+			show = {
+				type = "select",
+				name = L["Show"],
+				order = 4,
+				values = { all = L["Buffs and debuffs"], debuffs = L["Debuffs only"], buffs = L["Buffs only"] },
 			},
 			onlyMine = {
 				type = "toggle",
 				name = L["Only my auras"],
 				desc = L["Only show auras you cast."],
 				order = 5
+			},
+			glow = {
+				type = "toggle",
+				name = L["Glow"],
+				desc = L["Glow around the icons of the categories (not around other auras)."],
+				order = 6
+			},
+			remove = {
+				type = "execute",
+				name = L["Remove this row"],
+				order = 7,
+				hidden = function() return not (topIndex and topIndex > 1 and topIndex == (P.topRowCount or 1)) end,
+				func = function()
+					P.topRowCount = math.max(1, (P.topRowCount or 1) - 1)
+					core:ResetSideRows()
+					NotifyOptions()
+				end,
 			},
 			catHeader = { type = "header", name = L["Show in this row"], order = 10 },
 			catDesc = {
@@ -1202,10 +1252,9 @@ local function RowOptions(rowKey, order)
 		}
 	}
 	for i, c in ipairs(ROW_CATS) do
-		group.args[c[1]] = { type = "toggle", name = L[c[2]], order = 20 + i, width = "full" }
-		if c[1] == "classic" then
-			group.args[c[1]].desc = L["Auras from the Other tracked auras list in the Spells tab (DoTs, poisons, ...), and whatever Show Buffs / Show Debuffs in Display conditions lets through."]
-		end
+		local t = { type = "toggle", name = L[c[2]], order = 20 + i, width = "full" }
+		if ROW_CAT_DESC[c[1]] then t.desc = L[ROW_CAT_DESC[c[1]]] end
+		group.args[c[1]] = t
 	end
 	return group
 end
@@ -1241,12 +1290,26 @@ core.RowsOptionsTable = {
 			width = "full",
 			order = 3
 		},
+		addRow = {
+			type = "execute",
+			name = L["Add a top row"],
+			desc = L["Rows above the nameplate. Each one has its own content, size and number of icons."],
+			order = 4,
+			hidden = function() return (P.topRowCount or 1) >= MAX_TOP_ROWS end,
+			func = function()
+				P.topRowCount = (P.topRowCount or 1) + 1
+				core:ResetSideRows()
+				NotifyOptions()
+			end,
+		},
 		rowLeft = RowOptions("rowLeft", 10),
 		rowRight = RowOptions("rowRight", 11),
 		rowTop1 = RowOptions("rowTop1", 12),
 		rowTop2 = RowOptions("rowTop2", 13),
 		rowTop3 = RowOptions("rowTop3", 14),
 		rowTop4 = RowOptions("rowTop4", 15),
+		rowTop5 = RowOptions("rowTop5", 16),
+		rowTop6 = RowOptions("rowTop6", 17),
 	}
 }
 
@@ -1303,6 +1366,10 @@ do
 		if style.args[k] then style.args[k].hidden = true end
 	end
 	core.DisplayOptionsTable.order = 2
+	-- Show buffs / Show debuffs / Show interrupts: each row decides now (Buffs and debuffs, Only my auras, categories)
+	for _, k in ipairs{ "displayHeader", "defaultBuffShow", "defaultDebuffShow", "showInterrupts" } do
+		if core.DisplayOptionsTable.args[k] then core.DisplayOptionsTable.args[k].hidden = true end
+	end
 	if core.DisplayOptionsTable.args.unknownSpellDataIcon then core.DisplayOptionsTable.args.unknownSpellDataIcon.hidden = true end
 
 	core.MainOptionsTable = {
@@ -1349,7 +1416,7 @@ do
 
 		local list = {}
 		for name, data in pairs(P.spellOpts) do
-			if not P.ignoreDefaultSpell[name] then
+			if not P.ignoreDefaultSpell[name] and not core.CategorizedNames[name] then
 				table_insert(list, name)
 			end
 		end

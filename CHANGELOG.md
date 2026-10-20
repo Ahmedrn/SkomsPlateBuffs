@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0 (2026-10-20)
+- **Top rows on demand:** one top row by default, "Add a top row" for more (up to six), "Remove this row" on the last one.
+- **Per row: Buffs and debuffs / Debuffs only / Buffs only, and Only my auras.** New content "Any other aura" (everything no earlier row took). Top row 1 by default is "my debuffs". The old Show Buffs / Show Debuffs / Show Interrupts settings are gone from Display conditions; the rows decide.
+- **New categories:** Snares (Hamstring, Wing Clip, Frostbolt, Cone of Cold, Chains of Ice, ...; slows that were filed as roots moved here) and Healing reduction (Mortal Strike, Wound Poison, Aimed Shot, ...).
+- **"Other tracked auras" no longer repeats spells that have a category** (about 125 duplicates), in the Spells tab and in the rows.
+- **Icon size multiplier per spell** in the Spells tab (for example Hamstring at 1.5x). Rows size each icon individually; top rows share one bottom line.
+- **Spells tab layout like BigDebuffs:** each category has its priority and glow and a small add-by-ID box; tools (print row auras, reset the list) are a separate group. Duration field for spells you add.
+- **Fixed** an error in test mode (a plate refreshed itself while its icons were being laid out).
+
 ## 1.3.0 (2026-10-20)
 - **Classic bars removed.** The rows are the only display. The unknown-plate question mark icon went with them.
 - **One options window:** Main settings (Rows, Display conditions, Appearance), Position, Spells, Profiles, About. The old Position settings and Bar spells tabs are folded in.

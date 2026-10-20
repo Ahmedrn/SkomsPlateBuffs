@@ -36,6 +36,8 @@ defaultSettings.sideDebug = false
 local CATEGORIES = {
 	{ "cc", "Crowd control", "sidePrioCC" },
 	{ "root", "Roots", "sidePrioRoot" },
+	{ "snare", "Snares", "sidePrioSnare" },
+	{ "healing_reduction", "Healing reduction", "sidePrioHealing" },
 	{ "interrupt", "Interrupt lockouts", "sidePrioInterrupt" },
 	{ "immunity", "Immunities", "sidePrioImmunity" },
 	{ "immunity_spell", "Spell immunities", "sidePrioImmunitySpell" },
@@ -60,6 +62,18 @@ function core:RebuildSpellCategories()
 	wipe(byName)
 	wipe(prio)
 	local ov = P.sideSpells
+
+	-- every spell that has a category, even when switched off: "Other tracked auras" leaves these alone
+	local names = core.CategorizedNames
+	wipe(names)
+	for id in pairs(core.SpellCategoryDefault) do
+		local n = GetSpellInfo(id)
+		if n then names[n] = true end
+	end
+	for id in pairs(P.sideCustom) do
+		local n = GetSpellInfo(id)
+		if n then names[n] = true end
+	end
 
 	local function add(id, cat)
 		local name = GetSpellInfo(id)
@@ -249,10 +263,28 @@ function core.SpellGlowArgs(name, order)
 	}
 end
 
--- settings of a category group: priority and glow
+-- add a spell to a category by ID
+local pendingID = {}
+local function AddSpell(cat)
+	local id = tonumber(pendingID[cat])
+	local name = id and GetSpellInfo(id)
+	if not name then
+		print("|cff33ff99" .. core.title .. "|r: " .. L["Unknown spell ID"])
+		return
+	end
+	P.sideCustom[id] = cat
+	local o = P.sideSpells[name]
+	if o then
+		o.enabled = nil
+		Tidy(name)
+	end
+	pendingID[cat] = ""
+	Changed(true)
+end
+
+-- settings of a category group: priority, glow, add a spell
 local function CategoryArgs(cat)
 	local args = {
-		catHeader = { type = "header", name = L["Category settings"], order = 1 },
 		catPriority = {
 			type = "range",
 			name = L["Priority"],
@@ -262,7 +294,20 @@ local function CategoryArgs(cat)
 			get = function() return P[CATEGORY_PRIO[cat]] end,
 			set = function(_, v) P[CATEGORY_PRIO[cat]] = v; Changed() end,
 		},
-		spellsHeader = { type = "header", name = L["Spells"], order = 9 },
+		addID = {
+			type = "input",
+			name = L["Add a spell by ID"],
+			order = 8,
+			get = function() return pendingID[cat] or "" end,
+			set = function(_, v) pendingID[cat] = v end,
+		},
+		addSpell = {
+			type = "execute",
+			name = L["Add"],
+			order = 9,
+			width = "half",
+			func = function() AddSpell(cat) end,
+		},
 	}
 	for k, v in pairs(CategoryGlowArgs(cat, 3)) do args[k] = v end
 	return args
@@ -370,13 +415,42 @@ local function EntryOptions(e)
 				order = 3.5,
 				args = core.SpellGlowArgs(name, 1),
 			},
+			scale = {
+				type = "range",
+				name = L["Icon size multiplier"],
+				desc = L["Multiplies the row's icon size for this spell (1 = the row's size). Used in every row that shows it."],
+				order = 3.6,
+				min = 0.5, max = 3, step = 0.05,
+				get = function() return P.spellScale[name] or 1 end,
+				set = function(_, v)
+					if math.abs(v - 1) < 0.001 then P.spellScale[name] = nil else P.spellScale[name] = v end
+					Changed()
+				end,
+			},
+			duration = {
+				type = "input",
+				name = L["Duration (seconds)"],
+				desc = L["Optional. Auras without a known duration are hidden in category rows."],
+				order = 3.8,
+				hidden = function() return not e.custom end,
+				get = function() return tostring(P.sideCustomDuration[e.id] or "") end,
+				set = function(_, v)
+					local d = tonumber(v)
+					for _, id in ipairs(e.ids) do
+						P.sideCustomDuration[id] = (d and d > 0) and d or nil
+					end
+					Changed()
+				end,
+			},
 			reset = {
 				type = "execute",
 				name = L["Reset this spell"],
 				order = 4,
-				hidden = function() return not eff() end,
+				hidden = function() return not (eff() or P.spellScale[name] or P.spellGlow[name]) end,
 				func = function()
 					P.sideSpells[name] = nil
+					P.spellScale[name] = nil
+					P.spellGlow[name] = nil
 					Changed(true)
 				end,
 			},
@@ -398,8 +472,6 @@ local function EntryOptions(e)
 	}
 end
 
-local addID, addCat, addDuration = "", "buff_def", ""
-
 core.SideSpellsOptionsTable = {
 	type = "group",
 	name = L["Spells"],
@@ -411,78 +483,34 @@ core.SideSpellsOptionsTable = {
 			name = L["Every spell the rows can show, by category. Pick a category on the left for its priority and glow, and its spells. Switch a spell off, move it to another category, give it its own priority or glow, or add spells by ID. Other tracked auras holds the classic PlateBuffs list."],
 			order = 1,
 		},
-		debug = {
-			type = "toggle",
-			name = L["Print side row auras in chat"],
-			desc = L["Prints the name, ID and category each time an aura is added to a side row. Use it to find a spell you do not recognise."],
-			width = "full",
-			order = 2,
-			get = function() return P.sideDebug end,
-			set = function(_, v) P.sideDebug = v end,
-		},
-		addGroup = {
+		tools = {
 			type = "group",
-			inline = true,
-			name = L["Add a spell"],
-			order = 3,
+			name = L["Tools"],
+			order = 200,
 			args = {
-				id = {
-					type = "input",
-					name = L["Spell ID"],
+				debug = {
+					type = "toggle",
+					name = L["Print row auras in chat"],
+					desc = L["Prints the name, ID and category each time an aura is added to a category row. Use it to find a spell you do not recognise."],
+					width = "full",
 					order = 1,
-					get = function() return addID end,
-					set = function(_, v) addID = v end,
+					get = function() return P.sideDebug end,
+					set = function(_, v) P.sideDebug = v end,
 				},
-				cat = {
-					type = "select",
-					name = L["Category"],
-					order = 2,
-					values = CATEGORY_VALUES,
-					get = function() return addCat end,
-					set = function(_, v) addCat = v end,
-				},
-				duration = {
-					type = "input",
-					name = L["Duration (seconds)"],
-					desc = L["Optional. Auras on the left row without a known duration are hidden."],
-					order = 3,
-					get = function() return addDuration end,
-					set = function(_, v) addDuration = v end,
-				},
-				add = {
+				resetAll = {
 					type = "execute",
-					name = L["Add"],
-					order = 4,
+					name = L["Reset the whole list"],
+					desc = L["Removes every change and every spell you added."],
+					confirm = true,
+					order = 2,
 					func = function()
-						local id = tonumber(addID)
-						local name = id and GetSpellInfo(id)
-						if not name then
-							print("|cff33ff99" .. core.title .. "|r: " .. L["Unknown spell ID"])
-							return
-						end
-						P.sideCustom[id] = addCat
-						local d = tonumber(addDuration)
-						P.sideCustomDuration[id] = (d and d > 0) and d or nil
-						local o = P.sideSpells[name]
-						if o then o.enabled = nil; Tidy(name) end
-						addID, addDuration = "", ""
+						wipe(P.sideSpells)
+						wipe(P.sideCustom)
+						wipe(P.sideCustomDuration)
 						Changed(true)
 					end,
 				},
 			},
-		},
-		resetAll = {
-			type = "execute",
-			name = L["Reset the whole list"],
-			desc = L["Removes every change and every spell you added."],
-			confirm = true,
-			order = 4,
-			func = function()
-				wipe(P.sideSpells)
-				wipe(P.sideCustom)
-				wipe(P.sideCustomDuration)
-				Changed(true)
-			end,
 		},
 	},
 }

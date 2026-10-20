@@ -763,49 +763,84 @@ end
 local sideFrames = {}   -- [plate] = { parent = Frame, rows = { [rowKey] = { icon frames } } }
 core.sideFrames = sideFrames
 
-local ROW_KEYS = { "rowLeft", "rowRight", "rowTop1", "rowTop2", "rowTop3", "rowTop4" }
+local ROW_KEYS = { "rowLeft", "rowRight", "rowTop1", "rowTop2", "rowTop3", "rowTop4", "rowTop5", "rowTop6" }
 core.RowKeys = ROW_KEYS
 
 local rowScratch = {}   -- [rowKey] = records this plate puts in the row
 for _, key in ipairs(ROW_KEYS) do rowScratch[key] = {} end
 local EMPTY = {}
 
--- categories the rows ask for: the combat log only keeps a category some row shows
+-- a top row is active when it is switched on and within the number of top rows the user added
+local function RowActive(key)
+	local row = P[key]
+	if not row or not row.enabled then return false end
+	local n = key:match("^rowTop(%d+)$")
+	return not n or tonumber(n) <= (P.topRowCount or 1)
+end
+core.RowActive = RowActive
+
+-- categories the rows ask for: the combat log only keeps a category some row shows.
+-- The old "show buffs / show debuffs" filters are derived from the rows too.
 core.WantedCats = core.WantedCats or {}
 local WantedCats = core.WantedCats
 
 function core:UpdateWantedCategories()
 	wipe(WantedCats)
 	local any = false
+	local tracked, buffs, debuffs = false, nil, nil   -- buffs / debuffs: nil, "mine" or "all"
 	for _, key in ipairs(ROW_KEYS) do
-		local row = P[key]
-		if row and row.enabled then
+		if RowActive(key) then
+			local row = P[key]
 			for cat, on in pairs(row.cats) do
-				if on and cat ~= "classic" then
+				if on and cat ~= "tracked" and cat ~= "any" then
 					WantedCats[cat] = true
 					any = true
 					if cat == "immunity" then WantedCats.immunity_spell = true end
 				end
 			end
+			if row.cats.tracked then tracked = true end
+			if row.cats.any then
+				local level = row.onlyMine and "mine" or "all"
+				if row.show ~= "debuffs" and buffs ~= "all" then buffs = level end
+				if row.show ~= "buffs" and debuffs ~= "all" then debuffs = level end
+			end
 		end
 	end
+	-- 1 = always, 2 = mine only, 3 = only the tracked list, 5 = none
+	P.defaultBuffShow = (buffs == "all" and 1) or (buffs == "mine" and 2) or (tracked and 3) or 5
+	P.defaultDebuffShow = (debuffs == "all" and 1) or (debuffs == "mine" and 2) or (tracked and 3) or 5
 	core.AnyCategoryWanted = any
 end
 
 -- categories that share one checkbox
 local ROWKEY_OF_CAT = { immunity_spell = "immunity" }
 
--- does the row take this record? ("classic" = whatever the classic filters and the Bar spells list let through)
+local CategorizedNames = core.CategorizedNames
+
+-- is the aura on the "Other tracked auras" list (and not a spell that has a category)?
+local function IsTracked(rec)
+	if CategorizedNames[rec.name or ""] then return false end
+	local o = core:HaveSpellOpts(rec.name, rec.sID)
+	return o ~= nil and o.show ~= 3
+end
+
+-- does the row take this record?
 local function RowAccepts(row, rec)
+	local show = row.show
+	if show == "debuffs" and not rec.isDebuff then return false end
+	if show == "buffs" and rec.isDebuff then return false end
 	if row.onlyMine and not rec.playerCast then return false end
 	local cats = row.cats
 	if rec.cat and cats[ROWKEY_OF_CAT[rec.cat] or rec.cat] then return true end
-	return cats.classic and rec.main ~= false
+	if rec.main == false then return false end
+	if cats.tracked and IsTracked(rec) then return true end
+	return cats.any and true or false
 end
 
 -- priority of a category (adjustable in the options): higher goes closer to the nameplate / first in the row
 local PRIORITY_KEY = {
 	cc = "sidePrioCC", interrupt = "sidePrioInterrupt", root = "sidePrioRoot",
+	snare = "sidePrioSnare", healing_reduction = "sidePrioHealing",
 	immunity = "sidePrioImmunity", immunity_spell = "sidePrioImmunitySpell",
 	buff_def = "sidePrioDefensive", buff_off = "sidePrioOffensive", buff_other = "sidePrioOther",
 }
@@ -980,8 +1015,22 @@ local function SetRowIcon(f, rec, size, glow)
 	end
 end
 
--- Lays one row out. Rows above the plate stack upwards from topY; returns the next topY.
+-- Bumped whenever a plate is laid out again, so a layout that is interrupted by a newer one stops.
+local layoutGen = 0
+
+-- the icon size of a record: the row's size times the spell's own multiplier (Spells tab); a spell of the tracked list
+-- keeps the scale it has there
+local function RecSize(rec, base)
+	local scale = P.spellScale[rec.name or ""]
+	if not scale and not rec.cat and rec.scale and rec.scale > 0 then scale = rec.scale end
+	return base * (scale or 1)
+end
+
+local sizeScratch = {}
+
+-- Lays one row out. Rows above the plate stack upwards from topY; returns the next topY (and true if interrupted).
 local function LayoutRow(plate, s, key, row, list, topY)
+	local gen = layoutGen
 	local frames = s.rows[key]
 	if not frames then
 		frames = {}
@@ -989,11 +1038,25 @@ local function LayoutRow(plate, s, key, row, list, topY)
 	end
 	local n = math_min(#list, row.max or 3)
 	if #list > 1 then table_sort(list, sideSort) end
-	local size = row.size or 28
+	local base = row.size or 28
 	local padX, padY = P.intervalX or 12, P.intervalY or 12
 	local isTop = key ~= "rowLeft" and key ~= "rowRight"
 	local anchor = isTop and (plate.PB_parentFrame or plate) or SideAnchor(plate)
+
+	local rowHeight, total = 0, 0
 	for i = 1, n do
+		local rec = list[i]
+		if not rec then return topY, true end
+		local size = RecSize(rec, base)
+		sizeScratch[i] = size
+		if size > rowHeight then rowHeight = size end
+		total = total + size
+	end
+	local cursor = -(total + math_max(0, n - 1) * P.topSpacing) / 2
+
+	for i = 1, n do
+		local rec = list[i]
+		local size = sizeScratch[i]
 		local f = frames[i]
 		if not f then
 			f = CreateBuffFrame(s.parent, plate)
@@ -1014,14 +1077,16 @@ local function LayoutRow(plate, s, key, row, list, topY)
 				f:SetPoint("RIGHT", frames[i - 1], "LEFT", -P.sideSpacing + padX, 0)
 			end
 		else
-			-- centred above the plate; the icon is at the top of its frame
-			local xc = (i - (n + 1) / 2) * (size + P.topSpacing)
+			-- centred above the plate; the icon is at the top of its frame, so the icons of a row share one bottom line
+			local xc = cursor + size / 2
+			cursor = cursor + size + P.topSpacing
 			f:SetPoint("TOP", anchor, "TOP", P.topOffsetX + xc, P.topOffsetY + topY + size)
 		end
-		SetRowIcon(f, list[i], size, row.glow)
+		SetRowIcon(f, rec, size, row.glow)
+		if gen ~= layoutGen then return topY, true end
 	end
 	for i = n + 1, #frames do frames[i]:Hide() end
-	if isTop and n > 0 then topY = topY + size + P.topRowSpacing end
+	if isTop and n > 0 then topY = topY + rowHeight + P.topRowSpacing end
 	return topY
 end
 
@@ -1030,7 +1095,7 @@ function core:UpdateSideRows(plate)
 	if not s then
 		local any = false
 		for _, key in ipairs(ROW_KEYS) do
-			if P[key].enabled and #rowScratch[key] > 0 then any = true break end
+			if RowActive(key) and #rowScratch[key] > 0 then any = true break end
 		end
 		if not any then return end
 		s = GetSideFrames(plate)
@@ -1038,7 +1103,9 @@ function core:UpdateSideRows(plate)
 	local topY = 0
 	for _, key in ipairs(ROW_KEYS) do
 		local row = P[key]
-		topY = LayoutRow(plate, s, key, row, row.enabled and rowScratch[key] or EMPTY, topY)
+		local aborted
+		topY, aborted = LayoutRow(plate, s, key, row, RowActive(key) and rowScratch[key] or EMPTY, topY)
+		if aborted then return end
 	end
 end
 
@@ -1059,6 +1126,7 @@ end
 
 -- Show spells on a plate linked to a GUID.
 function core:AddBuffsToPlate(plate, GUID)
+	layoutGen = layoutGen + 1
 	local t = guidBuffs[GUID]
 	if not t then
 		self:HideSideRows(plate)
@@ -1074,7 +1142,7 @@ function core:AddBuffsToPlate(plate, GUID)
 		local r = t[i]
 		for _, key in ipairs(ROW_KEYS) do
 			local row = P[key]
-			if row.enabled and RowAccepts(row, r) then
+			if RowActive(key) and RowAccepts(row, r) then
 				local l = rowScratch[key]
 				l[#l + 1] = r
 				break

@@ -4,6 +4,28 @@ local folder, core = ...
 -- Generated from the BigDebuffs WotLK spell list (Jordon, Tsoukie): spell id -> category.
 -- Ranks of one spell are listed individually; the spell name is matched as well (see below).
 core.SpellCategory = {
+    -- snare / healing_reduction (added)
+    [1715] = "snare", -- Hamstring
+    [2974] = "snare", -- Wing Clip
+    [5116] = "snare", -- Concussive Shot
+    [35101] = "snare", -- Concussive Barrage
+    [13810] = "snare", -- Frost Trap Aura
+    [42945] = "snare", -- Blast Wave
+    [7321] = "snare", -- Chilled
+    [42931] = "snare", -- Cone of Cold
+    [42842] = "snare", -- Frostbolt
+    [47610] = "snare", -- Frostfire Bolt
+    [31589] = "snare", -- Slow
+    [48827] = "snare", -- Avenger's Shield
+    [51693] = "snare", -- Waylay
+    [3600] = "snare", -- Earthbind
+    [49236] = "snare", -- Frost Shock
+    [58799] = "snare", -- Frostbrand Attack
+    [18118] = "snare", -- Aftermath
+    [12323] = "snare", -- Piercing Howl
+    [1604] = "snare", -- Dazed
+    [15407] = "snare", -- Mind Flay
+    [64850] = "healing_reduction", -- Unrelenting Assault
     -- cc
     [118] = "cc", -- Polymorph
     [408] = "cc", -- Kidney Shot
@@ -167,7 +189,7 @@ core.SpellCategory = {
     [1062] = "root",
     [1714] = "root", -- Curse of Tongues
     [3034] = "root", -- Viper Sting
-    [3409] = "root", -- Crippling Poison
+    [3409] = "snare", -- Crippling Poison
     [4167] = "root", -- Web (Pet)
     [5195] = "root",
     [5196] = "root",
@@ -178,7 +200,7 @@ core.SpellCategory = {
     [11201] = "root",
     [11719] = "root",
     [12494] = "root", -- Frostbite
-    [12548] = "root", -- Frost Shock
+    [12548] = "snare", -- Frost Shock
     [13099] = "root", -- Net-o-Matic
     [13119] = "root", -- Net-o-Matic
     [13120] = "root", -- Net-o-Matic
@@ -187,7 +209,7 @@ core.SpellCategory = {
     [14279] = "root",
     [14280] = "root",
     [16566] = "root", -- Net-o-Matic
-    [18223] = "root", -- Curse of Exhaustion
+    [18223] = "snare", -- Curse of Exhaustion
     [18310] = "root",
     [18313] = "root",
     [19185] = "root", -- Entrapment
@@ -201,7 +223,7 @@ core.SpellCategory = {
     [19975] = "root", -- Nature's Grasp Rank 1
     [20909] = "root",
     [20910] = "root",
-    [23694] = "root", -- Improved Hamstring
+    [23694] = "snare", -- Improved Hamstring
     [25999] = "root", -- Boar Charge
     [26989] = "root",
     [27010] = "root",
@@ -211,15 +233,15 @@ core.SpellCategory = {
     [33395] = "root", -- Freeze
     [42917] = "root",
     [45334] = "root",
-    [45524] = "root", -- Chains of Ice
-    [47168] = "root", -- Improved Wing Clip
+    [45524] = "snare", -- Chains of Ice
+    [47168] = "snare", -- Improved Wing Clip
     [48999] = "root", -- Counterattack
     [53308] = "root", -- Entangling Roots
     [53313] = "root", -- Entangling Roots (From Nature's Grasp)
     [53548] = "root", -- Pin (Pet)
     [55080] = "root", -- Shattered Barrier
     [55509] = "root", -- Venom Web Spray (Pet)
-    [58373] = "root", -- Glyph of Hamstring
+    [58373] = "snare", -- Glyph of Hamstring
     [63685] = "root", -- Freeze (Enhancement)
     [64695] = "root", -- Earthgrab (Elemental)
     [64803] = "root",
@@ -432,14 +454,14 @@ core.SpellCategory = {
     [8192] = "buff_other",
     [9634] = "buff_other", -- Dire Bear Form
     [10953] = "buff_other",
-    [12294] = "buff_other", -- Mortal Strike
-    [13218] = "buff_other", -- Wound Poison
-    [13222] = "buff_other", -- Wound Poison II
-    [13223] = "buff_other", -- Wound Poison III
-    [13224] = "buff_other", -- Wound Poison IV
+    [12294] = "healing_reduction", -- Mortal Strike
+    [13218] = "healing_reduction", -- Wound Poison
+    [13222] = "healing_reduction", -- Wound Poison II
+    [13223] = "healing_reduction", -- Wound Poison III
+    [13224] = "healing_reduction", -- Wound Poison IV
     [14251] = "buff_other", -- Riposte (Rogue)
     [16857] = "buff_other", -- Faerie Fire (Feral)
-    [19434] = "buff_other", -- Aimed Shot
+    [19434] = "healing_reduction", -- Aimed Shot
     [20900] = "buff_other",
     [20901] = "buff_other",
     [20902] = "buff_other",
@@ -453,25 +475,25 @@ core.SpellCategory = {
     [25596] = "buff_other",
     [25771] = "buff_other", -- Forbearance
     [27065] = "buff_other",
-    [27189] = "buff_other", -- Wound Poison V
+    [27189] = "healing_reduction", -- Wound Poison V
     [30330] = "buff_other",
     [33357] = "buff_other", -- Dash
     [33891] = "buff_other", -- Tree of Life
     [41425] = "buff_other", -- Hypothermia
     [43039] = "buff_other", -- Ice Barrier
     [47485] = "buff_other",
-    [47486] = "buff_other",
+    [47486] = "healing_reduction",
     [47986] = "buff_other", -- Sacrifice
     [48065] = "buff_other", -- Power Word: Shield
     [48066] = "buff_other",
     [49049] = "buff_other",
-    [49050] = "buff_other",
+    [49050] = "healing_reduction",
     [53312] = "buff_other", -- Nature's Grasp
     [54428] = "buff_other", -- Divine Plea
     [55277] = "buff_other", -- Stoneclaw Totem (Absorb)
-    [56112] = "buff_other", -- Furious Attacks
-    [57974] = "buff_other", -- Wound Poison VI
-    [57975] = "buff_other", -- Wound Poison VII
+    [56112] = "healing_reduction", -- Furious Attacks
+    [57974] = "healing_reduction", -- Wound Poison VI
+    [57975] = "healing_reduction", -- Wound Poison VII
     [58597] = "buff_other", -- Sacred Shield Proc
     [58875] = "buff_other", -- Spirit Walk (Spirit Wolf)
     [59578] = "buff_other", -- The Art of War
@@ -479,11 +501,11 @@ core.SpellCategory = {
 
 -- which row a category goes to, and its priority inside the row (higher first)
 core.CategorySide = {
-    cc = "right", root = "right", interrupt = "right",
+    cc = "right", root = "right", interrupt = "right", snare = "right", healing_reduction = "right",
     immunity = "left", immunity_spell = "left", buff_def = "left", buff_off = "left", buff_other = "left",
 }
 core.CategoryPriority = {
-    cc = 6, interrupt = 5, root = 3,
+    cc = 6, interrupt = 5, root = 3, snare = 3, healing_reduction = 4,
     immunity = 6, immunity_spell = 6, buff_def = 5, buff_off = 4, buff_other = 1,
 }
 
@@ -521,3 +543,5 @@ core.SpellCategoryDefault = {}
 for id, cat in pairs(core.SpellCategory) do core.SpellCategoryDefault[id] = cat end
 -- per-spell priority overrides, by spell name
 core.SpellPriorityByName = {}
+-- names of every spell that has a category (even when switched off): "Other tracked auras" leaves them alone
+core.CategorizedNames = {}

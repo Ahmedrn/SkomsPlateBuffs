@@ -4,6 +4,12 @@ local folder, core = ...
 -- Generated from the BigDebuffs WotLK spell list (Jordon, Tsoukie): spell id -> category.
 -- Ranks of one spell are listed individually; the spell name is matched as well (see below).
 core.SpellCategory = {
+    [5384] = "buff_def", -- Feign Death (kept on request)
+    [974] = "shield", -- Earth Shield (kept on request)
+    [32593] = "shield", -- Earth Shield (kept on request)
+    [32594] = "shield", -- Earth Shield (kept on request)
+    [49283] = "shield", -- Earth Shield (kept on request)
+    [49284] = "shield", -- Earth Shield (kept on request)
     [47753] = "shield", -- Divine Aegis
     -- speed (added)
     [61684] = "speed", -- Dash (pet)

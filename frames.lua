@@ -880,12 +880,17 @@ end
 local SpellPriorityByName = core.SpellPriorityByName
 
 local function RecPriority(rec)
-	-- My debuffs ignore the category priority: their own priority (default 5), then alphabetical, so the order never shuffles
+	-- My debuffs ignore the category priority: their own priority (default 5); size and name break ties (see sideSort)
 	if rec.myDebuff then return SpellPriorityByName[rec.name or ""] or 5 end
 	return SpellPriorityByName[rec.name or ""] or CatPriority(rec.cat)
 end
 
 local function sideSort(a, b)
+	-- My debuffs: the bigger icon first (size multiplier from the Spells tab), then priority, then alphabetical
+	if a.myDebuff and b.myDebuff then
+		local sa, sb = P.spellScale[a.name or ""] or 1, P.spellScale[b.name or ""] or 1
+		if sa ~= sb then return sa > sb end
+	end
 	local pa, pb = RecPriority(a), RecPriority(b)
 	if pa ~= pb then return pa > pb end
 	if a.myDebuff and b.myDebuff and a.name ~= b.name then return (a.name or "") < (b.name or "") end

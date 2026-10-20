@@ -36,9 +36,9 @@ local LibNameplates = core.LibNameplates
 local CategoryPriority = core.CategoryPriority
 
 local unknownIconPath = "Interface\\Icons\\Inv_misc_questionmark"
-local COOLDOWN_RADIAL_TEXTURE = "Interface\\AddOns\\PlateBuffsMini\\media\\Swipe"
-local COOLDOWN_RADIAL_EDGE_TEXTURE = "Interface\\AddOns\\PlateBuffsMini\\media\\SwipeEdge"
-local COOLDOWN_VERTICAL_TEXTURE = "Interface\\AddOns\\PlateBuffsMini\\media\\SwipeVertical"
+local COOLDOWN_RADIAL_TEXTURE = "Interface\\AddOns\\SkomsPlateBuffs\\media\\Swipe"
+local COOLDOWN_RADIAL_EDGE_TEXTURE = "Interface\\AddOns\\SkomsPlateBuffs\\media\\SwipeEdge"
+local COOLDOWN_VERTICAL_TEXTURE = "Interface\\AddOns\\SkomsPlateBuffs\\media\\SwipeVertical"
 
 local defaultSettings = core.defaultSettings
 defaultSettings.profile.skin_SkinID = "Blizzard"

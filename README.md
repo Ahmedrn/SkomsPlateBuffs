@@ -1,4 +1,4 @@
-# PlateBuffsMini 1.0.0 (WoW 3.3.5a)
+# SkomsPlateBuffs 1.0.0 (WoW 3.3.5a)
 
 PlateBuffs with two extra rows beside the enemy nameplate, in the style of the retail addon MiniCC:
 
@@ -12,7 +12,7 @@ hidden from the rows above the plate (default: yes).
 
 ## Install
 1. Delete or disable the original **PlateBuffs** (two copies would draw on the same plates).
-2. Put the `PlateBuffsMini` folder in `Interface\AddOns`.
+2. Put the `SkomsPlateBuffs` folder in `Interface\AddOns`.
 3. Log in. Your existing PlateBuffs settings are kept (same saved variables, `PB_DB`).
 
 No client patches are needed. It works the same way PlateBuffs does: nameplates are found with LibNameplates, auras come
@@ -23,7 +23,7 @@ A plate whose unit PlateBuffs cannot identify yet shows nothing until you target
 - **PlateBuffs** by **Cyprias**.
 - 3.3.5a backport by **Kader**, WotLK modifications and fixes by **Khal**: https://github.com/KhalGH/PlateBuffs-WoTLK
   Almost all of this addon is their work.
-- Side rows and spell categories by **Ahmedrn**. The spell category list is generated from the BigDebuffs WotLK spell
+- Side rows and spell categories by **Skom**. The spell category list is generated from the BigDebuffs WotLK spell
   list (Jordon, Tsoukie). The idea follows MiniCC / MiniAuras by Verubato; no code was copied from it.
 
 ## Changes from PlateBuffs r238
@@ -32,4 +32,4 @@ A plate whose unit PlateBuffs cannot identify yet shows nothing until you target
 - `frames.lua`: records are split into the normal rows and the two side rows; side rows are laid out left/right of the plate.
 - `options.lua` and `locales/enUS.lua`: the Side rows tab.
 - Start-up hardening: the settings table is set before the previous `OnEnable` runs.
-- The addon folder is `PlateBuffsMini`; the media paths point there.
+- The addon folder is `SkomsPlateBuffs`; the media paths point there.

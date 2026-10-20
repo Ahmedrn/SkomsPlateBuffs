@@ -1,5 +1,5 @@
 ## Interface: 30300
-## Title: PlateBuffsMini
+## Title: SkomsPlateBuffs
 ## Notes: PlateBuffs with two extra rows beside the nameplate: crowd control on the right, important buffs on the left. Replaces PlateBuffs.
 ## Version: 1.0.0 (based on PlateBuffs 1.19.5 r238)
 ## Author: Cyprias (original PlateBuffs)
@@ -8,7 +8,7 @@
 
 ## X-Backporter: Kader
 ## X-Modder: Khal
-## X-Variant: Ahmedrn (side rows)
+## X-Variant: Skom (side rows)
 ## X-Website: https://github.com/KhalGH/PlateBuffs-WoTLK
 ## X-Packaged-Version: r238-mini1
 ## X-Date: 2026-10-20

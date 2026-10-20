@@ -2,6 +2,7 @@
 
 ## 1.6.0 (2026-10-20)
 - **"Other tracked auras" is gone.** Everything the old list knew now has a category: crowd control (bombs, Hungering Cold, Holy Wrath, Ravage, Sonic Blast), defensives (Free Action), offensives (Brutal/Focused Assault, Tidal Force, Sweeping Strikes, Bestial Wrath), The Beast Within, and Other buffs (flags, HoTs, Blessings, Speed). The class debuffs of the old list live in My debuffs. The tab, the row option and the default list are removed.
+- **Disarms is its own category again, and counts as hard crowd control** (like stuns and fears): your own disarm stays on the right row and never goes to My debuffs. Snares are not hard CC. Disarms is ticked in the default right row.
 - **Extra top row 1** shows Other buffs by default (28 px, buffs only).
 - **Fixed** an error when "Print row auras in chat" was on.
 

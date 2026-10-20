@@ -827,7 +827,7 @@ local SpellCategoryByName = core.SpellCategoryByName
 -- hard crowd control (stuns, fears, disarms, silences, interrupts) is never a "my debuff": it stays on the right row
 local function IsHardCC(rec)
 	local c = rec.cat or SpellCategory[rec.sID or 0] or SpellCategoryByName[rec.name or ""]
-	return c == "cc" or c == "interrupt"
+	return c == "cc" or c == "interrupt" or c == "disarm"
 end
 
 -- does the row take this record?
@@ -846,7 +846,7 @@ end
 -- priority of a category (adjustable in the options): higher goes closer to the nameplate / first in the row
 local PRIORITY_KEY = {
 	cc = "sidePrioCC", interrupt = "sidePrioInterrupt", root = "sidePrioRoot",
-	snare = "sidePrioSnare", healing_reduction = "sidePrioHealing",
+	snare = "sidePrioSnare", healing_reduction = "sidePrioHealing", disarm = "sidePrioDisarm",
 	immunity = "sidePrioImmunity", immunity_spell = "sidePrioImmunitySpell",
 	buff_def = "sidePrioDefensive", buff_off = "sidePrioOffensive", buff_other = "sidePrioOther",
 }

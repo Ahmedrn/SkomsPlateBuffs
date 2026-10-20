@@ -37,6 +37,7 @@ local CATEGORIES = {
 	{ "cc", "Crowd control", "sidePrioCC" },
 	{ "root", "Roots", "sidePrioRoot" },
 	{ "snare", "Snares", "sidePrioSnare" },
+	{ "disarm", "Disarms", "sidePrioDisarm" },
 	{ "healing_reduction", "Healing reduction", "sidePrioHealing" },
 	{ "interrupt", "Interrupt lockouts", "sidePrioInterrupt" },
 	{ "immunity", "Immunities", "sidePrioImmunity" },
@@ -509,7 +510,7 @@ end
 -- ---------------------------------------------------------------------------------------------------------
 local function IsHardCCSpell(id, name)
 	local c = core.SpellCategory[id] or core.SpellCategoryByName[name or ""]
-	return c == "cc" or c == "interrupt"
+	return c == "cc" or c == "interrupt" or c == "disarm"
 end
 
 function core:LearnMyDebuff(id, name)

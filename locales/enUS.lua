@@ -316,3 +316,4 @@ L["Remove this extra row"] = true
 L["Shows your own debuffs on enemies, except hard crowd control (stuns, fears, disarms, silences), which stays on the right row. Pick which ones to show, their size and glow in the Spells tab, My debuffs."] = true
 L["Your own debuffs on enemies, except hard crowd control (stuns, fears, disarms, silences), which stays on the right row. Switch off the ones you do not want to see, set a size multiplier and a glow. The list starts with your class's debuffs and grows with every debuff you apply."] = true
 L["Every spell the rows can show, by category. Pick a category on the left for its priority and glow, and its spells. Switch a spell off, move it to another category, give it its own priority or glow, or add spells by ID."] = true
+L["Disarms"] = true

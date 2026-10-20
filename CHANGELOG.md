@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.11.1 (2026-10-21)
+- **Durations checked against the client's own spell data** (`Spell.dbc`): every buff duration already in the data matched. Added: Free Action Potion 30 s, Bestial Wrath (pet) 18 s, Perception 20 s, Stoneform 8 s.
+- Removed 17 spell ids that do not exist in this client (old ranks, e.g. Divine Shield 1020 / 5573, Blessing of Sacrifice 20729). Hand of Sacrifice (6940) is 12 s on this client.
+- Ardent Defender 31852 (talent rank, no aura) no longer has a duration.
+
 ## 1.11.0 (2026-10-20)
 - **Brought back:** Swiftness Potion, Goblin and Gnomish Rocket Boots (Speed boosts) and Living Action Potion (Defensive buffs), with durations.
 - **Credits reworded:** the addon is no longer presented as a PlateBuffs fork. Author is Skom; the About tab and README say "Built on" (PlateBuffs by Cyprias, backport by Kader, WotLK changes by Khal) and "Inspired by" (MiniCC, BigDebuffs, WeakAuras / LibCustomGlow).

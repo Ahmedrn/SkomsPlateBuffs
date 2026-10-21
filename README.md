@@ -1,6 +1,14 @@
-# SkomsPlateBuffs 1.11.0 (WoW 3.3.5a)
+<p align="center"><img src="logo.png" alt="SkomsPlateBuffs" width="120"></p>
 
-Enemy nameplate auras, laid out the way you decide: rows beside and above the nameplate, each with the categories you pick, with glow and its own spell list. Built on the PlateBuffs engine (see Credits); the layout, categories, glow and options are new.
+# SkomsPlateBuffs 1.0.0 (WoW 3.3.5a)
+
+Enemy nameplate auras, laid out the way you decide: rows beside and above the nameplate, each showing the categories you pick, with glow and its own spell list. Built on the PlateBuffs engine (see Credits); the layout, categories, glow and options are new.
+
+![In a fight](screenshot_4.png)
+
+| | | |
+|---|---|---|
+| ![Rows around a nameplate](screenshot.png) | ![Top row and cast bar](screenshot_2.png) | ![My debuffs on top](screenshot_3.png) |
 
 ## Rows
 - **Left row** and **right row**: one row each, 3 icons by default.
@@ -13,29 +21,24 @@ Enemy nameplate auras, laid out the way you decide: rows beside and above the na
 - An aura goes to the first row that takes it. Rows set to *Only my auras* are checked first, then left, right and the top rows in order.
 
 Default set-up (32 px icons, extra top row 28 px): left = buffs only: immunities, defensive and offensive cooldowns; right = debuffs only: crowd control, roots, interrupts, disarms, snares, healing reduction; top row = my debuffs; extra top row 1 = other buffs.
-The classic PlateBuffs bars are gone: the rows replace them.
 
 ## Options (`/spb`)
 - **Main settings:** Rows (per row: on/off, max icons, size, show, only mine, glow, categories), Display conditions, Appearance.
-- **Position:** left/right and top offsets and spacing, test mode.
-- **Spells:** a tree by category, like the BigDebuffs spells tab. Each category has its priority and glow and an add-by-ID box;
-  each spell has show on/off, category, priority, icon size multiplier (for example Hamstring 1.5x) and its own glow; hovering a spell shows what it does. *My debuffs* is the first group.
+- **Position:** left/right and top offsets and spacing, test mode, glow showcase.
+- **Spells:** a tree by category, like the BigDebuffs spells tab. Each category has its priority and glow and an add-by-ID box; each spell has show on/off, category, priority, icon size multiplier (for example Hamstring 1.5x) and its own glow; hovering a spell shows what it does. *My debuffs* is the first group.
 - **Profiles** and **About**.
 
 ## Glow
-Per category and per spell: none, border (optionally pulsing), pixel glow, autocast shine, action button glow, proc glow
-(the same styles as WeakAuras). The last four need `LibCustomGlow-1.0`, which comes with WeakAuras; without it they are drawn
-as the border.
-Glow colour: native yellow (retail look, default), by spell type, or by category. Border colour: by spell type, by category, or one custom (dark) colour. Magic buffs you can dispel get a glow of their own (Appearance > Glow). To compare glows: Position > Glow showcase, or `/spb glow`.
+Per category and per spell: none, border (optionally pulsing), pixel glow, autocast shine, action button glow, proc glow (the same styles as WeakAuras). The last four need `LibCustomGlow-1.0`, which comes with WeakAuras; without it they are drawn as the border.
+
+Glow colour: the style's native yellow, by spell type, or by category (default). Border colour: by spell type, by category, or one custom (dark) colour. Magic buffs you can dispel get a glow of their own (Appearance > Glow). To compare the styles: Position > Glow showcase, or `/spb glow`.
 
 ## Install
 1. Delete or disable the original **PlateBuffs** (two copies would draw on the same plates).
 2. Put the `SkomsPlateBuffs` folder in `Interface\AddOns`.
 3. Log in. Settings from the original PlateBuffs (`PB_DB`) are copied over once, to `SkomsPlateBuffsDB`.
 
-No client patches are needed. Nameplates are found with LibNameplates, auras come from the combat log and from `UnitAura`
-on your target, focus and mouseover. A plate whose unit the addon cannot identify yet shows nothing until you target or
-mouse over it.
+No client patches are needed. Nameplates are found with LibNameplates, auras come from the combat log and from `UnitAura` on your target, focus and mouseover. A plate whose unit the addon cannot identify yet shows nothing until you target or mouse over it.
 
 ## Credits and inspirations
 **Built on** (code this addon still runs on):

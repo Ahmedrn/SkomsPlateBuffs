@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.11.2 (2026-10-21)
+- **New defaults:** thin borders (buffs and debuffs), border colour *Custom* (dark), glow colour *By category*, dispellable-buff glow on *All buffs except immunities* in a violet magic colour. Only applies to settings you have not changed.
+- Checked that the Magic type of every categorised buff matches the client data (104 buffs, no mismatch), so the dispel glow only lands on Magic buffs.
+
 ## 1.11.1 (2026-10-21)
 - **Durations checked against the client's own spell data** (`Spell.dbc`): every buff duration already in the data matched. Added: Free Action Potion 30 s, Bestial Wrath (pet) 18 s, Perception 20 s, Stoneform 8 s.
 - Removed 17 spell ids that do not exist in this client (old ranks, e.g. Divine Shield 1020 / 5573, Blessing of Sacrifice 20729). Hand of Sacrifice (6940) is 12 s on this client.

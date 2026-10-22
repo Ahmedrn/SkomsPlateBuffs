@@ -337,3 +337,7 @@ L["Highlight buffs I can dispel"] = true
 L["Magic buffs on enemies that your class can remove (Dispel Magic, Purge, Spellsteal, Devour Magic, Shield Slam) get their own glow. Classes that cannot dispel buffs never see it."] = true
 L["Other buffs only"] = true
 L["Which buffs"] = true
+L["Friendly nameplates"] = true
+L["Off: friendly nameplates get the same rows as the enemy ones. On: they get one top row with the categories you pick below. Friendly nameplates must be on in Display conditions, Unit reaction."] = true
+L["On friendly nameplates, show only a top row"] = true
+L["Show on friendly nameplates"] = true

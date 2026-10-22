@@ -20,6 +20,8 @@ Enemy nameplate auras, laid out the way you decide: rows beside and above the na
 - Per row: buffs and debuffs / debuffs only / buffs only, and **only my auras**.
 - An aura goes to the first row that takes it. Rows set to *Only my auras* are checked first, then left, right and the top rows in order.
 
+**Friendly nameplates** (Rows > Friendly nameplates): off by default, so friendly plates get the same rows as enemy ones. Tick *On friendly nameplates, show only a top row* and they get a single top row instead, with the categories you choose (crowd control, roots, interrupts and disarms by default), its own icon size, number of icons and glow. Friendly nameplates must be on in Display conditions > Unit reaction.
+
 Default set-up (32 px icons, extra top row 28 px): left = buffs only: immunities, defensive and offensive cooldowns; right = debuffs only: crowd control, roots, interrupts, disarms, snares, healing reduction; top row = my debuffs; extra top row 1 = other buffs.
 
 ## Options (`/spb`)

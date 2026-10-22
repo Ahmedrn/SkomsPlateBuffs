@@ -832,6 +832,15 @@ function core:UpdateWantedCategories()
 			end
 		end
 	end
+	if P.friendlyTopRowOnly then
+		for cat, on in pairs(P.friendlyCats or EMPTY) do
+			if on then
+				WantedCats[cat] = true
+				any = true
+				if cat == "immunity" then WantedCats.immunity_spell = true end
+			end
+		end
+	end
 	-- 1 = always, 2 = mine only, 3 = only the tracked list, 5 = none
 	P.defaultBuffShow = (buffs == "all" and 1) or (buffs == "mine" and 2) or (tracked and 3) or 5
 	P.defaultDebuffShow = (debuffs == "all" and 1) or (debuffs == "mine" and 2) or (tracked and 3) or 5
@@ -862,6 +871,20 @@ local function RowAccepts(row, rec)
 	if rec.cat and cats[ROWKEY_OF_CAT[rec.cat] or rec.cat] then return true end
 	if rec.main == false then return false end
 	return cats.any and true or false
+end
+
+-- friendly nameplates with "only a top row": one row with its own size and categories, put where the first top row is
+local friendlyRow = { enabled = true, show = "all", onlyMine = false }
+local function FriendlyRow()
+	friendlyRow.max = P.friendlyMax or 4
+	friendlyRow.size = P.friendlySize or 28
+	friendlyRow.glow = P.friendlyGlow and true or false
+	friendlyRow.cats = P.friendlyCats or EMPTY
+	return friendlyRow
+end
+
+local function IsFriendlyMode(plate)
+	return P.friendlyTopRowOnly and core.GetPlateReaction(plate) == "FRIENDLY"
 end
 
 -- priority of a category (adjustable in the options): higher goes closer to the nameplate / first in the row
@@ -1245,21 +1268,30 @@ local function LayoutRow(plate, s, key, row, list, topY)
 	return topY
 end
 
-function core:UpdateSideRows(plate)
+function core:UpdateSideRows(plate, friendly)
 	local s = sideFrames[plate]
 	if not s then
 		local any = false
 		for _, key in ipairs(ROW_KEYS) do
-			if RowActive(key) and #rowScratch[key] > 0 then any = true break end
+			local active
+			if friendly then active = (key == "rowTop1") else active = RowActive(key) end
+			if active and #rowScratch[key] > 0 then any = true break end
 		end
 		if not any then return end
 		s = GetSideFrames(plate)
 	end
 	local topY = 0
 	for _, key in ipairs(ROW_KEYS) do
-		local row = P[key]
+		local row, active
+		if friendly then
+			row = (key == "rowTop1") and FriendlyRow() or P[key]
+			active = (key == "rowTop1")
+		else
+			row = P[key]
+			active = RowActive(key)
+		end
 		local aborted
-		topY, aborted = LayoutRow(plate, s, key, row, RowActive(key) and rowScratch[key] or EMPTY, topY)
+		topY, aborted = LayoutRow(plate, s, key, row, active and rowScratch[key] or EMPTY, topY)
 		if aborted then return end
 	end
 end
@@ -1292,6 +1324,18 @@ function core:AddBuffsToPlate(plate, GUID)
 	for _, key in ipairs(ROW_KEYS) do
 		local l = rowScratch[key]
 		for i = #l, 1, -1 do l[i] = nil end
+	end
+	-- a friendly plate with "only a top row": one row, its own categories, nothing else
+	if IsFriendlyMode(plate) then
+		local frow = FriendlyRow()
+		local l = rowScratch.rowTop1
+		for i = 1, #t do
+			local r = t[i]
+			r.myDebuff = false
+			if RowAccepts(frow, r) then l[#l + 1] = r end
+		end
+		self:UpdateSideRows(plate, true)
+		return
 	end
 	-- rows set to "Only my auras" are checked first, so "my debuffs" keeps them even when another row also wants their category
 	local order = claimOrder

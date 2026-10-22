@@ -212,6 +212,13 @@ defaultSettings.rowTop6 = {
 	cats = {}
 }
 
+-- friendly nameplates: off = same rows as the enemy plates; on = only one top row with these categories
+defaultSettings.friendlyTopRowOnly = false
+defaultSettings.friendlyMax = 4
+defaultSettings.friendlySize = 28
+defaultSettings.friendlyGlow = true
+defaultSettings.friendlyCats = { cc = true, root = true, interrupt = true, disarm = true }
+
 core.CoreOptionsTable = {
 	name = core.title,
 	type = "group",
@@ -1303,6 +1310,65 @@ local function RowOptions(rowKey, order)
 	return group
 end
 
+local function FriendlyOptions(order)
+	local isCat = {}
+	local group = {
+		type = "group",
+		name = L["Friendly nameplates"],
+		order = order,
+		get = function(info)
+			local k = info[#info]
+			if isCat[k] then return P.friendlyCats[k] end
+			return P[k]
+		end,
+		set = function(info, v)
+			local k = info[#info]
+			if isCat[k] then
+				P.friendlyCats[k] = v and true or false
+			else
+				P[k] = v
+			end
+			core:ResetSideRows()
+		end,
+		args = {
+			desc = {
+				type = "description",
+				order = 1,
+				name = L["Off: friendly nameplates get the same rows as the enemy ones. On: they get one top row with the categories you pick below. Friendly nameplates must be on in Display conditions, Unit reaction."],
+			},
+			friendlyTopRowOnly = {
+				type = "toggle",
+				order = 2,
+				width = "full",
+				name = L["On friendly nameplates, show only a top row"],
+			},
+			friendlyMax = {
+				type = "range", order = 3, name = L["Max icons"], min = 1, max = 12, step = 1,
+				disabled = function() return not P.friendlyTopRowOnly end,
+			},
+			friendlySize = {
+				type = "range", order = 4, name = L["Icon size"], min = 12, max = 64, step = 1,
+				disabled = function() return not P.friendlyTopRowOnly end,
+			},
+			friendlyGlow = {
+				type = "toggle", order = 5, name = L["Glow"],
+				disabled = function() return not P.friendlyTopRowOnly end,
+			},
+			catHeader = { type = "header", name = L["Show on friendly nameplates"], order = 10 },
+		}
+	}
+	for i, c in ipairs(ROW_CATS) do
+		if c[1] ~= "any" then
+			isCat[c[1]] = true
+			group.args[c[1]] = {
+				type = "toggle", name = L[c[2]], order = 20 + i, width = "full",
+				disabled = function() return not P.friendlyTopRowOnly end,
+			}
+		end
+	end
+	return group
+end
+
 core.RowsOptionsTable = {
 	type = "group",
 	name = L["Rows"],
@@ -1342,6 +1408,7 @@ core.RowsOptionsTable = {
 			hidden = function() return (P.topRowCount or 1) >= MAX_TOP_ROWS end,
 			func = AddTopRow,
 		},
+		friendly = FriendlyOptions(9),
 		rowLeft = RowOptions("rowLeft", 10),
 		rowRight = RowOptions("rowRight", 11),
 		rowTop1 = RowOptions("rowTop1", 12),

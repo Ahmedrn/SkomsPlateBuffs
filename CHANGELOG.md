@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0 (2026-10-22)
+
+- **Friendly nameplates:** a new option, Main settings > Rows > Friendly nameplates. Off (default): friendly plates get the same rows as the enemy ones. On: friendly plates get only one top row, with the categories you pick (crowd control, roots, interrupts and disarms by default), its own icon size, number of icons and glow. Enemy plates are not changed. Friendly nameplates must be switched on in Display conditions, Unit reaction.
+
 ## 1.0.0 (2026-10-21)
 
 First release.

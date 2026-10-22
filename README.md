@@ -27,7 +27,7 @@ Default set-up (32 px icons, extra top row 28 px): left = buffs only: immunities
 ## Options (`/spb`)
 - **Main settings:** Rows (per row: on/off, max icons, size, show, only mine, glow, categories), Display conditions, Appearance.
 - **Position:** left/right and top offsets and spacing, test mode, glow showcase.
-- **Spells:** a tree by category, like the BigDebuffs spells tab. Each category has its priority and glow and an add-by-ID box; each spell has show on/off, category, priority, icon size multiplier (for example Hamstring 1.5x) and its own glow; hovering a spell shows what it does. *My debuffs* is the first group.
+- **Spells:** a tree by category, like the BigDebuffs spells tab. Each category has its priority and glow and an add-by-ID box; each spell has show on/off, category, priority, icon size multiplier (for example Hamstring 1.5x) and its own glow; hovering a spell shows what it does. *Search* finds a spell by name or ID, wherever it is. *My debuffs* is the first group.
 - **Profiles** and **About**.
 
 ## Glow

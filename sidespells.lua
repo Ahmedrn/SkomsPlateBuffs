@@ -724,6 +724,117 @@ function core:BuildSideSpellUI()
 		end
 	end
 	core:BuildMyDebuffsUI()
+	core:BuildSearchUI()
+end
+
+-- ---------------------------------------------------------------------------------------------------------
+-- search: type part of a name (or a spell ID); the matching spells are listed under "Search" on the left, with the
+-- same settings as in their category
+-- ---------------------------------------------------------------------------------------------------------
+local searchText = ""
+local MAX_RESULTS = 40
+
+local function SearchMatches(query, name, ids)
+	if name:lower():find(query, 1, true) then return true end
+	local n = tonumber(query)
+	if n then
+		for _, id in ipairs(ids) do
+			if id == n then return true end
+		end
+	end
+	return false
+end
+
+function core:BuildSearchUI()
+	local args = core.SideSpellsOptionsTable.args
+	local group = args.search
+	if not group then
+		group = {
+			type = "group",
+			name = L["Search"],
+			order = 2,
+			args = {
+				box = {
+					type = "input",
+					name = L["Search a spell (name or ID)"],
+					desc = L["Type part of a spell name, or its spell ID. The matching spells are listed under Search on the left, with the same settings as in their category."],
+					order = 1,
+					width = "full",
+					get = function() return searchText end,
+					set = function(_, v)
+						searchText = (v or ""):gsub("^%s+", ""):gsub("%s+$", "")
+						core:BuildSearchUI()
+						local registry = LibStub("AceConfigRegistry-3.0", true)
+						if registry then registry:NotifyChange(core.title) end
+					end,
+				},
+				info = { type = "description", name = "", order = 2, fontSize = "medium" },
+			},
+		}
+		args.search = group
+	end
+	for k in pairs(group.args) do
+		if k:find("^spell") then group.args[k] = nil end
+	end
+
+	local query = searchText:lower()
+	if #query < 2 and not tonumber(query) then
+		group.name = L["Search"]
+		group.args.info.name = #query == 0 and "" or L["Type at least two letters."]
+		return
+	end
+
+	local catLabel = {}
+	for _, c in ipairs(CATEGORIES) do catLabel[c[1]] = L[c[2]] end
+
+	local found = {}
+	for _, e in pairs(CollectEntries()) do
+		if SearchMatches(query, e.name, e.ids) then
+			local o = P.sideSpells[e.name]
+			found[#found + 1] = { name = e.name, entry = e, cat = (o and o.cat) or e.cat }
+		end
+	end
+	-- the debuffs of My debuffs
+	local mine = {}
+	for _, id in ipairs(core.MyDebuffSeeds or {}) do
+		local name = GetSpellInfo(id)
+		if name and not IsHardCCSpell(id, name) then mine[name] = id end
+	end
+	for name, id in pairs(P.myDebuffs or {}) do
+		if not mine[name] then mine[name] = id end
+	end
+	for name, id in pairs(mine) do
+		if SearchMatches(query, name, { id }) then found[#found + 1] = { name = name, mineID = id, cat = "mydebuffs" } end
+	end
+	table_sort(found, function(a, b)
+		if a.name ~= b.name then return a.name < b.name end
+		return a.cat < b.cat
+	end)
+
+	local shown = math.min(#found, MAX_RESULTS)
+	for i = 1, shown do
+		local r = found[i]
+		local opts
+		if r.entry then
+			opts = EntryOptions(r.entry)
+		else
+			opts = MyDebuffEntry(r.name, r.mineID)
+		end
+		-- say where the spell lives
+		local label = r.cat == "mydebuffs" and L["My debuffs"] or catLabel[r.cat] or ""
+		local baseName = opts.name
+		opts.name = function() return baseName() .. "  |cff808080" .. label .. "|r" end
+		opts.order = 10 + i
+		group.args["spell" .. i .. "_" .. (r.entry and r.entry.id or r.mineID)] = opts
+	end
+	group.name = L["Search"] .. " (" .. #found .. ")"
+	if #found == 0 then
+		group.args.info.name = L["No spell matches."]
+	elseif #found > shown then
+		group.args.info.name = (L["%d spells found, showing the first %d: type more letters to narrow it down."]):format(#found, shown)
+	else
+		group.args.info.name = (L["%d spell(s) found: pick one under Search on the left."]):format(#found)
+	end
 end
 
 core.CoreOptionsTable.args.spells = core.SideSpellsOptionsTable

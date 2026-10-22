@@ -191,8 +191,14 @@ function core:MySlashProcessorFunc(input)
 		self:ToggleGlowShowcase()
 		return
 	end
-	InterfaceOptionsFrame_OpenToCategory(self.title)
-	InterfaceOptionsFrame_OpenToCategory(self.title)
+	-- own window: InterfaceOptionsFrame_OpenToCategory often only opens the AddOns list
+	local ACD = LibStub("AceConfigDialog-3.0")
+	if ACD.OpenFrames[self.title] then
+		ACD:Close(self.title)
+	else
+		if InterfaceOptionsFrame and InterfaceOptionsFrame:IsShown() then InterfaceOptionsFrame:Hide() end
+		ACD:Open(self.title)
+	end
 end
 
 -- note to self, not buffBars

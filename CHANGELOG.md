@@ -2,7 +2,7 @@
 
 ## 1.1.0 (2026-10-22)
 
-- Added the Berserking (59620) and Executioner (42976) weapon enchant procs to Offensive buffs.
+- Added the Berserking (59620) and Executioner (42976) weapon enchant procs and Tiger's Fury (50213 and its lower ranks) to Offensive buffs.
 - **Search in the Spells tab:** type part of a spell name, or a spell ID, and the matching spells are listed under Search on the left (the first 40), each with the same settings as in its category (show, category, priority, glow, size multiplier). The category is shown next to the name. My debuffs are searched too.
 - An About tab in the options: how to get help (GitHub issues, Warperia, Discord) and the other addons by Skom, with what is installed. ArenaLFG is marked as Warmane only.
 - **Friendly nameplates:** a new option, Main settings > Rows > Friendly nameplates. Off (default): friendly plates get the same rows as the enemy ones. On: friendly plates get only one top row, with the categories you pick (crowd control, roots, interrupts and disarms by default), its own icon size, number of icons and glow. Enemy plates are not changed. Friendly nameplates must be switched on in Display conditions, Unit reaction.

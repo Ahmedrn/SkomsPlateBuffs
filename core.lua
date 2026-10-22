@@ -107,7 +107,8 @@ function core:OnInitialize()
 	local optionsTable = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	optionsTable.order = 90
 	self.CoreOptionsTable.args.profiles = optionsTable
-	self.CoreOptionsTable.args.about = core.AboutGroup(91)
+	-- about.lua is only in the file list after a full restart (a /reload keeps the old list)
+	if core.AboutGroup then self.CoreOptionsTable.args.about = core.AboutGroup(91) end
 	if LDS then LDS:EnhanceOptions(optionsTable, self.db) end
 
 	config:RegisterOptionsTable(self.title, self.CoreOptionsTable)

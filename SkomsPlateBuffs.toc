@@ -17,6 +17,7 @@ locales\locales.xml
 spellData.lua
 spellList.lua
 categories.lua
+about.lua
 core.lua
 frames.lua
 options.lua

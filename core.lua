@@ -107,8 +107,7 @@ function core:OnInitialize()
 	local optionsTable = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	optionsTable.order = 90
 	self.CoreOptionsTable.args.profiles = optionsTable
-	self.AboutOptionsTable.order = 91
-	self.CoreOptionsTable.args.about = self.AboutOptionsTable
+	self.CoreOptionsTable.args.about = core.AboutGroup(91)
 	if LDS then LDS:EnhanceOptions(optionsTable, self.db) end
 
 	config:RegisterOptionsTable(self.title, self.CoreOptionsTable)

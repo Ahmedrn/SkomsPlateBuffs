@@ -33,6 +33,7 @@ core.SpellCategory = {
     [50519] = "cc", -- Sonic Blast (Bat) (from the old tracked list)
     [6615] = "buff_def", -- Free Action (from the old tracked list)
     [59620] = "buff_off", -- Berserking (Berserking weapon enchant proc)
+    [42976] = "buff_off", -- Executioner (Executioner weapon enchant proc)
     [46393] = "buff_off", -- Brutal Assault (from the old tracked list)
     [46392] = "buff_off", -- Focused Assault (from the old tracked list)
     [55166] = "buff_off", -- Tidal Force (from the old tracked list)

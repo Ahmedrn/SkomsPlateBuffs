@@ -21,6 +21,7 @@ local InterruptsDuration	= core.InterruptsDuration
 local hasModernAPI 		= core.hasModernAPI
 local SpellCategory 		= core.SpellCategory
 local SpellCategoryByName 	= core.SpellCategoryByName
+local SpellListed 			= core.SpellListed
 local CategorySide 		= core.CategorySide
 
 local GUIDDurations = {}
@@ -59,7 +60,10 @@ local P
 local WantedCats = core.WantedCats
 
 local function SideForSpell(spellID, spellName)
-	local cat = SpellCategory[spellID] or (spellName and SpellCategoryByName[spellName])
+	-- the name only stands in for ranks missing from the list: a listed spell that is switched off stays off, even
+	-- when another spell with the same name is on (the Berserk weapon proc and the druid's Berserk)
+	local cat = SpellCategory[spellID]
+	if not cat and spellName and not SpellListed[spellID] then cat = SpellCategoryByName[spellName] end
 	if not cat or not WantedCats[cat] then return end
 	return true, cat
 end
@@ -333,6 +337,88 @@ local function CollectAuras(unitID, GUID, filter)
 	end
 end
 
+-- Test mode: sample auras on your target, one or more per category plus a few debuffs of yours, so every row you
+-- use fills up as soon as you target something whose nameplate you can see. Each sample counts down and starts again.
+--   spell ID, category (nil = a debuff of yours for the My debuffs row), duration, stacks, debuff, cast by you
+local TEST_AURAS = {
+	{ 10308, "cc", 6, 0, true },                     -- Hammer of Justice
+	{ 12826, "cc", 10, 0, true },                    -- Polymorph
+	{ 6215, "cc", 8, 0, true },                      -- Fear
+	{ 1766, "interrupt", 5, 0, true },               -- Kick (lockout)
+	{ 42917, "root", 8, 0, true },                   -- Frost Nova
+	{ 53308, "root", 10, 0, true },                  -- Entangling Roots
+	{ 1715, "snare", 15, 0, true },                  -- Hamstring
+	{ 3409, "snare", 12, 0, true },                  -- Crippling Poison
+	{ 676, "disarm", 10, 0, true },                  -- Disarm
+	{ 57975, "healing_reduction", 15, 5, true },     -- Wound Poison
+	{ 642, "immunity", 12, 0, false },               -- Divine Shield
+	{ 45438, "immunity", 10, 0, false },             -- Ice Block
+	{ 31224, "immunity_spell", 5, 0, false },        -- Cloak of Shadows
+	{ 48707, "immunity_spell", 5, 0, false },        -- Anti-Magic Shell
+	{ 33206, "buff_def", 8, 0, false },              -- Pain Suppression
+	{ 22812, "buff_def", 12, 0, false },             -- Barkskin
+	{ 48066, "shield", 30, 0, false },               -- Power Word: Shield
+	{ 43039, "shield", 60, 0, false },               -- Ice Barrier
+	{ 2825, "buff_off", 40, 0, false },              -- Bloodlust
+	{ 1719, "buff_off", 12, 0, false },              -- Recklessness
+	{ 59620, "buff_off", 15, 0, false },             -- Berserk (Berserking enchant)
+	{ 11305, "speed", 15, 0, false },                -- Sprint
+	{ 1850, "speed", 15, 0, false },                 -- Dash
+	{ 29166, "buff_other", 10, 0, false },           -- Innervate
+	{ 1044, "buff_other", 6, 0, false },             -- Hand of Freedom
+	{ 47486, "healing_reduction", 10, 0, true, true }, -- Mortal Strike (yours)
+	{ 47465, nil, 15, 0, true, true },               -- Rend
+	{ 7386, nil, 30, 5, true, true },                -- Sunder Armor
+	{ 47502, nil, 10, 0, true, true },               -- Thunder Clap
+	{ 47437, nil, 30, 0, true, true },               -- Demoralizing Shout
+}
+
+local function AddTestAuras(GUID)
+	local now = GetTime()
+	local list = guidBuffs[GUID]
+	for i, a in ipairs(TEST_AURAS) do
+		local id, cat, duration, stacks, isDebuff, mine = a[1], a[2], a[3], a[4], a[5], a[6]
+		local name, _, icon = GetSpellInfo(id)
+		if name then
+			-- each sample starts at its own point of its countdown, and starts again when it runs out
+			local left = duration - ((now + i * 1.7) % duration)
+			table_insert(list, {
+				name = name,
+				icon = icon,
+				expirationTime = now + left,
+				duration = duration,
+				playerCast = mine and 1,
+				stackCount = stacks,
+				isDebuff = isDebuff or nil,
+				sID = id,
+				scale = 1,
+				side = cat and true or nil,
+				main = false,
+				cat = cat,
+			})
+		end
+	end
+end
+
+-- while test mode is on, the samples on the target are renewed every second so they keep counting down
+local testTicker = CreateFrame("Frame")
+local testWaited = 0
+testTicker:SetScript("OnUpdate", function(_, elapsed)
+	if not core.iconTestMode then return end
+	testWaited = testWaited + elapsed
+	if testWaited < 1 then return end
+	testWaited = 0
+	if UnitExists("target") then core:CollectUnitInfo("target") end
+end)
+
+function core:SetTestMode(on)
+	core.iconTestMode = on and true or false
+	testWaited = 1
+	if UnitExists("target") then
+		self:CollectUnitInfo("target")
+	end
+end
+
 function core:CollectUnitInfo(unitID)
 	if not unitID or UnitIsUnit(unitID, "player") then return end
 	local GUID = UnitGUID(unitID)
@@ -349,12 +435,8 @@ function core:CollectUnitInfo(unitID)
 	end
 	CollectAuras(unitID, GUID, "HELPFUL")
 	CollectAuras(unitID, GUID, "HARMFUL")
-	if core.iconTestMode == true then
-		for j = table_getn(guidBuffs[GUID]), 1, -1 do
-			for t = 1, 2 do
-				table_insert(guidBuffs[GUID], j, guidBuffs[GUID][j]) --reinsert the entry abunch of times.
-			end
-		end
+	if core.iconTestMode == true and UnitIsUnit(unitID, "target") then
+		AddTestAuras(GUID)
 	end
 	if unitName and not self:UpdatePlateByGUID(GUID) and (UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss") then
 		self:UpdatePlateByName(unitName, UnitHealthMax(unitID))

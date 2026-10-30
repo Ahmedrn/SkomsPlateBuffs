@@ -43,6 +43,7 @@ L["Nameplate's Anchor Point"] = true
 L["Point of the nameplate our buff frame gets anchored to.\ndefault = Top"] = true
 L["Offset X"] = true
 L["Offset Y"] = true
+L["Positive: further from the plate."] = true
 L["Offset of the buff frame containing all icons."] = true
 L["Icons per row"] = true
 L["Number of icons to display per row."] = true
@@ -266,6 +267,7 @@ L["Custom glow color"] = true
 L["Each row shows the categories you choose. Left and right are one row each, above the plate there are up to four rows. An aura goes to the first row that takes it. Which spells belong to which category, their priority and their glow are set in the Spells tab."] = true
 L["Every spell the rows can show, by category. Pick a category on the left for its priority and glow, and its spells. Switch a spell off, move it to another category, give it its own priority or glow, or add spells by ID. Other tracked auras holds the classic PlateBuffs list."] = true
 L["For each spell on someone, multiply it by 3.\nThis option won't be saved at logout."] = true
+L["Shows sample auras in every row on your target's nameplate: crowd control, roots, buffs, your debuffs ... Target an enemy close enough to see its nameplate, no need to attack it.\nThis option won't be saved at logout."] = true
 L["Glow color"] = true
 L["Left and right rows"] = true
 L["Main settings"] = true

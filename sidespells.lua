@@ -59,12 +59,59 @@ end
 -- the live category tables, built from the defaults plus the user's changes (edited in place: other files
 -- keep local references to them)
 -- ---------------------------------------------------------------------------------------------------------
+-- The settings of a spell are kept under its name, so its ranks share them. Two different spells with the same name
+-- (another icon: the Berserk weapon enchant proc and the druid's Berserk) are told apart: the lowest ID keeps the
+-- plain name, the other gets "name #ID".
+function core.SpellKey(id, name)
+	return (id and core.SpellKeyByID[id]) or name
+end
+
+local function RebuildSpellKeys()
+	local keys = core.SpellKeyByID
+	wipe(keys)
+	local groups = {} -- name -> icon -> lowest ID
+	local function add(id)
+		local name, _, icon = GetSpellInfo(id)
+		if not name then return end
+		local g = groups[name]
+		if not g then g = {}; groups[name] = g end
+		icon = icon or ""
+		if not g[icon] or id < g[icon] then g[icon] = id end
+	end
+	for id in pairs(core.SpellCategoryDefault) do add(id) end
+	for id in pairs(P.sideCustom) do add(id) end
+	for name, g in pairs(groups) do
+		local first
+		for _, low in pairs(g) do
+			if not first or low < first then first = low end
+		end
+		for icon, low in pairs(g) do
+			if low ~= first then
+				local key = name .. " #" .. low
+				for id in pairs(core.SpellCategoryDefault) do
+					local n, _, i = GetSpellInfo(id)
+					if n == name and (i or "") == icon then keys[id] = key end
+				end
+				for id in pairs(P.sideCustom) do
+					local n, _, i = GetSpellInfo(id)
+					if n == name and (i or "") == icon then keys[id] = key end
+				end
+			end
+		end
+	end
+end
+
 function core:RebuildSpellCategories()
 	local cats, byName, prio = core.SpellCategory, core.SpellCategoryByName, core.SpellPriorityByName
 	wipe(cats)
 	wipe(byName)
 	wipe(prio)
 	local ov = P.sideSpells
+	RebuildSpellKeys()
+	local listed = core.SpellListed
+	wipe(listed)
+	for id in pairs(core.SpellCategoryDefault) do listed[id] = true end
+	for id in pairs(P.sideCustom) do listed[id] = true end
 
 	-- every spell that has a category, even when switched off: "Other tracked auras" leaves these alone
 	local names = core.CategorizedNames
@@ -80,7 +127,7 @@ function core:RebuildSpellCategories()
 
 	local function add(id, cat)
 		local name = GetSpellInfo(id)
-		local o = name and ov[name]
+		local o = name and ov[core.SpellKey(id, name)]
 		if o and o.enabled == false then return end
 		cats[id] = (o and o.cat) or cat
 	end
@@ -168,10 +215,11 @@ local function CollectEntries()
 	local function add(id, cat, custom)
 		local name = GetSpellInfo(id)
 		if not name then return end
-		local e = entries[name]
+		local key = core.SpellKey(id, name)
+		local e = entries[key]
 		if not e then
-			e = { name = name, id = id, cat = cat, custom = custom, ids = {} }
-			entries[name] = e
+			e = { name = name, key = key, id = id, cat = cat, custom = custom, ids = {} }
+			entries[key] = e
 		elseif id < e.id then
 			e.id, e.cat = id, cat
 		end
@@ -349,7 +397,9 @@ local function CategoryArgs(cat)
 end
 
 local function EntryOptions(e)
-	local name = e.name
+	-- settings live under the key; the label shows the ID when the name is shared with another spell
+	local name = e.key
+	local label = name == e.name and name or (e.name .. " |cff808080#" .. e.id .. "|r")
 	local function eff() return P.sideSpells[name] end
 	local function effCat()
 		local o = eff()
@@ -363,8 +413,8 @@ local function EntryOptions(e)
 		type = "group",
 		name = function()
 			local o = eff()
-			if o and o.enabled == false then return "|cff808080" .. name .. "|r" end
-			return name
+			if o and o.enabled == false then return "|cff808080" .. e.name .. (name == e.name and "" or " #" .. e.id) .. "|r" end
+			return label
 		end,
 		icon = function() return select(3, GetSpellInfo(e.id)) end,
 		desc = function()
@@ -709,7 +759,7 @@ function core:BuildSideSpellUI()
 
 	local count = {}
 	for i, e in ipairs(list) do
-		local o = P.sideSpells[e.name]
+		local o = P.sideSpells[e.key]
 		local cat = (o and o.cat) or e.cat
 		local g = groups[cat] or groups.buff_other
 		g.args["spell" .. e.id] = EntryOptions(e)
@@ -790,7 +840,7 @@ function core:BuildSearchUI()
 	local found = {}
 	for _, e in pairs(CollectEntries()) do
 		if SearchMatches(query, e.name, e.ids) then
-			local o = P.sideSpells[e.name]
+			local o = P.sideSpells[e.key]
 			found[#found + 1] = { name = e.name, entry = e, cat = (o and o.cat) or e.cat }
 		end
 	end

@@ -901,17 +901,23 @@ local function CatPriority(cat)
 end
 
 local SpellPriorityByName = core.SpellPriorityByName
+local SpellKeyByID = core.SpellKeyByID
+
+-- the settings key of an aura: its name, or "name #ID" when another spell has the same name (see core.SpellKey)
+local function RecKey(rec)
+	return (rec.sID and SpellKeyByID[rec.sID]) or rec.name or ""
+end
 
 local function RecPriority(rec)
 	-- My debuffs ignore the category priority: their own priority (default 5); size and name break ties (see sideSort)
 	if rec.myDebuff then return SpellPriorityByName[rec.name or ""] or 5 end
-	return SpellPriorityByName[rec.name or ""] or CatPriority(rec.cat)
+	return SpellPriorityByName[RecKey(rec)] or CatPriority(rec.cat)
 end
 
 local function sideSort(a, b)
 	-- My debuffs: the bigger icon first (size multiplier from the Spells tab), then priority, then alphabetical
 	if a.myDebuff and b.myDebuff then
-		local sa, sb = P.spellScale[a.name or ""] or 1, P.spellScale[b.name or ""] or 1
+		local sa, sb = P.spellScale[RecKey(a)] or 1, P.spellScale[RecKey(b)] or 1
 		if sa ~= sb then return sa > sb end
 	end
 	local pa, pb = RecPriority(a), RecPriority(b)
@@ -923,13 +929,34 @@ local function sideSort(a, b)
 	return (a.sID or 0) < (b.sID or 0)
 end
 
+-- Nameplates share one strata, so only the frame level decides what covers what. Nameplate addons that sort
+-- plates by distance (DragonUI: a band of 16 levels per visible plate) put every other plate above ours: the
+-- auras get a level above all of those bands.
+local AURA_FRAME_LEVEL = 600
+
+-- The client raises a frame by at most 128 levels per SetFrameLevel call.
+local function SetFrameLevelFully(frame, level)
+	for _ = 1, 16 do
+		local current = frame:GetFrameLevel()
+		if current == level then return end
+		frame:SetFrameLevel(level)
+		if frame:GetFrameLevel() == current then return end
+	end
+end
+
+local function GetParentFrame(plate)
+	if not plate.PB_parentFrame then
+		plate.PB_parentFrame = CreateFrame("Frame", nil, plate)
+		plate.PB_parentFrame:SetAllPoints(plate)
+		SetFrameLevelFully(plate.PB_parentFrame, AURA_FRAME_LEVEL)
+	end
+	return plate.PB_parentFrame
+end
+
 local function GetSideFrames(plate)
 	local s = sideFrames[plate]
 	if not s then
-		if not plate.PB_parentFrame then
-			plate.PB_parentFrame = CreateFrame("Frame", nil, plate)
-			plate.PB_parentFrame:SetAllPoints(plate)
-		end
+		GetParentFrame(plate)
 		s = { rows = {} }
 		s.parent = CreateFrame("Frame", nil, plate.PB_parentFrame)
 		s.parent:SetAllPoints(plate.PB_parentFrame)
@@ -977,7 +1004,7 @@ end
 
 -- the glow a record gets: the spell's own setting, else the "dispellable buff" glow, else its category's
 local function ResolveGlow(rec)
-	local o = P.spellGlow[rec.name or ""]
+	local o = P.spellGlow[RecKey(rec)]
 	local cg = P.catGlow[rec.myDebuff and "mydebuffs" or rec.cat or "tracked"]
 	-- a Magic buff on an enemy that the player's class can remove
 	if not (o and o.type) and P.dispelGlow and not rec.isDebuff and rec.debuffType == "Magic" and CanDispelBuffs() then
@@ -1198,7 +1225,7 @@ local layoutGen = 0
 -- the icon size of a record: the row's size times the spell's own multiplier (Spells tab); a spell of the tracked list
 -- keeps the scale it has there
 local function RecSize(rec, base)
-	local scale = P.spellScale[rec.name or ""]
+	local scale = P.spellScale[RecKey(rec)]
 	if not scale and not rec.cat and rec.scale and rec.scale > 0 then scale = rec.scale end
 	return base * (scale or 1)
 end
@@ -1244,13 +1271,15 @@ local function LayoutRow(plate, s, key, row, list, topY)
 		f:ClearAllPoints()
 		if key == "rowRight" then
 			if i == 1 then
-				f:SetPoint("LEFT", anchor, "RIGHT", P.sideOffsetX - padX / 2, P.sideOffsetY - padY / 2)
+				local x, y = core:SideOffset("Right")
+				f:SetPoint("LEFT", anchor, "RIGHT", x - padX / 2, y - padY / 2)
 			else
 				f:SetPoint("LEFT", frames[i - 1], "RIGHT", P.sideSpacing - padX, 0)
 			end
 		elseif key == "rowLeft" then
 			if i == 1 then
-				f:SetPoint("RIGHT", anchor, "LEFT", -P.sideOffsetX + padX / 2, P.sideOffsetY - padY / 2)
+				local x, y = core:SideOffset("Left")
+				f:SetPoint("RIGHT", anchor, "LEFT", -x + padX / 2, y - padY / 2)
 			else
 				f:SetPoint("RIGHT", frames[i - 1], "LEFT", -P.sideSpacing + padX, 0)
 			end
@@ -1379,8 +1408,8 @@ end
 
 function core:SetFrameLevel(frame)
     local plate = frame.realPlate
-    if plate and plate:GetFrameLevel() then
-        frame:SetFrameLevel(plate:GetFrameLevel())
+    if plate then
+        frame:SetFrameLevel(GetParentFrame(plate):GetFrameLevel())
     end
 end
 
@@ -1454,11 +1483,7 @@ end
 
 -- Create our buff frames on a plate.
 function core:BuildBuffFrame(plate, reset, onlyOne)
-	if not plate.PB_parentFrame then
-		plate.PB_parentFrame = CreateFrame("Frame", nil, plate)
-		plate.PB_parentFrame:SetAllPoints(plate)
-	end
-	local visibleFrame = plate.PB_parentFrame
+	local visibleFrame = GetParentFrame(plate)
 
 	if not buffBars[plate] then
 		BuildPlateBars(plate, visibleFrame)

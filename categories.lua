@@ -579,7 +579,11 @@ end
 -- the defaults as shipped: the live tables above are rebuilt from these plus the user's changes (sidespells.lua)
 core.SpellCategoryDefault = {}
 for id, cat in pairs(core.SpellCategory) do core.SpellCategoryDefault[id] = cat end
--- per-spell priority overrides, by spell name
+-- per-spell priority overrides, by spell key (see core.SpellKey)
 core.SpellPriorityByName = {}
+-- spells that share their name with a different spell (another icon) get their own settings key: spell ID -> key
+core.SpellKeyByID = {}
+-- every spell ID of the list (defaults and added), switched off or not: these never fall back to the name lookup
+core.SpellListed = {}
 -- names of every spell that has a category (even when switched off): "Other tracked auras" leaves them alone
 core.CategorizedNames = {}

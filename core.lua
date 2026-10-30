@@ -112,7 +112,7 @@ function core:OnInitialize()
 	if LDS then LDS:EnhanceOptions(optionsTable, self.db) end
 
 	config:RegisterOptionsTable(self.title, self.CoreOptionsTable)
-	dialog:AddToBlizOptions(self.title, self.title)
+	dialog:AddToBlizOptions(self.title, "Skom's Plate Buffs")
 end
 
 do

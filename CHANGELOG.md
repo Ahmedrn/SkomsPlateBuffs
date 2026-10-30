@@ -1,35 +1,27 @@
 # Changelog
 
+## 1.2.0 (2026-10-29)
+
+- Unticking a category in "Show in this row" is now remembered; the default categories used to come back.
+- One Skom's minimap button opens all your Skom's addons when two or more are installed (/skoms).
+- Test mode shows realistic sample auras in every row, just by targeting an enemy.
+- Left and right rows can be positioned separately.
+- Spells sharing a name (like the Berserk weapon proc and druid Berserk) have their own settings.
+- Auras stay on top of other nameplates (DragonUI).
+- New display name: Skom's Plate Buffs.
+
 ## 1.1.0 (2026-10-22)
 
-- Added the Berserking (59620) and Executioner (42976) weapon enchant procs and Tiger's Fury (50213 and its lower ranks) to Offensive buffs.
-- **Search in the Spells tab:** type part of a spell name, or a spell ID, and the matching spells are listed under Search on the left (the first 40), each with the same settings as in its category (show, category, priority, glow, size multiplier). The category is shown next to the name. My debuffs are searched too.
-- An About tab in the options: how to get help (GitHub issues, Warperia, Discord) and the other addons by Skom, with what is installed. ArenaLFG is marked as Warmane only.
-- **Friendly nameplates:** a new option, Main settings > Rows > Friendly nameplates. Off (default): friendly plates get the same rows as the enemy ones. On: friendly plates get only one top row, with the categories you pick (crowd control, roots, interrupts and disarms by default), its own icon size, number of icons and glow. Enemy plates are not changed. Friendly nameplates must be switched on in Display conditions, Unit reaction.
+- Search spells by name or ID in the Spells tab.
+- Friendly nameplates can show their own single row of crowd control.
+- Added the Berserking and Executioner weapon procs and Tiger's Fury.
+- New About tab.
 
 ## 1.0.0 (2026-10-21)
 
 First release.
 
-**Rows around the nameplate**
-- A left row and a right row (3 icons each by default), a top row, and up to five extra top rows. Every row has its own size, number of icons and glow.
-- Each row picks what it shows: crowd control, disarms, roots, snares, healing reduction, interrupt lockouts, immunities, defensive buffs, shields, offensive buffs, speed boosts, other buffs, or any other aura. A row can be limited to buffs or debuffs, and to your own auras.
-- An aura goes to the first row that takes it. Rows set to "only my auras" are filled first.
-- **My debuffs:** a switch on the top row. It shows your own debuffs on enemies (hard crowd control stays on the right row). In the Spells tab you choose which ones to show, their size, priority and glow. The list starts with your class's debuffs and grows with every debuff you apply.
-- Default set-up: left = immunities and defensive / offensive cooldowns, right = crowd control, roots, interrupts, disarms, snares and healing reduction, top = my debuffs, extra top row = other buffs.
-
-**Spells tab**
-- A tree by category, like BigDebuffs: hundreds of spells, each with show on/off, category, priority, icon size multiplier and its own glow. Hover a spell to see what it does.
-- Add spells by ID to any category. Everything is stored by spell name, so all ranks follow.
-- Durations and dispel types were checked against the 3.3.5a client's own spell data.
-
-**Glow**
-- Per category and per spell: none, border (optionally pulsing), pixel glow, autocast shine, action button glow or proc glow. The last four need LibCustomGlow-1.0 (it comes with WeakAuras); without it a border is used.
-- Glow colour: the style's native yellow (default is by category), by spell type or by category. Border colour: by spell type, by category, or one custom colour (dark by default).
-- Magic buffs you can dispel (priest, shaman, mage, warlock, warrior) get a glow of their own.
-- A glow showcase (Position tab, or `/spb glow`) shows every style on a sample icon.
-
-**Also**
-- One options window: Main settings, Position, Spells, Profiles, About (`/spb`).
-- Settings from the original PlateBuffs (`PB_DB`) are copied over once to `SkomsPlateBuffsDB`. Disable the original PlateBuffs first.
-- Built on the PlateBuffs engine by Cyprias (3.3.5a backport by Kader, WotLK changes by Khal). See the README for the credits and inspirations.
+- Rows of auras around enemy nameplates: left, right, top and extra top rows, each showing the categories you pick.
+- PvP categories (crowd control, interrupts, roots, immunities, cooldowns...) and your own debuffs on top.
+- Glow and size per category or per spell, hundreds of spells checked against the 3.3.5a client data.
+- Imports your settings from the original PlateBuffs.

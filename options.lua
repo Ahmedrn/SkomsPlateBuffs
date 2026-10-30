@@ -130,6 +130,7 @@ defaultSettings.increase = 1
 defaultSettings.sideSpacing = 2
 defaultSettings.sideOffsetX = 2
 defaultSettings.sideOffsetY = 0
+-- per row (sideLeftOffsetX, sideRightOffsetY ...): unset until changed, then the shared offset above is the fallback
 defaultSettings.sideAnchorHealthBar = true
 defaultSettings.sidePrioCC = 9
 defaultSettings.sidePrioInterrupt = 7
@@ -220,7 +221,7 @@ defaultSettings.friendlyGlow = true
 defaultSettings.friendlyCats = { cc = true, root = true, interrupt = true, disarm = true }
 
 core.CoreOptionsTable = {
-	name = core.title,
+	name = "Skom's Plate Buffs",
 	type = "group",
 	childGroups = "tab",
 	get = function(info)
@@ -1234,7 +1235,8 @@ local function RowOptions(rowKey, order)
 		set = function(info, v)
 			local k = info[#info]
 			if isCat[k] then
-				row().cats[k] = v and true or nil
+				-- false, not nil: nil lets the AceDB default (true) show through again
+				row().cats[k] = v and true or false
 			else
 				row()[k] = v
 			end
@@ -1420,6 +1422,25 @@ core.RowsOptionsTable = {
 	}
 }
 
+-- offset of the left or right row; X counts away from the plate on both sides
+function core:SideOffset(side)
+	local p = core.db.profile -- not the cached P: frames.lua calls this after a profile change too
+	return p["side" .. side .. "OffsetX"] or p.sideOffsetX, p["side" .. side .. "OffsetY"] or p.sideOffsetY
+end
+
+local function SideOffsetOption(side, axis, order)
+	return {
+		type = "range",
+		name = L["Offset " .. axis],
+		desc = axis == "X" and L["Positive: further from the plate."] or nil,
+		order = order,
+		min = -60,
+		max = 60,
+		step = 1,
+		get = function() return select(axis == "X" and 1 or 2, core:SideOffset(side)) end,
+	}
+end
+
 core.PositionOptionsTable = {
 	type = "group",
 	name = L["Position"],
@@ -1441,8 +1462,12 @@ core.PositionOptionsTable = {
 			order = 2
 		},
 		sideSpacing = { type = "range", name = L["Spacing"], order = 3, min = -10, max = 30, step = 1 },
-		sideOffsetX = { type = "range", name = L["Offset X"], order = 4, min = -60, max = 60, step = 1 },
-		sideOffsetY = { type = "range", name = L["Offset Y"], order = 5, min = -60, max = 60, step = 1 },
+		sideLeftHeader = { type = "description", name = "|cffffd100" .. L["Left row"] .. "|r", order = 4, fontSize = "medium" },
+		sideLeftOffsetX = SideOffsetOption("Left", "X", 5),
+		sideLeftOffsetY = SideOffsetOption("Left", "Y", 6),
+		sideRightHeader = { type = "description", name = "|cffffd100" .. L["Right row"] .. "|r", order = 7, fontSize = "medium" },
+		sideRightOffsetX = SideOffsetOption("Right", "X", 8),
+		sideRightOffsetY = SideOffsetOption("Right", "Y", 9),
 		topHeader = { type = "header", name = L["Rows above the plate"], order = 10 },
 		topSpacing = { type = "range", name = L["Spacing"], order = 11, min = -10, max = 30, step = 1 },
 		topRowSpacing = { type = "range", name = L["Space between rows"], order = 12, min = -10, max = 30, step = 1 },
@@ -1459,13 +1484,13 @@ core.PositionOptionsTable = {
 		iconTestMode = {
 			type = "toggle",
 			name = L["Test Mode"],
-			desc = L["For each spell on someone, multiply it by 3.\nThis option won't be saved at logout."],
+			desc = L["Shows sample auras in every row on your target's nameplate: crowd control, roots, buffs, your debuffs ... Target an enemy close enough to see its nameplate, no need to attack it.\nThis option won't be saved at logout."],
 			order = 21,
 			get = function()
 				return core.iconTestMode
 			end,
-			set = function()
-				core.iconTestMode = not core.iconTestMode
+			set = function(_, v)
+				core:SetTestMode(v)
 			end
 		},
 	}

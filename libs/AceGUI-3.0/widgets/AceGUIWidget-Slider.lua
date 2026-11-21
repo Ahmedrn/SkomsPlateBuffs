@@ -2,7 +2,7 @@
 Slider Widget
 Graphical Slider, like, for Range values.
 -------------------------------------------------------------------------------]]
-local Type, Version = "Slider", 25
+local Type, Version = "Slider", 24
 local AceGUI = LibStub and LibStub("AceGUI-3.0", true)
 if not AceGUI or (AceGUI:GetWidgetVersion(Type) or 0) >= Version then return end
 
@@ -103,7 +103,7 @@ local function EditBox_OnEnterPressed(frame)
 	end
 
 	if value then
-		PlaySound("igMainMenuOptionCheckBoxOn")
+		PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
 		self.slider:SetValue(value)
 		self:Fire("OnMouseUp", value)
 	end
@@ -210,7 +210,7 @@ local ManualBackdrop = {
 }
 
 local function Constructor()
-	local frame = CreateFrame("Frame", string.format("%s%d", Type, AceGUI:GetNextWidgetNum(Type)), UIParent)
+	local frame = CreateFrame("Frame", nil, UIParent)
 
 	frame:EnableMouse(true)
 	frame:SetScript("OnMouseDown", Frame_OnMouseDown)
@@ -221,8 +221,7 @@ local function Constructor()
 	label:SetJustifyH("CENTER")
 	label:SetHeight(15)
 
-	local slider = CreateFrame("Slider", nil, frame)
-	slider:SetFrameLevel(frame:GetFrameLevel() + 1)
+	local slider = CreateFrame("Slider", nil, frame, "BackdropTemplate")
 	slider:SetOrientation("HORIZONTAL")
 	slider:SetHeight(15)
 	slider:SetHitRectInsets(0, 0, -10, 0)
@@ -244,8 +243,7 @@ local function Constructor()
 	local hightext = slider:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	hightext:SetPoint("TOPRIGHT", slider, "BOTTOMRIGHT", -2, 3)
 
-	local editbox = CreateFrame("EditBox", nil, frame)
-	editbox:SetFrameLevel(frame:GetFrameLevel() + 1)
+	local editbox = CreateFrame("EditBox", nil, frame, "BackdropTemplate")
 	editbox:SetAutoFocus(false)
 	editbox:SetFontObject(GameFontHighlightSmall)
 	editbox:SetPoint("TOP", slider, "BOTTOM")
@@ -275,6 +273,7 @@ local function Constructor()
 		widget[method] = func
 	end
 	slider.obj, editbox.obj = widget, widget
+	C_Timer.After(0.3, function() editbox:SetText(" ") UpdateText(widget) end) -- Workaround for font loading issue, making the editboxes blank until the text is changed
 
 	return AceGUI:RegisterAsWidget(widget)
 end

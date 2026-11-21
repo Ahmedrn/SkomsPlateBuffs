@@ -2,7 +2,7 @@
 BlizOptionsGroup Container
 Simple container widget for the integration of AceGUI into the Blizzard Interface Options
 -------------------------------------------------------------------------------]]
-local Type, Version = "BlizOptionsGroup", 28
+local Type, Version = "BlizOptionsGroup", 26
 local AceGUI = LibStub and LibStub("AceGUI-3.0", true)
 if not AceGUI or (AceGUI:GetWidgetVersion(Type) or 0) >= Version then return end
 
@@ -99,8 +99,7 @@ local methods = {
 Constructor
 -------------------------------------------------------------------------------]]
 local function Constructor()
-	local frame = CreateFrame("Frame", string.format("%s%d", Type, AceGUI:GetNextWidgetNum(Type)), InterfaceOptionsFramePanelContainer)
-	frame:SetFrameLevel(InterfaceOptionsFramePanelContainer:GetFrameLevel() + 1)
+	local frame = CreateFrame("Frame", nil, InterfaceOptionsFramePanelContainer)
 	frame:Hide()
 
 	-- support functions for the Blizzard Interface Options
@@ -125,7 +124,6 @@ local function Constructor()
 
 	--Container Support
 	local content = CreateFrame("Frame", nil, frame)
-	content:SetFrameLevel(frame:GetFrameLevel() + 1)
 	content:SetPoint("TOPLEFT", 10, -10)
 	content:SetPoint("BOTTOMRIGHT", -10, 10)
 

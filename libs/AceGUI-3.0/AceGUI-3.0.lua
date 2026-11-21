@@ -25,16 +25,16 @@
 -- @class file
 -- @name AceGUI-3.0
 -- @release $Id: AceGUI-3.0.lua 1288 2022-09-25 14:19:00Z funkehdude $
-local ACEGUI_MAJOR, ACEGUI_MINOR = "AceGUI-3.0", 42
+local ACEGUI_MAJOR, ACEGUI_MINOR = "AceGUI-3.0", 41
 local AceGUI, oldminor = LibStub:NewLibrary(ACEGUI_MAJOR, ACEGUI_MINOR)
 
 if not AceGUI then return end -- No upgrade needed
 
 -- Lua APIs
-local tconcat, tinsert, wipe = table.concat, table.insert, table.wipe
+local tinsert, wipe = table.insert, table.wipe
 local select, pairs, next, type = select, pairs, next, type
-local error, assert, loadstring = error, assert, loadstring
-local setmetatable, rawget, rawset = setmetatable, rawget, rawset
+local error, assert = error, assert
+local setmetatable, rawget = setmetatable, rawget
 local math_max, math_min, math_ceil = math.max, math.min, math.ceil
 
 -- WoW APIs
@@ -61,39 +61,10 @@ local function errorhandler(err)
 	return geterrorhandler()(err)
 end
 
-local function CreateDispatcher(argCount)
-	local code = [[
-		local xpcall, eh = ...
-		local method, ARGS
-		local function call() return method(ARGS) end
-
-		local function dispatch(func, ...)
-			method = func
-			if not method then return end
-			ARGS = ...
-			return xpcall(call, eh)
-		end
-
-		return dispatch
-	]]
-
-	local ARGS = {}
-	for i = 1, argCount do ARGS[i] = "arg"..i end
-	code = code:gsub("ARGS", tconcat(ARGS, ", "))
-	return assert(loadstring(code, "safecall Dispatcher["..argCount.."]"))(xpcall, errorhandler)
-end
-
-local Dispatchers = setmetatable({}, {__index=function(self, argCount)
-	local dispatcher = CreateDispatcher(argCount)
-	rawset(self, argCount, dispatcher)
-	return dispatcher
-end})
-Dispatchers[0] = function(func)
-	return xpcall(func, errorhandler)
-end
-
 local function safecall(func, ...)
-	return Dispatchers[select("#", ...)](func, ...)
+	if func then
+		return xpcall(func, errorhandler, ...)
+	end
 end
 
 -- Recycling functions
@@ -511,14 +482,14 @@ do
 		end
 	end
 
-	local function FrameResize(this, width, height) -- backwards compatibility
+	local function FrameResize(this)
 		local self = this.obj
 		if this:GetWidth() and this:GetHeight() then
 			if self.OnWidthSet then
-				self:OnWidthSet(width or this:GetWidth())
+				self:OnWidthSet(this:GetWidth())
 			end
 			if self.OnHeightSet then
-				self:OnHeightSet(height or this:GetHeight())
+				self:OnHeightSet(this:GetHeight())
 			end
 		end
 	end

@@ -1,7 +1,7 @@
 --[[-----------------------------------------------------------------------------
 Checkbox Widget
 -------------------------------------------------------------------------------]]
-local Type, Version = "CheckBox", 28
+local Type, Version = "CheckBox", 27
 local AceGUI = LibStub and LibStub("AceGUI-3.0", true)
 if not AceGUI or (AceGUI:GetWidgetVersion(Type) or 0) >= Version then return end
 
@@ -56,9 +56,9 @@ local function CheckBox_OnMouseUp(frame)
 		self:ToggleChecked()
 
 		if self.checked then
-			PlaySound("igMainMenuOptionCheckBoxOn")
+			PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
 		else -- for both nil and false (tristate)
-			PlaySound("igMainMenuOptionCheckBoxOff")
+			PlaySound(857) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF
 		end
 
 		self:Fire("OnValueChanged", self.checked)
@@ -97,7 +97,7 @@ local methods = {
 		if disabled then
 			self.frame:Disable()
 			self.text:SetTextColor(0.5, 0.5, 0.5)
-			SetDesaturation(self.check, true)
+			self.check:SetDesaturated(true)
 			if self.desc then
 				self.desc:SetTextColor(0.5, 0.5, 0.5)
 			end
@@ -105,9 +105,9 @@ local methods = {
 			self.frame:Enable()
 			self.text:SetTextColor(1, 1, 1)
 			if self.tristate and self.checked == nil then
-				SetDesaturation(self.check, true)
+				self.check:SetDesaturated(true)
 			else
-				SetDesaturation(self.check, false)
+				self.check:SetDesaturated(false)
 			end
 			if self.desc then
 				self.desc:SetTextColor(1, 1, 1)
@@ -119,15 +119,15 @@ local methods = {
 		local check = self.check
 		self.checked = value
 		if value then
-			SetDesaturation(check, false)
+			self.check:SetDesaturated(false)
 			check:Show()
 		else
 			--Nil is the unknown tristate value
 			if self.tristate and value == nil then
-				SetDesaturation(check, true)
+				self.check:SetDesaturated(true)
 				check:Show()
 			else
-				SetDesaturation(check, false)
+				self.check:SetDesaturated(false)
 				check:Hide()
 			end
 		end
@@ -151,21 +151,21 @@ local methods = {
 		local size
 		if type == "radio" then
 			size = 16
-			checkbg:SetTexture("Interface\\Buttons\\UI-RadioButton")
+			checkbg:SetTexture(130843) -- Interface\\Buttons\\UI-RadioButton
 			checkbg:SetTexCoord(0, 0.25, 0, 1)
-			check:SetTexture("Interface\\Buttons\\UI-RadioButton")
+			check:SetTexture(130843) -- Interface\\Buttons\\UI-RadioButton
 			check:SetTexCoord(0.25, 0.5, 0, 1)
 			check:SetBlendMode("ADD")
-			highlight:SetTexture("Interface\\Buttons\\UI-RadioButton")
+			highlight:SetTexture(130843) -- Interface\\Buttons\\UI-RadioButton
 			highlight:SetTexCoord(0.5, 0.75, 0, 1)
 		else
 			size = 24
-			checkbg:SetTexture("Interface\\Buttons\\UI-CheckBox-Up")
+			checkbg:SetTexture(130755) -- Interface\\Buttons\\UI-CheckBox-Up
 			checkbg:SetTexCoord(0, 1, 0, 1)
-			check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+			check:SetTexture(130751) -- Interface\\Buttons\\UI-CheckBox-Check
 			check:SetTexCoord(0, 1, 0, 1)
 			check:SetBlendMode("BLEND")
-			highlight:SetTexture("Interface\\Buttons\\UI-CheckBox-Highlight")
+			highlight:SetTexture(130753) -- Interface\\Buttons\\UI-CheckBox-Highlight
 			highlight:SetTexCoord(0, 1, 0, 1)
 		end
 		checkbg:SetHeight(size)
@@ -238,7 +238,7 @@ local methods = {
 Constructor
 -------------------------------------------------------------------------------]]
 local function Constructor()
-	local frame = CreateFrame("Button", string.format("%s%d", Type, AceGUI:GetNextWidgetNum(Type)), UIParent)
+	local frame = CreateFrame("Button", nil, UIParent)
 	frame:Hide()
 
 	frame:EnableMouse(true)
@@ -251,11 +251,11 @@ local function Constructor()
 	checkbg:SetWidth(24)
 	checkbg:SetHeight(24)
 	checkbg:SetPoint("TOPLEFT")
-	checkbg:SetTexture("Interface\\Buttons\\UI-CheckBox-Up")
+	checkbg:SetTexture(130755) -- Interface\\Buttons\\UI-CheckBox-Up
 
 	local check = frame:CreateTexture(nil, "OVERLAY")
 	check:SetAllPoints(checkbg)
-	check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+	check:SetTexture(130751) -- Interface\\Buttons\\UI-CheckBox-Check
 
 	local text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 	text:SetJustifyH("LEFT")
@@ -264,7 +264,7 @@ local function Constructor()
 	text:SetPoint("RIGHT")
 
 	local highlight = frame:CreateTexture(nil, "HIGHLIGHT")
-	highlight:SetTexture("Interface\\Buttons\\UI-CheckBox-Highlight")
+	highlight:SetTexture(130753) -- Interface\\Buttons\\UI-CheckBox-Highlight
 	highlight:SetBlendMode("ADD")
 	highlight:SetAllPoints(checkbg)
 

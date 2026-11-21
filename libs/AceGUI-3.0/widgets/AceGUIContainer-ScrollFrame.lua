@@ -2,7 +2,7 @@
 ScrollFrame Container
 Plain container that scrolls its content and doesn't grow in height.
 -------------------------------------------------------------------------------]]
-local Type, Version = "ScrollFrame", 28
+local Type, Version = "ScrollFrame", 26
 local AceGUI = LibStub and LibStub("AceGUI-3.0", true)
 if not AceGUI or (AceGUI:GetWidgetVersion(Type) or 0) >= Version then return end
 
@@ -164,11 +164,10 @@ local methods = {
 Constructor
 -------------------------------------------------------------------------------]]
 local function Constructor()
+	local frame = CreateFrame("Frame", nil, UIParent)
 	local num = AceGUI:GetNextWidgetNum(Type)
-	local frame = CreateFrame("Frame", string.format("%s%d", Type, num), UIParent)
 
 	local scrollframe = CreateFrame("ScrollFrame", nil, frame)
-	scrollframe:SetFrameLevel(frame:GetFrameLevel() + 1)
 	scrollframe:SetPoint("TOPLEFT")
 	scrollframe:SetPoint("BOTTOMRIGHT")
 	scrollframe:EnableMouseWheel(true)
@@ -176,7 +175,6 @@ local function Constructor()
 	scrollframe:SetScript("OnSizeChanged", ScrollFrame_OnSizeChanged)
 
 	local scrollbar = CreateFrame("Slider", ("AceConfigDialogScrollFrame%dScrollBar"):format(num), scrollframe, "UIPanelScrollBarTemplate")
-	scrollbar:SetFrameLevel(scrollframe:GetFrameLevel() + 1)
 	scrollbar:SetPoint("TOPLEFT", scrollframe, "TOPRIGHT", 4, -16)
 	scrollbar:SetPoint("BOTTOMLEFT", scrollframe, "BOTTOMRIGHT", 4, 16)
 	scrollbar:SetMinMaxValues(0, 1000)
@@ -189,11 +187,10 @@ local function Constructor()
 
 	local scrollbg = scrollbar:CreateTexture(nil, "BACKGROUND")
 	scrollbg:SetAllPoints(scrollbar)
-	scrollbg:SetTexture(0, 0, 0, 0.4)
+	scrollbg:SetColorTexture(0, 0, 0, 0.4)
 
 	--Container Support
 	local content = CreateFrame("Frame", nil, scrollframe)
-	content:SetFrameLevel(scrollframe:GetFrameLevel() + 1)
 	content:SetPoint("TOPLEFT")
 	content:SetPoint("TOPRIGHT")
 	content:SetHeight(400)

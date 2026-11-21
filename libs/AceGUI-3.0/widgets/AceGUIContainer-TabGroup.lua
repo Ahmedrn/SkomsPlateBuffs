@@ -2,7 +2,7 @@
 TabGroup Container
 Container that uses tabs on top to switch between groups.
 -------------------------------------------------------------------------------]]
-local Type, Version = "TabGroup", 40
+local Type, Version = "TabGroup", 38
 local AceGUI = LibStub and LibStub("AceGUI-3.0", true)
 if not AceGUI or (AceGUI:GetWidgetVersion(Type) or 0) >= Version then return end
 
@@ -196,7 +196,7 @@ Scripts
 -------------------------------------------------------------------------------]]
 local function Tab_OnClick(frame)
 	if not (frame.selected or frame.disabled) then
-		PlaySound("igCharacterInfoTab")
+		PlaySound(841) -- SOUNDKIT.IG_CHARACTER_INFO_TAB
 		frame.obj:SelectTab(frame.value)
 	end
 end
@@ -237,7 +237,6 @@ local methods = {
 	["CreateTab"] = function(self, id)
 		local tabname = ("AceGUITabGroup%dTab%d"):format(self.num, id)
 		local tab = CreateFrame("Button", tabname, self.border)
-		tab:SetFrameLevel(self.border:GetFrameLevel() + 1)
 		tab:SetSize(115, 24)
 		tab.deselectedTextY = -3
 		tab.selectedTextY = -2
@@ -491,7 +490,7 @@ local PaneBackdrop  = {
 
 local function Constructor()
 	local num = AceGUI:GetNextWidgetNum(Type)
-	local frame = CreateFrame("Frame", string.format("%s%d", Type, num), UIParent)
+	local frame = CreateFrame("Frame",nil,UIParent)
 	frame:SetHeight(100)
 	frame:SetWidth(100)
 	frame:SetFrameStrata("FULLSCREEN_DIALOG")
@@ -503,8 +502,7 @@ local function Constructor()
 	titletext:SetHeight(18)
 	titletext:SetText("")
 
-	local border = CreateFrame("Frame", nil, frame)
-	border:SetFrameLevel(frame:GetFrameLevel() + 1)
+	local border = CreateFrame("Frame", nil, frame, "BackdropTemplate")
 	border:SetPoint("TOPLEFT", 1, -27)
 	border:SetPoint("BOTTOMRIGHT", -1, 3)
 	border:SetBackdrop(PaneBackdrop)
@@ -512,7 +510,6 @@ local function Constructor()
 	border:SetBackdropBorderColor(0.4, 0.4, 0.4)
 
 	local content = CreateFrame("Frame", nil, border)
-	content:SetFrameLevel(border:GetFrameLevel() + 1)
 	content:SetPoint("TOPLEFT", 10, -7)
 	content:SetPoint("BOTTOMRIGHT", -10, 7)
 

@@ -1,26 +1,14 @@
-## Interface: 30300
+## Interface: 120105, 120100, 16001
 ## Title: |cff33ff99Skom's|r Plate Buffs
-## Notes: Enemy nameplate auras in rows you define: left, right and up to four above the plate, each with its own categories. Built on the PlateBuffs engine; replaces PlateBuffs.
-## Version: 1.2.0
+## Notes: Enemy nameplate auras in rows you define: left, right and up to six above the plate. Forever edition on the client's AuraContainer frames. Rows, categories and profiles from the Warmane version.
+## Version: 0.11.0-forever
 ## Author: Skom
-## SavedVariables: SkomsPlateBuffsDB, PB_DB, SkomsLauncherDB
-## OptionalDeps: LibStub, CallbackHandler-1.0, LibNameplates-1.0, LibCustomGlow-1.0, WeakAuras
+## SavedVariables: SkomsPlateBuffsDB
+## IconTexture: Interface\AddOns\SkomsPlateBuffs\icon.tga
 
-## X-Based-On: PlateBuffs by Cyprias, 3.3.5a backport by Kader, WotLK changes by Khal (github.com/KhalGH/PlateBuffs-WoTLK)
-## X-Inspired-By: MiniCC (Verubato), BigDebuffs (Jordon, Tsoukie), WeakAuras / LibCustomGlow
-## X-Packaged-Version: 1.2.0
-## X-Date: 2026-10-22
-
-libs\embeds.xml
-locales\locales.xml
-
-spellData.lua
-spellList.lua
-categories.lua
-about.lua
+libs.xml
+data.lua
+ranks.lua
 core.lua
-frames.lua
-options.lua
-combatlog.lua
-sidespells.lua
-launcher.lua
+testmode.lua
+ui.lua

@@ -1,51 +1,15 @@
-<p align="center"><img src="logo.png" alt="SkomsPlateBuffs" width="120"></p>
+# Skom's Plate Buffs (Forever edition)
 
-# Skom's Plate Buffs (WoW 3.3.5a)
+Port of [Skom's Plate Buffs](https://github.com/Ahmedrn/SkomsPlateBuffs) for the WoW Forever server: a 12.x client running 1.x spell data.
 
-See every crowd control, cooldown and debuff that matters right on enemy nameplates, laid out the way you want. Made for PvP.
+Same rows, categories and profiles as the Warmane (3.3.5a) version, drawn with the client's own AuraContainer frames, because in combat Forever hides aura spell ids and the combat log from addons.
 
-![In a fight](screenshot_4.png)
+- **Enemy debuffs** (crowd control, roots, snares, disarms, healing reduction, my debuffs) by spell list. The lists in `data.lua` are built from Forever's own spell data.
+- **Enemy buffs** by the game's own tags (big defensive, external defensive, important), plus short buffs and any other aura.
+- **Friendly buffs** by spell list (immunities, defensives, offensives, shields, speed boosts, other).
+- **Interrupt lockouts** from cast-interrupted events.
+- **Aura library**: every aura met on nameplates out of combat, by class, with a block switch and right-click "Move to".
 
-| | | |
-|---|---|---|
-| ![Rows around a nameplate](screenshot.png) | ![Top row and cast bar](screenshot_2.png) | ![My debuffs on top](screenshot_3.png) |
+`/skpb` opens the settings, `/skpb test` toggles the preview on your target.
 
-## Features
-
-- **Rows around the nameplate:**
-  - left, right, top and up to five extra top rows;
-  - each with its own icon size, icon count and position;
-  - each showing the categories you pick.
-- **PvP categories:** crowd control, interrupts, roots, snares, disarms, healing reduction, immunities, defensives, offensives, shields and speed boosts.
-- **My debuffs** on the top row, so you track your own DoTs and debuffs at a glance.
-- **Glow and size** per category or per spell, in the WeakAuras glow styles. Dispellable magic buffs are highlighted.
-- **Hundreds of spells** sorted and checked against the 3.3.5a client data:
-  - search by name or ID;
-  - add your own by ID;
-  - set the priority of each one.
-- **Friendly nameplates** can get their own single row of crowd control.
-- **Test mode:** target any enemy to see sample auras in every row and place them without a fight.
-- **Profiles** per character or shared.
-
-The default layout puts:
-- immunities and cooldowns on the left;
-- crowd control and other debuffs on the right;
-- your debuffs on top.
-
-## Install
-
-Disable the original **PlateBuffs** first. Your old settings are imported once.
-
-## Commands
-
-`/spb` opens the options, `/spb glow` shows every glow style.
-
-## Feedback
-
-- **GitHub:** https://github.com/Ahmedrn/SkomsPlateBuffs/issues
-- **Warperia:** comment on the addon page
-- **Discord:** `skomzx`
-
-## Credits
-
-Built on **PlateBuffs** by Cyprias, with the 3.3.5a backport by Kader and the WotLK fixes by Khal.
+The `main` branch is the Warmane version.

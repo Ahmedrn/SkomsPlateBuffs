@@ -22,11 +22,11 @@ AceConfigDialog.frame.closing = AceConfigDialog.frame.closing or {}
 AceConfigDialog.frame.closeAllOverride = AceConfigDialog.frame.closeAllOverride or {}
 
 -- Lua APIs
-local tconcat, tinsert, tsort, tremove, wipe = table.concat, table.insert, table.sort, table.remove, table.wipe
+local tinsert, tsort, tremove, wipe = table.insert, table.sort, table.remove, table.wipe
 local strmatch, format = string.match, string.format
-local assert, loadstring, error = assert, loadstring, error
+local error = error
 local pairs, next, select, type, unpack, ipairs = pairs, next, select, type, unpack, ipairs
-local rawset, tostring, tonumber = rawset, tostring, tonumber
+local tostring, tonumber = tostring, tonumber
 local math_min, math_max, math_floor = math.min, math.max, math.floor
 
 local emptyTbl = {}
@@ -40,39 +40,10 @@ local function errorhandler(err)
 	return geterrorhandler()(err)
 end
 
-local function CreateDispatcher(argCount)
-	local code = [[
-		local xpcall, eh = ...
-		local method, ARGS
-		local function call() return method(ARGS) end
-
-		local function dispatch(func, ...)
-			method = func
-			if not method then return end
-			ARGS = ...
-			return xpcall(call, eh)
-		end
-
-		return dispatch
-	]]
-
-	local ARGS = {}
-	for i = 1, argCount do ARGS[i] = "arg"..i end
-	code = code:gsub("ARGS", tconcat(ARGS, ", "))
-	return assert(loadstring(code, "safecall Dispatcher["..argCount.."]"))(xpcall, errorhandler)
-end
-
-local Dispatchers = setmetatable({}, {__index=function(self, argCount)
-	local dispatcher = CreateDispatcher(argCount)
-	rawset(self, argCount, dispatcher)
-	return dispatcher
-end})
-Dispatchers[0] = function(func)
-	return xpcall(func, errorhandler)
-end
-
 local function safecall(func, ...)
-	return Dispatchers[select("#", ...)](func, ...)
+	if func then
+		return xpcall(func, errorhandler, ...)
+	end
 end
 
 local width_multiplier = 170
@@ -598,33 +569,11 @@ do
 				self:SetPropagateKeyboardInput(true)
 			end
 		end)
-		-- Background (Retail - Center slice (DialogBorderOpaqueTemplate))
-		local bg = CreateFrame("Frame", nil, frame)
-		bg:SetAllPoints(frame)
-		bg:SetFrameLevel(frame:GetFrameLevel() - 2)
-		bg:SetBackdrop({
-			bgFile = "Interface\\Buttons\\WHITE8x8",
-		})
-		bg:SetBackdropColor(0, 0, 0, 1)
-		bg:SetPoint("TOPLEFT", frame, 10, -11)
-		bg:SetPoint("BOTTOMRIGHT", frame, -11, 10)
-		frame.bg = bg
-		-- Border (Retail - NineSlice border pieces (DialogBorderOpaqueTemplate))
-		local border = CreateFrame("Frame", nil, frame)
-		border:SetAllPoints(frame)
-		border:SetFrameLevel(frame:GetFrameLevel() - 1)
-		border:SetBackdrop({
-			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-			edgeSize = 32,
-			insets = { left = 11, right = 12, top = 12, bottom = 11 },
-		})
-		border:SetBackdropBorderColor(1, 1, 1, 1)
-		frame.border = border
 
-		frame.realSetFrameStrata = frame.SetFrameStrata
-		frame.realSetFrameLevel = frame.SetFrameLevel
-		frame.SetFrameStrata = function() end -- frame:SetFixedFrameStrata(true)
-		frame.SetFrameLevel = function() end -- frame:SetFixedFrameLevel(true)
+		local border = CreateFrame("Frame", nil, frame, "DialogBorderOpaqueTemplate")
+		border:SetAllPoints(frame)
+		frame:SetFixedFrameStrata(true)
+		frame:SetFixedFrameLevel(true)
 
 		local text = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 		text:SetSize(290, 0)
@@ -633,15 +582,14 @@ do
 
 		local function newButton(newText)
 			local button = CreateFrame("Button", nil, frame)
-			button:SetFrameLevel(frame:GetFrameLevel() + 1)
 			button:SetSize(128, 21)
 			button:SetNormalFontObject(GameFontNormal)
 			button:SetHighlightFontObject(GameFontHighlight)
-			button:SetNormalTexture("Interface\\Buttons\\UI-DialogBox-Button-Up")
+			button:SetNormalTexture(130763) -- "Interface\\Buttons\\UI-DialogBox-Button-Up"
 			button:GetNormalTexture():SetTexCoord(0.0, 1.0, 0.0, 0.71875)
-			button:SetPushedTexture("Interface\\Buttons\\UI-DialogBox-Button-Down")
+			button:SetPushedTexture(130761) -- "Interface\\Buttons\\UI-DialogBox-Button-Down"
 			button:GetPushedTexture():SetTexCoord(0.0, 1.0, 0.0, 0.71875)
-			button:SetHighlightTexture("Interface\\Buttons\\UI-DialogBox-Button-Highlight")
+			button:SetHighlightTexture(130762) -- "Interface\\Buttons\\UI-DialogBox-Button-Highlight"
 			button:GetHighlightTexture():SetTexCoord(0.0, 1.0, 0.0, 0.71875)
 			button:SetText(newText)
 			return button
@@ -813,7 +761,7 @@ local function ActivateControl(widget, event, ...)
 		else
 			validationErrorPopup(validated)
 		end
-		PlaySound("igPlayerInviteDecline")
+		PlaySound(882) -- SOUNDKIT.IG_PLAYER_INVITE_DECLINE || _DECLINE is actually missing from the table
 		del(info)
 		return true
 	else
@@ -1805,6 +1753,9 @@ function AceConfigDialog:FeedGroup(appName,options,container,rootframe,path, isR
 	end
 end
 
+local old_CloseSpecialWindows
+
+
 local function RefreshOnUpdate(this)
 	for appName in pairs(this.closing) do
 		if AceConfigDialog.OpenFrames[appName] then
@@ -1900,6 +1851,13 @@ end
 -- @param container An optional container frame to feed the options into
 -- @param ... The path to open after creating the options window (see `:SelectGroup` for details)
 function AceConfigDialog:Open(appName, container, ...)
+	if not old_CloseSpecialWindows then
+		old_CloseSpecialWindows = CloseSpecialWindows
+		CloseSpecialWindows = function()
+			local found = old_CloseSpecialWindows()
+			return self:CloseAll() or found
+		end
+	end
 	local app = reg:GetOptionsTable(appName)
 	if not app then
 		error(("%s isn't registed with AceConfigRegistry, unable to open config"):format(appName), 2)
@@ -1958,10 +1916,6 @@ function AceConfigDialog:Open(appName, container, ...)
 		else
 			f = self.OpenFrames[appName]
 		end
-		if not f.usesUISpecialFrames then
-			tinsert(UISpecialFrames, f.frame:GetName())
-			f.usesUISpecialFrames = true
-		end
 		f:ReleaseChildren()
 		f:SetCallback("OnClose", FrameOnClose)
 		f:SetUserData("appName", appName)
@@ -1999,6 +1953,8 @@ else
 	AceConfigDialog.BlizOptions = AceConfigDialog.BlizOptions or {}
 end
 
+AceConfigDialog.BlizOptionsIDMap = AceConfigDialog.BlizOptionsIDMap or {}
+
 local function FeedToBlizPanel(widget, event)
 	local path = widget:GetUserData("path")
 	AceConfigDialog:Open(widget:GetUserData("appName"), widget, unpack(path or emptyTbl))
@@ -2020,16 +1976,17 @@ end
 -- has to be a head-level note.
 --
 -- This function returns a reference to the container frame registered with the Interface
--- Options. You can use this reference to open the options with the API function
--- `InterfaceOptionsFrame_OpenToCategory`.
+-- Options, as well as the registered ID. You can use the ID to open the options with
+-- the API function `Settings.OpenToCategory`.
 -- @param appName The application name as given to `:RegisterOptionsTable()`
 -- @param name A descriptive name to display in the options tree (defaults to appName)
 -- @param parent The parent to use in the interface options tree.
 -- @param ... The path in the options table to feed into the interface options panel.
 -- @return The reference to the frame registered into the Interface Options.
--- @return The category name to pass to InterfaceOptionsFrame_OpenToCategory
+-- @return The category ID to pass to Settings.OpenToCategory
 function AceConfigDialog:AddToBlizOptions(appName, name, parent, ...)
 	local BlizOptions = AceConfigDialog.BlizOptions
+	local BlizOptionsIDMap = AceConfigDialog.BlizOptionsIDMap
 
 	local key = appName
 	for n = 1, select("#", ...) do
@@ -2055,8 +2012,32 @@ function AceConfigDialog:AddToBlizOptions(appName, name, parent, ...)
 		end
 		group:SetCallback("OnShow", FeedToBlizPanel)
 		group:SetCallback("OnHide", ClearBlizPanel)
-		group:SetName(name or appName, parent)
-		InterfaceOptions_AddCategory(group.frame)
+
+		local categoryName = name or appName
+		if parent then
+			local parentID = BlizOptionsIDMap[parent] or parent
+			local category = Settings.GetCategory(parentID)
+			if not category then
+				error(("The parent category '%s' was not found"):format(parent), 2)
+			end
+			local subcategory = Settings.RegisterCanvasLayoutSubcategory(category, group.frame, categoryName)
+			group:SetName(subcategory.ID, parentID)
+		else
+			if BlizOptionsIDMap[categoryName] then
+				error(("%s has already been added to the Blizzard Options Window with the given name: %s"):format(appName, categoryName), 2)
+			end
+
+			local category = Settings.RegisterCanvasLayoutCategory(group.frame, categoryName)
+			if not (C_SettingsUtil and C_SettingsUtil.OpenSettingsPanel) then
+				-- override the ID so the name can be used in Settings.OpenToCategory
+				-- unfortunately with incoming API changes in 12.0 (and likely classic at some point) this override is no longer possible
+				category.ID = categoryName
+			end
+			group:SetName(category.ID)
+			BlizOptionsIDMap[categoryName] = category.ID
+			Settings.RegisterAddOnCategory(category)
+		end
+
 		return group.frame, group.frame.name
 	else
 		error(("%s has already been added to the Blizzard Options Window with the given path"):format(appName), 2)

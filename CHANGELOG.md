@@ -1,27 +1,22 @@
-# Changelog
+# Changelog (Forever edition)
 
-## 1.2.0 (2026-10-29)
+## 0.11.0-forever (2026-11-21)
 
-- Unticking a category in "Show in this row" is now remembered; the default categories used to come back.
-- One Skom's minimap button opens all your Skom's addons when two or more are installed (/skoms).
-- Test mode shows realistic sample auras in every row, just by targeting an enemy.
-- Left and right rows can be positioned separately.
-- Spells sharing a name (like the Berserk weapon proc and druid Berserk) have their own settings.
-- Auras stay on top of other nameplates (DragonUI).
-- New display name: Skom's Plate Buffs.
+Fixes from a full code audit:
 
-## 1.1.0 (2026-10-22)
+- Silence auras (Counterspell, Improved Kick, Improved Shield Bash) are crowd control.
+- Sliders ignore the mouse wheel, so scrolling a settings page no longer changes them.
+- Moving a row no longer builds new frames; frames are rebuilt only when sizes, categories or looks change. The preview reuses its frames.
+- Interrupts inside instances no longer risk an error on hidden values.
+- "Only my auras" works on a row while My debuffs is on.
+- Unused libraries removed (AceGUI, AceConfig, AceDBOptions); the one-off Warmane import is no longer loaded.
 
-- Search spells by name or ID in the Spells tab.
-- Friendly nameplates can show their own single row of crowd control.
-- Added the Berserking and Executioner weapon procs and Tiger's Fury.
-- New About tab.
+## 0.10.x-forever (2026-11-21)
 
-## 1.0.0 (2026-10-21)
+- Spell lists rebuilt from Forever's own spell data (426 auras), Warmane lists dropped.
+- No more errors from hidden aura update fields in combat.
+- Blocking spells only through the Aura library.
 
-First release.
+## 0.1.0 to 0.9.1-forever (2026-11-20)
 
-- Rows of auras around enemy nameplates: left, right, top and extra top rows, each showing the categories you pick.
-- PvP categories (crowd control, interrupts, roots, immunities, cooldowns...) and your own debuffs on top.
-- Glow and size per category or per spell, hundreds of spells checked against the 3.3.5a client data.
-- Imports your settings from the original PlateBuffs.
+- First port: rows on AuraContainer frames, Warmane settings import, custom settings window, test mode, interrupt lockouts, timer colours by % of the duration, Aura library with class database.
